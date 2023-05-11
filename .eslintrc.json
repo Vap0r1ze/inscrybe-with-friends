@@ -1,0 +1,20 @@
+{
+    "extends": "next/core-web-vitals",
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "@typescript-eslint/semi": "error",
+        "@typescript-eslint/space-before-blocks": "error",
+        "@typescript-eslint/block-spacing": "error",
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "@typescript-eslint/indent": [
+            "error",
+            4
+        ]
+    }
+}
