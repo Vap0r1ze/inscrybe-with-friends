@@ -1,5 +1,4 @@
-import { authErrors } from '@/lib/auth';
-import { isClient } from '@/utils/next';
+import { AuthErrors } from '@/lib/constants';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
@@ -15,7 +14,7 @@ export default function AuthError() {
             window.opener.postMessage({ type: 'signinResult', error: errorCode }, window.location.origin);
             return window.close();
         }
-        setMessage(`An internal error occured: ${authErrors[errorCode]}`);
+        setMessage(`An internal error occured: ${AuthErrors[errorCode]}`);
     }, [router.query.error]);
 
     return <p>{message}</p>;
