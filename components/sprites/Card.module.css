@@ -1,0 +1,79 @@
+.card {
+    position: relative;
+    width: 44em;
+    height: 58em;
+}
+
+.cardContent {
+    position: absolute;
+    transition: transform 0.5s ease-in-out;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+
+    inset: 0;
+}
+
+.cardContent.flipped {
+    transform: rotateY(180deg);
+}
+
+.cardFront {
+    position: relative;
+}
+
+.cardFront,
+.cardBack {
+    height: 100%;
+    backface-visibility: hidden;
+}
+
+.cardBack {
+    position: absolute;
+    transform: rotateY(180deg);
+    top: 0;
+}
+
+.cardFace {
+    position: absolute;
+    inset: 0;
+}
+
+.cardFrame {
+    position: absolute;
+    inset: 0;
+}
+
+.cardPortrait {
+    position: absolute;
+    top: 2em;
+    left: 2em;
+}
+
+.cardCost {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+}
+
+.cardSigils {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 32em;
+}
+
+.cardSigil:nth-child(2) {
+    transform: translateX(1em);
+}
+
+.cardStats {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    position: absolute;
+    left: 3em;
+    right: 3em;
+    bottom: 3em;
+}

@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /play
+
+User-agent: *
+Allow: /

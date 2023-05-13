@@ -1,0 +1,33 @@
+.loginButton {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+
+    background-color: #5865f2;
+    color: #fff;
+
+    cursor: pointer;
+}
+
+.loggedIn {
+    background-color: #5865f222;
+    border: 1px solid #5865f2;
+}
+
+.pending {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.avatar {
+    width: 2rem;
+    height: 2rem;
+    margin-right: 0.5rem;
+    image-rendering: pixelated;
+}
+
+.username {
+    font-weight: 500;
+    font-size: 1rem;
+    margin-right: 0.5rem;
+}

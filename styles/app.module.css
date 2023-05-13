@@ -1,0 +1,3 @@
+.app {
+    filter: url(#abberation) url(#bloom) url(#wobble) url(#grain);
+}

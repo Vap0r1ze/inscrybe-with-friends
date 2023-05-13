@@ -15,6 +15,14 @@
         "@typescript-eslint/indent": [
             "error",
             4
+        ],
+        "comma-dangle": [
+            "error",
+            "only-multiline"
+        ],
+        "object-curly-spacing": [
+            "error",
+            "always"
         ]
     }
 }
