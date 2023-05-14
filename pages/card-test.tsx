@@ -15,7 +15,7 @@ const inputStyle = {
     background: '#e4edbd',
     fontSize: '1.25rem',
     padding: '0.25em',
-    fontFamily: 'Consolas, monospace',
+    fontFamily: 'GBC, monospace',
     fontWeight: '800',
 };
 const longInputStyle = {
@@ -100,6 +100,7 @@ export default function CardTest() {
                     display: 'flex',
                     width: '100%',
                     justifyContent: 'space-between',
+                    gap: '1rem',
                 }}>
                     <div style={{
                         display: 'flex',
