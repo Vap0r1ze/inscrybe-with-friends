@@ -1,8 +1,4 @@
-import CostSprite from '@/components/sprites/CostSprite';
-import styles from './page.module.css';
-import { MoxType } from '@/lib/game/Card';
-import { CardSprite } from '@/components/sprites/CardSprite';
-import { Sigil } from '@/lib/game/Sigil';
+import styles from './index.module.css';
 
 export default function Home() {
     return (
