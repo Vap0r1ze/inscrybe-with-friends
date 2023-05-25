@@ -1,3 +1,4 @@
 .app {
-    filter: url(#abberation) url(#bloom) url(#grain);
+    filter: url(#abberation) url(#bloom) url(#grain) url(#wobble);
+    font-size: 0.25rem;
 }

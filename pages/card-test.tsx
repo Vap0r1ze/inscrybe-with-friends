@@ -1,9 +1,9 @@
 import styles from './index.module.css';
 import cardStyles from '@/components/sprites/Card.module.css';
 import CostSprite from '@/components/sprites/CostSprite';
-import { Cost, MoxType, SpecialStat } from '@/lib/game/Card';
+import { Cost, MoxType, SpecialStat } from '@/lib/engine/Card';
 import { CardSprite } from '@/components/sprites/CardSprite';
-import { Sigil } from '@/lib/game/Sigil';
+import { Sigil } from '@/lib/engine/Sigil';
 import { Assets } from '@/lib/constants';
 import Asset from '@/components/sprites/Asset';
 import StatSprite from '@/components/sprites/StatSprite';

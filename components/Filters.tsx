@@ -1,17 +1,7 @@
-import { useEffect, useState } from 'react';
-
-const FPS = 10;
+import { useFrame } from '@/hooks/useFrames';
 
 export default function Filters() {
-    const [time, setTime] = useState(0);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setTime(time + 1 / FPS);
-            if (time >= 1) setTime(0);
-        }, 1e3 / FPS);
-        return () => clearInterval(interval);
-    });
+    const frame = useFrame(10);
 
     return <>
         <svg style={{ display: 'none' }}>
@@ -93,7 +83,7 @@ export default function Filters() {
                     type="fractalNoise"
                     baseFrequency={0.1}
                     numOctaves={4}
-                    seed={Math.round(time * 1000)}
+                    seed={frame*10}
                     stitchTiles="stitch"
                     result="noise"
                 />
@@ -103,13 +93,21 @@ export default function Filters() {
                     scale="3"
                     xChannelSelector="R"
                     yChannelSelector="G" />
+                <feColorMatrix
+                    values="1 0 0 0 0
+                                0 1 0 0 0
+                                0 0 1 0 0
+                                0 0 0 0.4 0"
+                />
+                <feGaussianBlur stdDeviation="1" />
+                <feBlend mode="normal" in2="SourceGraphic" />
             </filter>
             <filter id="grain">
                 <feTurbulence
                     type="fractalNoise"
                     baseFrequency={0.4}
                     numOctaves={4}
-                    seed={Math.round(time * 1000)}
+                    seed={frame*10}
                     stitchTiles="stitch"
                 />
                 <feColorMatrix
@@ -125,7 +123,7 @@ export default function Filters() {
             pointerEvents: 'none',
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to bottom, rgba(0, 0, 0, .1) 50%, transparent 60%)',
+            backgroundImage: 'linear-gradient(to bottom, rgba(0, 0, 0, .1) 50%, transparent 60%)',
             backgroundSize: '100% 8px',
         }}/>
     </>;
