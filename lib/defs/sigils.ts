@@ -1,8 +1,8 @@
-import { ActionReq, ActionRes } from './Actions';
-import { FieldPos, CardPos } from './Card';
-import { EffectContext, EffectTarget, EffectTriggers } from './Effects';
-import { ErrorType, createError } from './Errors';
-import { positions } from './utils';
+import { ActionReq, ActionRes } from '../engine/Actions';
+import { FieldPos, CardPos } from '../engine/Card';
+import { EffectContext, EffectTarget, EffectTriggers } from '../engine/Effects';
+import { ErrorType, createError } from '../engine/Errors';
+import { positions } from '../engine/utils';
 
 export type SigilPos = [CardPos, string];
 export interface SigilDef extends EffectTriggers {

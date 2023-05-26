@@ -1,4 +1,4 @@
-import { CardPrint } from './Card';
+import { CardPrint } from '../engine/Card';
 
 export const prints: Record<string, CardPrint> = {
     squirrel: {

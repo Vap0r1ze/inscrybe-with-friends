@@ -3,10 +3,10 @@ import { Card, CardInfo, CardPos, CardPrint, CardState, FieldPos, getCardPower }
 import { Event } from './Events';
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { FightContext } from './Context';
-import { SigilPos, sigils } from './sigils';
+import { SigilPos, sigils } from '../defs/sigils';
 import { positions } from './utils';
 import { ErrorType, createError } from './Errors';
-import { prints } from './prints';
+import { prints } from '../defs/prints';
 import { entries, fromEntries } from '../utils';
 
 export type EffectTargets = Partial<Record<Exclude<EffectTarget, 'global'>, CardPos>>;

@@ -1,5 +1,5 @@
 import { Fight, FightSide } from './Fight';
-import { prints } from './prints';
+import { prints } from '../defs/prints';
 import { positions } from './utils';
 
 // Bitfields

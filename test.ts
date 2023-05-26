@@ -1,7 +1,7 @@
 import { initCardFromPrint } from './lib/engine/Card';
 import { createFight } from './lib/engine/Fight';
 import { FightContext, FightPacket, createContext, handleAction, startGame } from './lib/engine/Context';
-import { prints } from './lib/engine/prints';
+import { prints } from './lib/defs/prints';
 import { writeFileSync } from 'fs';
 import { inspect } from 'util';
 

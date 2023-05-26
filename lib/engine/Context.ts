@@ -2,8 +2,8 @@ import { Action, ActionRes, isActionInvalid } from './Actions';
 import { Card, CardPos, getMoxes } from './Card';
 import { Event, eventSettlers, isEventInvalid } from './Events';
 import { DeckType, FIGHT_SIDES, Fight, FightSide } from './Fight';
-import { prints } from './prints';
-import { sigils } from './sigils';
+import { prints } from '../defs/prints';
+import { sigils } from '../defs/sigils';
 import { getActiveSigils, createEffectContext, createSigilContext, defaultEffects, getTargets } from './Effects';
 import { ErrorType, createError } from './Errors';
 
