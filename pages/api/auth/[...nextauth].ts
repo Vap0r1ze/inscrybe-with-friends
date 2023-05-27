@@ -18,7 +18,7 @@ const authOptions: AuthOptions = {
         signIn: '/auth/signin',
         error: '/auth/internal-error',
         signOut: '/auth/signout',
-    }
+    },
 };
 
 export default NextAuth(authOptions);

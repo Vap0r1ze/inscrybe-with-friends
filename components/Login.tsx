@@ -54,6 +54,6 @@ export function LoginButton() {
     return <div role="button" onClick={onClick} className={cn({
         [styles.loginButton]: true,
         [styles.loggedIn]: session.status === 'authenticated',
-        [styles.pending]: pending
+        [styles.pending]: pending,
     })}>{buttonInner}</div>;
 }
