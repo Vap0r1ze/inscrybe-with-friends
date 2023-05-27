@@ -3,7 +3,7 @@ import { DeckType, Fight, FightSide, Phase } from './Fight';
 
 export type Event<T extends keyof EventMap = keyof EventMap> = T extends keyof EventMap ? (EventMap[T] & { type: T }) : never;
 
-export type PerishCause = 'attack' | 'sac' | 'transient' | 'hammer';
+export type PerishCause = 'attack' | 'sac' | 'transient' | 'hammer' | 'death-touch';
 
 type EventMap = {
     phase: { phase: Phase; side?: FightSide };
@@ -13,12 +13,15 @@ type EventMap = {
     draw: { side: FightSide; card?: Card; source?: DeckType };
     perish: { pos: FieldPos; cause: PerishCause };
     triggerAttack: { pos: FieldPos };
-    attack: { from: FieldPos; to: FieldPos | 'direct'; damage?: number };
+    attack: { from: FieldPos; to: FieldPos; direct?: boolean; damage?: number };
+    shoot: { from: FieldPos; to: FieldPos; damage: number };
     play: { pos: FieldPos; card: Card; fromHand?: [FightSide, number]; transient?: boolean };
+    transform: { pos: FieldPos; card: Card; };
     move: { from: FieldPos; to: FieldPos };
     heal: { pos: FieldPos; amount: number };
     activate: { pos: FieldPos };
     newSigil: { pos: CardPos; sigil: string };
+    flip: { pos: FieldPos };
 };
 
 export const eventSettlers: {
@@ -49,13 +52,20 @@ export const eventSettlers: {
     triggerAttack(fight, event) {},
     attack(fight, event) {
         const power = getCardPower(fight, event.from)!;
-        indirect: if (event.to !== 'direct') {
+        event.damage ??= power;
+        toCard: if (event.direct) {
             const [toSide, toLane] = event.to;
             const target = fight.field[toSide][toLane];
-            if (!target) break indirect;
-            target.state.health -= event.damage ?? power;
+            if (!target) break toCard;
+            target.state.health -= event.damage;
         };
-        fight.points[event.from[0]] += power;
+        fight.points[event.from[0]] += event.damage;
+    },
+    shoot(fight, event) {
+        const [toSide, toLane] = event.to;
+        const target = fight.field[toSide][toLane];
+        if (!target) return;
+        target.state.health -= event.damage;
     },
     play(fight, event) {
         const [side, lane] = event.pos;
@@ -66,9 +76,14 @@ export const eventSettlers: {
             fight.hands[side].splice(idx, 1);
         }
     },
+    transform(fight, event) {
+        const [side, lane] = event.pos;
+        fight.field[side][lane] = event.card;
+    },
     move(fight, event) {
         const [fromSide, fromLane] = event.from;
         const [toSide, toLane] = event.to;
+        if (fight.field[toSide][toLane] != null) return;
         fight.field[toSide][toLane] = fight.field[fromSide][fromLane];
         fight.field[fromSide][fromLane] = null;
     },
@@ -82,6 +97,11 @@ export const eventSettlers: {
         const [side, lane] = event.pos;
         const card = fight.field[side][lane]!;
         card.state.sigils.push(event.sigil);
+    },
+    flip(fight, event) {
+        const [side, lane] = event.pos;
+        const card = fight.field[side][lane]!;
+        card.state.flipped = true;
     },
 };
 
@@ -114,6 +134,23 @@ export function isEventInvalid(fight: Fight<FightSide>, event: Event) {
         }
         case 'energySpend': {
             if (fight.players[event.side].energy[0] < event.amount) return true;
+            break;
+        }
+        case 'move': {
+            const [fromSide, fromLane] = event.from;
+            // const [toSide, toLane] = event.to;
+            // if (fight.field[toSide][toLane] != null) return true;2
+            if (fight.field[fromSide][fromLane] == null) return true;
+            break;
+        }
+        case 'heal':
+        case 'flip':
+        case 'newSigil':
+        case 'transform':
+        case 'perish': {
+            const [side, lane] = event.pos;
+            const card = fight.field[side][lane];
+            if (!card) return true;
             break;
         }
     }

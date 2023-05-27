@@ -4,7 +4,7 @@ import { Event, eventSettlers, isEventInvalid } from './Events';
 import { DeckType, FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { prints } from '../defs/prints';
 import { sigils } from '../defs/sigils';
-import { getActiveSigils, createEffectContext, createSigilContext, defaultEffects, getTargets } from './Effects';
+import { getActiveSigils, createEffectContext, createSigilContext, defaultEffects, getTargets, EffectSignals } from './Effects';
 import { ErrorType, createError } from './Errors';
 
 export interface FightContext<M = unknown> {
@@ -68,7 +68,7 @@ export async function handleResponse(ctx: FightContext, side: FightSide, res: Ac
     const targets = getTargets(ctx.fight, event);
     const stack: Event[] = [];
 
-    const effectCtx = createEffectContext(ctx, event, targets, { default: false, event: false }, stack);
+    const effectCtx = createEffectContext(ctx, event, targets, { default: false, event: false, prepend: [] }, stack);
     sigils[sigil].requests![event.type]!.onResponse.call(effectCtx, event as never, res, req);
 
     ctx.fight.waitingFor = null;
@@ -97,13 +97,20 @@ export async function handleAction(ctx: FightContext, side: FightSide, action: A
             if (card == null) throw createError(ErrorType.InvalidAction, 'You cannot play a card that is not in your hand');
             const print = prints[card.print];
             if (print.cost?.type === 'blood') {
-                if (action.sacs?.length !== print.cost.amount)
-                    throw createError(ErrorType.InsufficientResources, `Requires ${print.cost.amount} sacrifices`);
+                const sacError = createError(ErrorType.InsufficientResources, `Requires ${print.cost.amount} sacrifices`);
+                if (action.sacs == null) throw sacError;
                 const sacs = action.sacs.map(sac => ctx.fight.field[side][sac]);
                 if (sacs.some(sac => sac == null))
                     throw createError(ErrorType.InsufficientResources, 'Cannot sacrifice a card that is not on the field');
                 if (sacs.some(sac => prints[sac!.print].noSac))
                     throw createError(ErrorType.InsufficientResources, 'This card cannot be sacrificed');
+                const sacsAmount = sacs.map(sac => {
+                    let amount = 1;
+                    if (sac?.state.sigils?.includes('threeSacs')) amount = 3;
+                    return amount;
+                }).reduce((a, b) => a + b, 0);
+                // NOTE: this allows extraneous sacrifices, but that's fine i think?
+                if (sacsAmount < print.cost.amount) throw sacError;
             } else if (print.cost?.type === 'bone') {
                 if (ctx.fight.players[side].bones < print.cost.amount)
                     throw createError(ErrorType.InsufficientResources, `Requires ${print.cost.amount} bones`);
@@ -171,10 +178,12 @@ async function settleEvents(ctx: FightContext) {
         // TODO optimize??
         const preSettleSigils = getActiveSigils(ctx, event, targets, ['writers', 'readers']);
 
-        const signals = { event: false, default: false };
+        const signals: EffectSignals = { event: false, default: false, prepend: [] };
 
         const effectCtx = createEffectContext(ctx, event, targets, signals, stack);
         const sigilCtx = createSigilContext(ctx, effectCtx, null as unknown as CardPos);
+
+        const originalEvent = JSON.parse(JSON.stringify(event)) as Event;
 
         for (const sigilPos of preSettleSigils.writers) {
             sigilCtx.pos = sigilPos[0];
@@ -182,6 +191,10 @@ async function settleEvents(ctx: FightContext) {
         }
         if (signals.event) continue;
         if (isEventInvalid(ctx.fight, event)) throw createError(ErrorType.InvalidEvent);
+        if (signals.prepend.length) {
+            ctx.queue.unshift(...signals.prepend, originalEvent);
+            continue;
+        }
 
         if (!signals.default) defaultEffects.preSettle[event.type]?.call(ctx, event as never);
 

@@ -10,7 +10,7 @@ import { prints } from '../defs/prints';
 import { entries, fromEntries } from '../utils';
 
 export type EffectTargets = Partial<Record<Exclude<EffectTarget, 'global'>, CardPos>>;
-export type EffectTarget = 'played' | 'hand' | 'attackee' | 'opposing' | 'global';
+export type EffectTarget = 'played' | 'drawn' | 'attackee' | 'opposing' | 'global';
 export type EffectTriggers = {
     requests?: {
         [T in Event['type']]?: {
@@ -25,6 +25,7 @@ export type EffectTriggers = {
         [T in Event['type']]?: (this: ReaderSigilContext, event: Readonly<Event<T>>) => void;
     };
     cleanup?: {
+        // TODO: type as Readonly<SettledEvent<T>>
         [T in Event['type']]?: (this: ReaderSigilContext, event: Readonly<Event<T>>) => void;
     };
 };
@@ -46,6 +47,7 @@ export type EffectContext = {
     targets: EffectTargets;
 
     createEvent<T extends Event['type']>(type: T, event: Omit<Event<T>, 'type'>): void;
+    prependEvent<T extends Event['type']>(type: T, event: Omit<Event<T>, 'type'>): void;
     cancel(): void;
     cancelDefault(): void;
 
@@ -54,7 +56,7 @@ export type EffectContext = {
     getCard(pos: FieldPos): Readonly<Card> | null;
     getPower(pos: FieldPos): number | null;
 };
-export type EffectSignals = { event: boolean, default: boolean };
+export type EffectSignals = { event: boolean, default: boolean, prepend: Event[] };
 
 export function createEffectContext(ctx: FightContext, event: Event, targets: EffectTargets, signals: EffectSignals, stack: Event[]): EffectContext {
     const effectCtx: EffectContext = {
@@ -64,6 +66,10 @@ export function createEffectContext(ctx: FightContext, event: Event, targets: Ef
         createEvent(type, data) {
             const event: Event = JSON.parse(JSON.stringify({ type, ...data }));
             stack.push(event);
+        },
+        prependEvent(type, data) {
+            const event: Event = JSON.parse(JSON.stringify({ type, ...data }));
+            signals.prepend.push(event);
         },
         cancel() {
             signals.event = true;
@@ -92,7 +98,7 @@ export function createEffectContext(ctx: FightContext, event: Event, targets: Ef
                     if (card == null) continue;
                     for (const sigil of card.state.sigils) {
                         const sigilDef = sigils[sigil];
-                        power += sigilDef.buffs?.call(this, [side, lane], pos).power ?? 0;
+                        power += sigilDef.buffs?.call(this, [side, lane], pos)?.power ?? 0;
                     }
                 }
             }
@@ -143,7 +149,8 @@ export function getTargets(fight: Fight<FightSide>, event: Event): EffectTargets
     switch (event.type) {
         case 'attack':
             targets.played = ['field', event.from];
-            if (event.to !== 'direct') targets.attackee = ['field', event.to];
+
+            if (!event.direct) targets.attackee = ['field', event.to];
             break;
         case 'perish':
         case 'activate':
@@ -153,7 +160,7 @@ export function getTargets(fight: Fight<FightSide>, event: Event): EffectTargets
             targets.played = ['field', event.pos];
             break;
         case 'draw':
-            targets.hand = ['hand', [event.side, fight.hands[event.side].length - 1]];
+            targets.drawn = ['hand', [event.side, fight.hands[event.side].length - 1]];
             break;
         case 'move':
             targets.played = ['field', event.from];
@@ -172,6 +179,7 @@ function getActiveSigilsFromCard<T extends keyof ActiveSigils>(
 ) {
     for (const sigil of card.state.sigils) {
         const sigilDef = sigils[sigil];
+        if (sigilDef.runAt && sigilDef.runAt !== pos[0]) continue;
         const sigilPos: SigilPos = [pos, sigil];
         const targetType = sigilDef.runAs || 'played';
         if (targetType !== 'global') {
@@ -215,10 +223,18 @@ export const defaultEffects: {
 } = {
     preSettle: {
         triggerAttack(event) {
+            // FIXME
+            // const power = getCardPower(this.fight, event.pos);
+            // if (!power) return;
             this.queue.unshift({ type: 'attack', from: event.pos, to: positions.opposing(event.pos) });
         },
         perish(event) {
-            this.queue.unshift({ type: 'bones', amount: 1, side: event.pos[0] });
+            // TODO: maybe add a bones field to the event?
+            let collectedBones = 1;
+            const [side, lane] = event.pos;
+            const card = this.fight.field[side][lane]!;
+            if (card.state.sigils.includes('boneless')) collectedBones = 0;
+            this.queue.unshift({ type: 'bones', amount: collectedBones, side });
         },
     },
     postSettle: {

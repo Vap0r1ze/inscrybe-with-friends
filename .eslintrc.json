@@ -16,13 +16,22 @@
             "error",
             4
         ],
-        "comma-dangle": [
+        "@typescript-eslint/comma-dangle": [
             "error",
-            "only-multiline"
+            "always-multiline"
         ],
         "object-curly-spacing": [
             "error",
             "always"
+        ],
+        "no-useless-computed-key": "error",
+        "quote-props": [
+            "error",
+            "as-needed"
+        ],
+        "jsx-quotes": [
+            "error",
+            "prefer-double"
         ]
     }
 }

@@ -1,6 +1,7 @@
 import { Fight, FightSide } from './Fight';
 import { prints } from '../defs/prints';
 import { positions } from './utils';
+import { Sigil } from '../defs/sigils';
 
 // Bitfields
 export enum MoxType {
@@ -10,9 +11,9 @@ export enum MoxType {
 };
 export type SpecialStat =
     | 'ants'
-    | 'cards'
+    | 'hand'
     | 'bells'
-    | 'greenMox'
+    | 'moxes'
     | 'mirror';
 
 export type Stat = SpecialStat | number;
@@ -30,12 +31,14 @@ export type Cost = {
     needs: number;
 };
 
-export type Tribe = 'ant' | 'insect' | 'canine' | 'avian' | 'hooved' | 'reptile' | 'rodent';
+export type Tribe = 'ant' | 'insect' | 'canine' | 'avian' | 'hooved' | 'reptile' | 'rodent' | 'mox';
 export interface CardPrint {
     name: string;
+    desc?: string;
     portrait?: string;
-    face?: 'rare';
+    face?: 'rare' | 'terrain';
     frame?: 'nature_frame' | 'tech_frame' | 'undead_frame' | 'wizard_frame';
+    fused?: boolean;
 
     health: number;
     power: Stat;
@@ -43,16 +46,17 @@ export interface CardPrint {
     noSac?: boolean;
     tribes?: Tribe[];
 
-    sigils?: string[];
+    sigils?: Sigil[];
 
-    frozen?: string;
     evolution?: string;
 }
 export interface CardState {
     power: Stat;
     health: number;
-    flipped: boolean;
-    sigils: string[];
+    sigils: Sigil[];
+    flipped?: boolean;
+    forward?: boolean;
+    evolved?: boolean;
 }
 
 export type Card = {
@@ -85,7 +89,7 @@ export function getCardPower<Side extends FightSide = FightSide>(fight: Fight<Si
     if (card == null) return null;
     if (card.state.power === 'ants') {
         return fight.field[side].filter(card => card ? prints[card.print].tribes?.includes('ant') : false).length;
-    } else if (card.state.power === 'cards') {
+    } else if (card.state.power === 'hand') {
         return fight.hands[side].length;
     } else if (card.state.power === 'bells') {
         // TODO
@@ -96,7 +100,7 @@ export function getCardPower<Side extends FightSide = FightSide>(fight: Fight<Si
         if (opposing == null) return 0;
         // NOTE: https://youtu.be/lbeG5LjqCT4?t=521
         return getCardPower(fight, opposingPos);
-    } else if (card.state.power === 'greenMox') {
+    } else if (card.state.power === 'moxes') {
         return fight.field[side].filter(card => card?.state.sigils.includes('gainGemGreen')).length;
     } else {
         return card.state.power;

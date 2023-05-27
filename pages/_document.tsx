@@ -7,7 +7,9 @@ export const metadata = {
 export default function Document() {
     return (
         <Html lang="en">
-            <Head />
+            <Head>
+                <link rel="preload" href="/fonts/gbc.otf" as="font" type="font/otf" crossOrigin="anonymous"/>
+            </Head>
             <body>
                 <Main />
                 <NextScript />

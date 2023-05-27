@@ -5,10 +5,14 @@
 
 :root {
     --max-width: 1100px;
+    --ui: #d7e2a3;
+    --flow: #020a11;
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {}
+    :root {
+        color-scheme: dark;
+    }
 }
 
 * {
@@ -26,25 +30,7 @@ body {
     background-color: #01030d;
 }
 
-body::before {
-    position: absolute;
-    inset: 0;
-    background: #000;
-    content: '';
-    z-index: -1;
-    mix-blend-mode: darken;
-    mix-blend-mode: difference;
-    mix-blend-mode: exclusion;
-    mix-blend-mode: multiply;
-}
-
 a {
     color: inherit;
     text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-    html {
-        color-scheme: dark;
-    }
 }

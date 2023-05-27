@@ -78,7 +78,7 @@ export default function Filters() {
                 <feBlend mode="screen" in2="SourceGraphic" />
             </filter>
 
-            <filter id="wobble">
+            {/* <filter id="wobble">
                 <feTurbulence
                     type="fractalNoise"
                     baseFrequency={0.1}
@@ -117,7 +117,7 @@ export default function Filters() {
                             0 0 0 0.1 0"
                 />
                 <feBlend mode="overlay" in2="SourceGraphic" />
-            </filter>
+            </filter> */}
         </svg>
         <div style={{
             pointerEvents: 'none',

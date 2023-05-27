@@ -6,6 +6,8 @@ export interface SpriteProps {
 }
 export default function Sprite({ sheet, name }: SpriteProps) {
     const sprite = sheet.sprites[name];
+    if (!sprite) throw new Error(`Sprite ${name} not found in sheet ${sheet.path}`);
+
     let [x, y] = sprite;
     const [sheetWidth, sheetHeight] = sheet.size;
     const [tileWidth, tileHeight] = sheet.tiled?.tileSize ?? sprite.slice(2, 4);

@@ -8,10 +8,10 @@ export const StatSprites: Spritesheet = {
         borderWidth: { in: 1, out: 0 },
     },
     sprites: {
-        greenMox: [0, 0],
+        moxes: [0, 0],
         ants: [0, 1],
         bells: [0, 2],
         mirror: [0, 3],
-        cards: [0, 4],
-    }
+        hand: [0, 4],
+    },
 };

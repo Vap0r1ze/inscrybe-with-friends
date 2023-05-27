@@ -1,6 +1,7 @@
 import { CardSprites } from './cards';
 import { PortraitSprites } from './portraits';
 import { SigilSprites } from './sigils';
+import { ActivatedSigilSprites } from './activatedSigils';
 import { CostSprites } from './costs';
 import { CharSprites } from './text';
 import { StatSprites } from './stats';
@@ -18,6 +19,7 @@ export interface Spritesheet {
 export const Spritesheets = {
     portraits: PortraitSprites,
     sigils: SigilSprites,
+    buttonSigils: ActivatedSigilSprites,
     cards: CardSprites,
     costs: CostSprites,
     chars: CharSprites,

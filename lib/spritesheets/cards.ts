@@ -28,5 +28,5 @@ export const CardSprites: Spritesheet = {
 
         sac: [0, 2],
         slot: [2, 3],
-    }
+    },
 };

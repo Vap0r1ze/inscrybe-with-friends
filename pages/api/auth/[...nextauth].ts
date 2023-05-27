@@ -1,5 +1,5 @@
 import NextAuth, { AuthOptions } from 'next-auth';
-import { provider, adapter } from '@/lib/auth';
+import { provider, adapter } from '@/server/auth';
 
 const authOptions: AuthOptions = {
     providers: [

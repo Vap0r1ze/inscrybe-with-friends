@@ -38,11 +38,6 @@
     inset: 0;
 }
 
-.cardFrame {
-    position: absolute;
-    inset: 0;
-}
-
 .cardPortrait {
     position: absolute;
     top: 2em;
@@ -62,8 +57,10 @@
     left: 0;
     right: 0;
     top: 32em;
+}
 
-    cursor: pointer;
+.cardSigil {
+    cursor: help;
 }
 
 .cardStats {

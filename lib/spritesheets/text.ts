@@ -18,5 +18,5 @@ export const CharSprites: Spritesheet = {
         7: [7, 0],
         8: [8, 0],
         9: [9, 0],
-    }
+    },
 };

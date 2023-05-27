@@ -1,0 +1,25 @@
+.prints {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.75em;
+    width: calc(44em * 4);
+}
+
+.print {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.printName {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--flow);
+    width: 42em;
+    height: 8em;
+    padding: 1em;
+    background: var(--ui);
+    border: 1em solid var(--flow);
+}
