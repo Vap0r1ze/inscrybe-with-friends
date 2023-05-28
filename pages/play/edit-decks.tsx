@@ -67,7 +67,7 @@ export default function EditDecks() {
         <div className={styles.editor}>
             <div className={styles.controls}>
                 <div className={styles.controlsRow}>
-                    <Text text="Deck:    " size={14} />
+                    {/* <Text text="Deck:    " size={14} /> */}
                     <Select
                         options={deckEntries.map(([name]) => [name, name])}
                         disabled={!deckEntries.length}
@@ -79,16 +79,16 @@ export default function EditDecks() {
                         onEdit={name => onDeckNameChange(name)}
                     />
                     <div style={{ flex: 1 }} />
+                    <Button onClick={() => setDeck({ ...deck, main: [] })}>
+                        <Text text="Clear Deck" size={12} />
+                    </Button>
+                </div>
+                <div className={styles.controlsRow}>
                     <div className={styles.actions}>
                         <AssetButton path="/assets/plus.png" title="Create New Deck" disabled={!canMakeNew} onClick={() => saveDeck()} />
                         <AssetButton path="/assets/disk.png" title="Save Deck" disabled={!canSave} onClick={() => saveDeck(true)} />
                         <AssetButton path="/assets/trash.png" title="Delete Deck" disabled={noDeckSelected} onClick={() => deleteDeck(selectedDeck!)} />
                     </div>
-                </div>
-                <div className={styles.controlsRow}>
-                    <Button onClick={() => setDeck({ ...deck, main: [] })}>
-                        <Text text="Clear Deck" size={12} />
-                    </Button>
                     <div style={{ flex:1 }} />
                     <Text text={`${deck.main.length} card${deck.main.length === 1 ? '' : 's'}`} size={14} />
                 </div>

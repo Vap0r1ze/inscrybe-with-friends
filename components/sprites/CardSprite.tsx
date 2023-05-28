@@ -39,7 +39,6 @@ export function CardSprite({ print, state }: { print: CardPrint, state?: CardSta
                     <Asset path="/assets/no-sac.png" />
                 </div>}
                 <div className={styles.sigils}>
-                    {/* TODO: Open rulebook modal on rightclick */}
                     {print.sigils?.map((sigil, i) => <div key={i} className={styles.sigil} style={{
                         marginLeft: `${(print.sigils!.length % 2) ? 0 : 1}em`,
                     }} onContextMenu={() => openInRulebook(sigils[sigil].name)}>

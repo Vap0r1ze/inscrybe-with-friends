@@ -4,6 +4,7 @@ import { entries } from '@/lib/utils';
 import { CardSprite } from '../sprites/CardSprite';
 import { Text } from '../Text';
 import classNames from 'classnames';
+import { openInRulebook } from '@/hooks/useRulebook';
 
 const allPrintEntries = entries(allPrints).filter(([, print]) => !print.banned);
 
@@ -24,8 +25,10 @@ export default function PrintList({ onSelect, editable, stacked, showNames, prin
         })}>
             {printEntries.map(([id, print], index) => (
                 <div className={styles.print} key={index} onClick={() => onSelect?.(id, index)}>
-                    {/* TODO: add card info modal */}
-                    {showNames && <div className={styles.printName} onContextMenu={e => e.preventDefault()}>
+                    {showNames && <div className={styles.printName} onContextMenu={e => {
+                        e.preventDefault();
+                        openInRulebook(print.name);
+                    }}>
                         <Text fit text={print.name} />
                     </div>}
                     <CardSprite print={print} />
