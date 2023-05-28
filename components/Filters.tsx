@@ -1,7 +1,7 @@
 import { useFrame } from '@/hooks/useFrames';
 
 export default function Filters() {
-    const frame = useFrame(10);
+    const [frame] = useFrame(10);
 
     return <>
         <svg style={{ display: 'none' }}>
@@ -77,13 +77,23 @@ export default function Filters() {
                 />
                 <feBlend mode="screen" in2="SourceGraphic" />
             </filter>
+            <filter id="shadow">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+                <feColorMatrix
+                    values="1 0 0 0 0
+                            0 1 0 0 0
+                            0 0 1 0 0
+                            0 0 0 0.4 0"
+                />
+                <feBlend mode="multiply" in2="SourceGraphic" />
+            </filter>
 
-            {/* <filter id="wobble">
+            <filter id="wobble">
                 <feTurbulence
                     type="fractalNoise"
                     baseFrequency={0.1}
-                    numOctaves={4}
-                    seed={frame*10}
+                    numOctaves={1}
+                    seed={Math.floor(frame/2)*10}
                     stitchTiles="stitch"
                     result="noise"
                 />
@@ -93,13 +103,6 @@ export default function Filters() {
                     scale="3"
                     xChannelSelector="R"
                     yChannelSelector="G" />
-                <feColorMatrix
-                    values="1 0 0 0 0
-                                0 1 0 0 0
-                                0 0 1 0 0
-                                0 0 0 0.4 0"
-                />
-                <feGaussianBlur stdDeviation="1" />
                 <feBlend mode="normal" in2="SourceGraphic" />
             </filter>
             <filter id="grain">
@@ -117,14 +120,15 @@ export default function Filters() {
                             0 0 0 0.1 0"
                 />
                 <feBlend mode="overlay" in2="SourceGraphic" />
-            </filter> */}
+            </filter>
         </svg>
         <div style={{
             pointerEvents: 'none',
             position: 'absolute',
             inset: 0,
             backgroundImage: 'linear-gradient(to bottom, rgba(0, 0, 0, .1) 50%, transparent 60%)',
-            backgroundSize: '100% 8px',
+            backgroundSize: '100% 2em',
+            zIndex: 100,
         }}/>
     </>;
 }

@@ -17,8 +17,8 @@ const MAIN_DECK = ['stoat', 'bullfrog', 'wolf', 'oppossum', 'ringWorm'];
 
 const ctx = createContext(fight, {
     getCardsFromDeck: async (side, deck, idxs) => {
-        if (deck === 'side') return idxs.map(() => initCardFromPrint('squirrel'));
-        return idxs.map(idx => initCardFromPrint(MAIN_DECK[idx]));
+        if (deck === 'side') return idxs.map(() => initCardFromPrint(prints, 'squirrel'));
+        return idxs.map(idx => initCardFromPrint(prints, MAIN_DECK[idx]));
     },
     initDeck: async (side, deck) => {
         if (deck === 'side') return Array.from({ length: 10 }, (_, i) => i);

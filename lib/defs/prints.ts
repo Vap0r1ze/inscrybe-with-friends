@@ -1,9 +1,10 @@
-import { CardPrint, MoxType } from '../engine/Card';
+import { CardPrint, MoxType, SideDeck } from '../engine/Card';
 
 export const prints: Record<string, CardPrint> = {
     starvation: {
         name: 'Starvation',
         portrait: 'starvation',
+        banned: true,
         power: 1,
         health: 1,
         sigils: [ 'voidDamage' ],
@@ -12,6 +13,7 @@ export const prints: Record<string, CardPrint> = {
         name: 'Greater Smoke',
         portrait: 'greaterSmoke',
         face: 'rare',
+        banned: true,
         power: 1,
         health: 3,
         sigils: [ 'fourBones' ],
@@ -43,6 +45,7 @@ export const prints: Record<string, CardPrint> = {
     dam: {
         name: 'Dam',
         portrait: 'dam',
+        banned: true,
         power: 0,
         health: 2,
         noSac: true,
@@ -51,6 +54,7 @@ export const prints: Record<string, CardPrint> = {
     bee: {
         name: 'Bee',
         portrait: 'bee',
+        banned: true,
         power: 1,
         health: 1,
         sigils: [ 'airborne' ],
@@ -101,6 +105,7 @@ export const prints: Record<string, CardPrint> = {
     catUndead: {
         name: 'Undead Cat',
         portrait: 'catUndead',
+        banned: true,
         power: 3,
         health: 6,
         cost: { type: 'blood', amount: 1 },
@@ -134,6 +139,7 @@ export const prints: Record<string, CardPrint> = {
     chime: {
         name: 'Chime',
         portrait: 'chime',
+        banned: true,
         power: 0,
         health: 1,
         noSac: true,
@@ -176,6 +182,7 @@ export const prints: Record<string, CardPrint> = {
     fieldMice: {
         name: 'Field Mice',
         portrait: 'fieldMice',
+        banned: true,
         power: 2,
         health: 2,
         cost: { type: 'blood', amount: 2 },
@@ -454,6 +461,7 @@ export const prints: Record<string, CardPrint> = {
         portrait: 'strangePupa',
         face: 'rare',
         frame: 'nature_frame',
+        banned: true,
         power: 0,
         health: 3,
         cost: { type: 'blood', amount: 1 },
@@ -465,6 +473,7 @@ export const prints: Record<string, CardPrint> = {
         portrait: 'mothman',
         face: 'rare',
         frame: 'nature_frame',
+        banned: true,
         power: 7,
         health: 3,
         cost: { type: 'blood', amount: 1 },
@@ -482,6 +491,7 @@ export const prints: Record<string, CardPrint> = {
     bellTentacle: {
         name: 'Bell Tentacle',
         portrait: 'bellTentacle',
+        banned: true,
         power: 'bells',
         health: 3,
         cost: { type: 'blood', amount: 2 },
@@ -490,6 +500,7 @@ export const prints: Record<string, CardPrint> = {
     handTentacle: {
         name: 'Hand Tentacle',
         portrait: 'handTentacle',
+        banned: true,
         power: 'hand',
         health: 1,
         cost: { type: 'blood', amount: 1 },
@@ -498,6 +509,7 @@ export const prints: Record<string, CardPrint> = {
     mirrorTentacle: {
         name: 'Mirror Tentacle',
         portrait: 'mirrorTentacle',
+        banned: true,
         power: 'mirror',
         health: 3,
         cost: { type: 'blood', amount: 1 },
@@ -679,6 +691,7 @@ export const prints: Record<string, CardPrint> = {
     sentryBotFused: {
         name: 'Sentry Spore',
         portrait: 'sentryBotFused',
+        banned: true,
         fused: true,
         power: 0,
         health: 1,
@@ -699,9 +712,11 @@ export const prints: Record<string, CardPrint> = {
     sniperBot: {
         name: 'Sniper Bot',
         portrait: 'sniperBot',
+        // banned: true,
         power: 1,
         health: 1,
         cost: { type: 'energy', amount: 3 },
+        sigils: [ 'sniper' ],
     },
     steambot: {
         name: 'Steambot',
@@ -817,6 +832,7 @@ export const prints: Record<string, CardPrint> = {
     gravediggerFused: {
         name: 'Sporedigger',
         portrait: 'gravediggerFused',
+        banned: true,
         fused: true,
         power: 0,
         health: 3,
@@ -870,6 +886,7 @@ export const prints: Record<string, CardPrint> = {
     skeleton: {
         name: 'Skeleton',
         portrait: 'skeleton',
+        banned: true,
         power: 1,
         health: 1,
         sigils: [ 'brittle' ],
@@ -923,6 +940,7 @@ export const prints: Record<string, CardPrint> = {
     blueMageFused: {
         name: 'Blue Sporemage',
         portrait: 'blueMageFused',
+        banned: true,
         fused: true,
         power: 0,
         health: 1,
@@ -1012,6 +1030,8 @@ export const prints: Record<string, CardPrint> = {
     moxG: {
         name: 'Emerald Mox',
         portrait: 'moxG',
+        face: 'terrain',
+        banned: true,
         power: 0,
         health: 1,
         noSac: true,
@@ -1021,6 +1041,8 @@ export const prints: Record<string, CardPrint> = {
     moxO: {
         name: 'Ruby Mox',
         portrait: 'moxO',
+        face: 'terrain',
+        banned: true,
         power: 0,
         health: 1,
         noSac: true,
@@ -1030,6 +1052,8 @@ export const prints: Record<string, CardPrint> = {
     moxB: {
         name: 'Sapphire Mox',
         portrait: 'moxB',
+        face: 'terrain',
+        banned: true,
         power: 0,
         health: 1,
         noSac: true,
@@ -1039,8 +1063,9 @@ export const prints: Record<string, CardPrint> = {
     moxAll: {
         name: 'Magnus Mox',
         portrait: 'moxAll',
-        face: 'rare',
+        face: 'rare_terrain',
         frame: 'wizard_frame',
+        banned: true,
         power: 0,
         health: 2,
         noSac: true,
@@ -1081,6 +1106,7 @@ export const prints: Record<string, CardPrint> = {
     rubyGolem: {
         name: 'Ruby Golem',
         portrait: 'rubyGolem',
+        face: 'terrain',
         power: 1,
         health: 1,
         cost: { type: 'mox', needs: MoxType.Orange },
@@ -1098,6 +1124,7 @@ export const prints: Record<string, CardPrint> = {
     witheredCorpse: {
         name: 'Withered Corpse',
         portrait: 'witheredCorpse',
+        banned: true,
         power: 1,
         health: 1,
         sigils: [ 'brittle', 'boneless' ],
@@ -1105,10 +1132,37 @@ export const prints: Record<string, CardPrint> = {
     emptyVessel: {
         name: 'Empty Vessel',
         portrait: 'emptyVessel',
+        banned: true,
         power: 0,
         health: 3,
         cost: { type: 'energy', amount: 1 },
         noSac: true,
+    },
+};
+export const sideDecks: Record<string, SideDeck> = {
+    squirrels: {
+        name: 'Squirrels',
+        repeat: [ 10, 'squirrel' ],
+    },
+    skeletons: {
+        name: 'Skeletons',
+        repeat: [ 10, 'skeleton' ],
+    },
+    vessels: {
+        name: 'Vessels',
+        repeat: [ 10, 'emptyVessel' ],
+    },
+    moxG: {
+        name: 'Emerald Mox',
+        repeat: [ 10, 'moxG' ],
+    },
+    moxB: {
+        name: 'Sapphire Mox',
+        repeat: [ 10, 'moxB' ],
+    },
+    moxO: {
+        name: 'Ruby Mox',
+        repeat: [ 10, 'moxO' ],
     },
 };
 

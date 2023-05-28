@@ -1,0 +1,34 @@
+.button {
+    all: unset;
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    border: solid var(--flow);
+    border-width: 1em 1em 2em;
+    padding: 0 2em;
+}
+
+.button:active {
+    border-bottom-width: 1em;
+    margin-bottom: 1em;
+    transform: translateY(1em);
+}
+
+.button .hover {
+    visibility: hidden;
+    position: absolute;
+    inset: -2em;
+    width: calc(100% + 4em);
+    height: calc(100% + 5em);
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+.button:hover .hover {
+    visibility: visible;
+}
+
+.button:active .hover {
+    visibility: hidden;
+}

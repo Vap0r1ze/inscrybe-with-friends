@@ -1,0 +1,15 @@
+.button {
+    all: unset;
+    font-size: 0.75em;
+    cursor: pointer;
+}
+
+.button:disabled {
+    opacity: 0.4;
+    filter: grayscale(.6);
+    cursor: default;
+}
+
+.button:not(:disabled):hover {
+    filter: brightness(1.2) url(#shadow) url(#wobble);
+}

@@ -4,6 +4,7 @@
     align-items: center;
     min-height: 100vh;
 
-    filter: url(#abberation) url(#bloom) url(#grain) url(#wobble);
-    font-size: 0.25rem;
+    filter: url(#abberation) url(#bloom);
+    /* filter: url(#grain) url(#wobble); */
+    font-size: 0.1875rem;
 }

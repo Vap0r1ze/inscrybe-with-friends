@@ -20,7 +20,7 @@ export interface SigilDef extends EffectTriggers {
     } | void;
 }
 
-export const sigilsReal = {
+const sigilsReal = {
     // Act I
     airborne: {
         name: 'Airborne',
@@ -40,7 +40,7 @@ export const sigilsReal = {
             attack() {
                 this.createEvent('draw', {
                     side: this.side,
-                    card: initCardFromPrint('workerAnt'),
+                    card: initCardFromPrint(prints, 'workerAnt'),
                 });
             },
         },
@@ -54,7 +54,7 @@ export const sigilsReal = {
             attack() {
                 this.createEvent('draw', {
                     side: this.side,
-                    card: initCardFromPrint('bee'),
+                    card: initCardFromPrint(prints, 'bee'),
                 });
             },
         },
@@ -68,7 +68,7 @@ export const sigilsReal = {
             play(event) {
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] - 1],
-                    card: initCardFromPrint('chime'),
+                    card: initCardFromPrint(prints, 'chime'),
                 });
             },
         },
@@ -163,7 +163,7 @@ export const sigilsReal = {
             play(event) {
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] - 1],
-                    card: initCardFromPrint('dam'),
+                    card: initCardFromPrint(prints, 'dam'),
                 });
             },
         },
@@ -232,7 +232,7 @@ export const sigilsReal = {
         runAs: 'played',
         cleanup: {
             play() {
-                const card = initCardFromPrint(this.card.print);
+                const card = initCardFromPrint(prints, this.card.print);
                 card.state.sigils = lists.subtract(this.card.state.sigils, ['drawCopy']);
                 this.createEvent('draw', {
                     side: this.side,
@@ -250,7 +250,7 @@ export const sigilsReal = {
             play() {
                 this.createEvent('draw', {
                     side: this.side,
-                    card: initCardFromPrint('rabbit'),
+                    card: initCardFromPrint(prints, 'rabbit'),
                 });
             },
         },
@@ -268,7 +268,7 @@ export const sigilsReal = {
 
                 let extraSigils = lists.subtract(this.card.state.sigils, this.cardPrint.sigils ?? []);
                 extraSigils = lists.subtract(extraSigils, ['evolve']);
-                const card = initCardFromPrint(this.cardPrint.evolution);
+                const card = initCardFromPrint(prints, this.cardPrint.evolution);
                 card.state.sigils.push(...extraSigils);
 
                 this.createEvent('transform', {
@@ -306,7 +306,7 @@ export const sigilsReal = {
 
                 this.createEvent('transform', {
                     pos: this.fieldPos!,
-                    card: initCardFromPrint(evolution),
+                    card: initCardFromPrint(prints, evolution),
                 });
             },
         },
@@ -441,7 +441,7 @@ export const sigilsReal = {
                 sigilsReal.strafe.cleanup.phase.call(this, event);
                 this.createEvent('play', {
                     pos: this.fieldPos!,
-                    card: initCardFromPrint('skeleton'),
+                    card: initCardFromPrint(prints, 'skeleton'),
                 });
             },
         },
@@ -457,7 +457,7 @@ export const sigilsReal = {
                 sigilsReal.strafe.cleanup.phase.call(this, event);
                 this.createEvent('play', {
                     pos: this.fieldPos!,
-                    card: initCardFromPrint('squirrel'),
+                    card: initCardFromPrint(prints, 'squirrel'),
                 });
             },
         },
@@ -670,7 +670,7 @@ export const sigilsReal = {
             perish() {
                 this.createEvent('play', {
                     pos: this.fieldPos!,
-                    card: initCardFromPrint('moxO'),
+                    card: initCardFromPrint(prints, 'moxO'),
                 });
             },
         },

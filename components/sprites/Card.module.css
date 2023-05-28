@@ -4,7 +4,7 @@
     height: 58em;
 }
 
-.cardContent {
+.content {
     position: absolute;
     transition: transform 0.5s ease-in-out;
     backface-visibility: hidden;
@@ -13,44 +13,44 @@
     inset: 0;
 }
 
-.cardContent.flipped {
+.content.flipped {
     transform: rotateY(180deg);
 }
 
-.cardFront {
+.front {
     position: relative;
 }
 
-.cardFront,
-.cardBack {
+.front,
+.back {
     height: 100%;
     backface-visibility: hidden;
 }
 
-.cardBack {
+.back {
     position: absolute;
     transform: rotateY(180deg);
     top: 0;
 }
 
-.cardFace {
+.face {
     position: absolute;
     inset: 0;
 }
 
-.cardPortrait {
+.portrait {
     position: absolute;
     top: 2em;
     left: 2em;
 }
 
-.cardCost {
+.cost {
     position: absolute;
     top: 1em;
     right: 1em;
 }
 
-.cardSigils {
+.sigils {
     display: flex;
     justify-content: center;
     position: absolute;
@@ -59,11 +59,18 @@
     top: 32em;
 }
 
-.cardSigil {
+.sigil {
     cursor: help;
 }
 
-.cardStats {
+.noSac {
+    position: absolute;
+    top: 33em;
+    left: 4em;
+    opacity: 0.3;
+}
+
+.stats {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;

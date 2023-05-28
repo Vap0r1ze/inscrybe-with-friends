@@ -1,10 +1,9 @@
 import { Fight, FightSide } from './Fight';
-import { prints } from '../defs/prints';
 import { positions } from './utils';
 import { Sigil } from '../defs/sigils';
 
 // Bitfields
-export enum MoxType {
+export const enum MoxType {
     Green = 1 << 0,
     Orange = 1 << 1,
     Blue = 1 << 2,
@@ -31,14 +30,25 @@ export type Cost = {
     needs: number;
 };
 
+export interface SideDeck {
+    name: string;
+    repeat?: [number, string];
+}
+export function getSideDeckPrintIds(sideDeck: SideDeck): string[] {
+    const ids: string[] = [];
+    if (sideDeck.repeat) ids.push(...Array(sideDeck.repeat[0]).fill(sideDeck.repeat[1]));
+    return ids;
+};
+
 export type Tribe = 'ant' | 'insect' | 'canine' | 'avian' | 'hooved' | 'reptile' | 'rodent' | 'mox';
 export interface CardPrint {
     name: string;
     desc?: string;
     portrait?: string;
-    face?: 'rare' | 'terrain';
+    face?: 'rare' | 'terrain' | 'rare_terrain';
     frame?: 'nature_frame' | 'tech_frame' | 'undead_frame' | 'wizard_frame';
     fused?: boolean;
+    banned?: boolean;
 
     health: number;
     power: Stat;
@@ -70,7 +80,7 @@ export type CardInfo = {
 export type FieldPos = [FightSide, number];
 export type CardPos = ['field' | 'hand', [FightSide, number]];
 
-export function initCardFromPrint(printId: string): Card {
+export function initCardFromPrint(prints: Record<string, CardPrint>, printId: string): Card {
     const print = prints[printId];
     return {
         print: printId,
@@ -83,7 +93,7 @@ export function initCardFromPrint(printId: string): Card {
     };
 }
 
-export function getCardPower<Side extends FightSide = FightSide>(fight: Fight<Side>, pos: FieldPos): number | null {
+export function getCardPower<Side extends FightSide = FightSide>(prints: Record<string, CardPrint>, fight: Fight<Side>, pos: FieldPos): number | null {
     const [side, lane] = pos as [Side, number];
     const card = fight.field[side][lane];
     if (card == null) return null;
@@ -99,7 +109,7 @@ export function getCardPower<Side extends FightSide = FightSide>(fight: Fight<Si
         const opposing = fight.field[opposingPos[0]][opposingPos[1]];
         if (opposing == null) return 0;
         // NOTE: https://youtu.be/lbeG5LjqCT4?t=521
-        return getCardPower(fight, opposingPos);
+        return getCardPower(prints, fight, opposingPos);
     } else if (card.state.power === 'moxes') {
         return fight.field[side].filter(card => card?.state.sigils.includes('gainGemGreen')).length;
     } else {

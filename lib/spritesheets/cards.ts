@@ -17,6 +17,7 @@ export const CardSprites: Spritesheet = {
         deathcard: [2, 0],
 
         stitches: [0, 3],
+        noSac: [1, 3],
         conduit_frame: [0, 0],
         nature_frame: [4, 0],
         tech_frame: [4, 1],

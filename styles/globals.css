@@ -1,12 +1,17 @@
 @font-face {
-    font-family: GBC;
-    src: url(/fonts/gbc.otf);
+    font-family: Marksman;
+    src: url(/fonts/Marksman.woff);
 }
 
 :root {
     --max-width: 1100px;
     --ui: #d7e2a3;
+    --ui-dark: #727c5e;
+    --ui-darker: #6d775a;
+    --flow-lighter: #1e1f27;
+    --flow-light: #191d17;
     --flow: #020a11;
+    --font-gbc: Marksman;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,11 +28,12 @@
 
 html,
 body {
-    font-family: GBC, sans-serif;
+    font-family: var(--font-gbc), sans-serif;
     max-width: 100vw;
     overflow-x: hidden;
     user-select: none;
     background-color: #01030d;
+    color: var(--flow);
 }
 
 a {

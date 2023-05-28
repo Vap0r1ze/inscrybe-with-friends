@@ -4,6 +4,7 @@ export function useFrame(fps: number) {
     const [frame, setFrame] = useState(0);
     const requestRef = useRef<number>();
     const previousTimeRef = useRef<number>();
+    const [paused, setPaused] = useState(false);
 
     const animate: FrameRequestCallback = time => {
         const newFrame = Math.floor(time / 1e3 * fps) % fps;
@@ -12,13 +13,18 @@ export function useFrame(fps: number) {
         previousTimeRef.current = time;
     };
 
-
     useEffect(() => {
         requestRef.current = requestAnimationFrame(animate);
-        return () => {
-            if (requestRef.current) cancelAnimationFrame(requestRef.current);
-        };
+        return () => void (requestRef.current && cancelAnimationFrame(requestRef.current));
     });
 
-    return frame;
+    useEffect(() => {
+        if (paused) {
+            if (requestRef.current) cancelAnimationFrame(requestRef.current);
+        } else {
+            requestRef.current = requestAnimationFrame(animate);
+        }
+    }, [paused]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    return [frame, setPaused] as const;
 }

@@ -8,7 +8,7 @@ export default function Document() {
     return (
         <Html lang="en">
             <Head>
-                <link rel="preload" href="/fonts/gbc.otf" as="font" type="font/otf" crossOrigin="anonymous"/>
+                <link rel="preload" href="/fonts/Marksman.woff" as="font" type="font/woff" crossOrigin="anonymous"/>
             </Head>
             <body>
                 <Main />

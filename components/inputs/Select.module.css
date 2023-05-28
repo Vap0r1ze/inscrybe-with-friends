@@ -1,0 +1,88 @@
+.select {
+    display: flex;
+    position: relative;
+
+    width: 100em;
+    background: var(--ui);
+    border: solid var(--flow);
+    border-width: 1em 1em 2em;
+}
+
+.select.readonly {
+    cursor: pointer;
+}
+
+.value {
+    all: unset;
+    width: 0;
+    flex: 1;
+    padding: 0 0.25em;
+    font-size: 12em;
+    color: var(--flow);
+}
+
+.select.readonly:hover .value::placeholder {
+    opacity: 1;
+}
+
+.value::placeholder {
+    color: var(--flow);
+    opacity: 0.75;
+}
+
+.value::selection {
+    background-color: var(--flow);
+}
+
+.value:read-only {
+    user-select: none;
+    pointer-events: none;
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 2em;
+    cursor: pointer;
+    opacity: 0.75;
+}
+
+.select.open .button,
+.select.readonly:hover .button,
+.button:hover {
+    filter: url(#abberation) url(#abberation) url(#abberation) url(#abberation);
+    opacity: 1;
+}
+
+.select.open .options {
+    visibility: visible;
+}
+
+.options {
+    position: absolute;
+    background: var(--flow);
+    padding: 1em 1em;
+    z-index: 10;
+    visibility: hidden;
+    top: 100%;
+    left: 0;
+    right: 0;
+    cursor: default;
+}
+
+.options.overflows {
+    top: auto;
+    bottom: 100%;
+}
+
+.option {
+    font-size: 12em;
+    background: var(--ui);
+    padding: 0 .25em;
+    color: var(--flow);
+}
+
+.option:hover {
+    background: var(--ui-dark);
+}

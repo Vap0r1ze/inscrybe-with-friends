@@ -55,10 +55,7 @@ export const SigilSprites: Spritesheet = {
         bistrike: [6, 0],
         hoarder: [3, 6],
         chaseAttack: [4, 6],
-
-        vampiric: [0, 7],
-
-        // IMF?
+        sniper: [6, 6],
         damBuilder: [1, 7],
         beesWithin: [2, 7],
         corpseEater: [3, 7],
@@ -69,5 +66,7 @@ export const SigilSprites: Spritesheet = {
         antSpawner: [1, 8],
         stone: [2, 8],
         boneless: [3, 8],
+
+        vampiric: [0, 7],
     },
 };

@@ -1,0 +1,9 @@
+.text {
+    display: inline-block;
+    transform: translateY(-10%);
+    white-space: pre-wrap;
+}
+
+.text.fit {
+    white-space: pre;
+}

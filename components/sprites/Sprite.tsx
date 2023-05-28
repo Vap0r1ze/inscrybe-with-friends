@@ -10,10 +10,10 @@ export default function Sprite({ sheet, name }: SpriteProps) {
 
     let [x, y] = sprite;
     const [sheetWidth, sheetHeight] = sheet.size;
-    const [tileWidth, tileHeight] = sheet.tiled?.tileSize ?? sprite.slice(2, 4);
+    const [tileWidth, tileHeight] = sprite.length === 4 ? sprite.slice(2, 4) : sheet.tiled?.tileSize ?? [1, 1];
     if (sheet.tiled) {
-        x = sheet.tiled.borderWidth.out + x * (tileWidth + sheet.tiled.borderWidth.in);
-        y = sheet.tiled.borderWidth.out + y * (tileHeight + sheet.tiled.borderWidth.in);
+        x = sheet.tiled.borderWidth.out + x * (sheet.tiled.tileSize[0] + sheet.tiled.borderWidth.in);
+        y = sheet.tiled.borderWidth.out + y * (sheet.tiled.tileSize[1] + sheet.tiled.borderWidth.in);
     }
 
     return <div style={{

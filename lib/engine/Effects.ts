@@ -90,7 +90,7 @@ export function createEffectContext(ctx: FightContext, event: Event, targets: Ef
             return ctx.fight.field[pos[0]][pos[1]] ?? null;
         },
         getPower(pos) {
-            let power = getCardPower(this.ctx.fight, pos)!;
+            let power = getCardPower(prints, this.ctx.fight, pos)!;
             // TODO move buffs to somewhere separate
             for (const side of FIGHT_SIDES) {
                 for (let lane = 0; lane < ctx.fight.opts.lanes; lane++) {

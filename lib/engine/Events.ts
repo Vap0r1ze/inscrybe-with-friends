@@ -1,3 +1,4 @@
+import { prints } from '../defs/prints';
 import { Card, CardPos, FieldPos, getCardPower } from './Card';
 import { DeckType, Fight, FightSide, Phase } from './Fight';
 
@@ -51,7 +52,7 @@ export const eventSettlers: {
     },
     triggerAttack(fight, event) {},
     attack(fight, event) {
-        const power = getCardPower(fight, event.from)!;
+        const power = getCardPower(prints, fight, event.from)!;
         event.damage ??= power;
         toCard: if (event.direct) {
             const [toSide, toLane] = event.to;
@@ -108,7 +109,7 @@ export const eventSettlers: {
 export function isEventInvalid(fight: Fight<FightSide>, event: Event) {
     switch (event.type) {
         case 'attack': {
-            const power = getCardPower(fight, event.from);
+            const power = getCardPower(prints, fight, event.from);
             if (!power) return true;
             const [side, lane] = event.from;
             if (!fight.field[side][lane]) return true;

@@ -1,0 +1,49 @@
+.prints {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 2em 1em;
+}
+
+.prints.stacked {
+    gap: 0;
+}
+
+.print {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    /* align-items: center; */
+}
+
+.prints.stacked .print {
+    width: 8em;
+    transition: width 0.5s;
+}
+
+.prints.stacked .print:hover,
+.prints.stacked .print:last-child {
+    width: 44em;
+}
+
+.prints.editable .print {
+    cursor: pointer;
+}
+
+.prints.editable .print:hover {
+    filter: blur(0.2em) brightness(1.2) url(#wobble);
+}
+
+.printName {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--flow);
+    width: 42em;
+    height: 8em;
+    padding: 1em;
+    background: var(--ui);
+    border: 1em solid var(--flow);
+    cursor: help;
+}
