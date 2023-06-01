@@ -1,4 +1,5 @@
 import styles from './Client.module.css';
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { ClientContext, animationDurations, useClientStore } from '@/hooks/useClientStore';
 import { CSSProperties, memo } from 'react';
 import { Box } from '../ui/Box';
@@ -26,27 +27,43 @@ export const Client = memo(function Client({ id, debug }: ClientProps) {
     }
 
     return <div className={styles.root}>
-        {client ? <div className={styles.client} style={{
-            '--lane-count': client.fight.opts.lanes,
-            ...animationVars,
-        } as CSSProperties}>
-            <ClientContext.Provider value={id}>
-                <div className={styles.left}><LeftInfo /></div>
-                <Board />
-                <div className={styles.right}><RightInfo /></div>
-                <div className={styles.middle}></div>
-                <Hand />
-                {debug && <><DebugEvents /><DebugInfo /></>}
-                {client.errors[0] != null && <div className={styles.errorBackdrop} onClick={onDismissError}>
-                    <div className={styles.error} onClick={e => e.stopPropagation()}>
-                        <Box>
-                            <Text size={12}>{client.errors[0]}</Text>
-                        </Box>
-                    </div>
-                </div>}
-            </ClientContext.Provider>
-        </div> : <Box className={styles.missing}>
-            <Text size={20}>CLIENT MISSING</Text>
-        </Box>}
+        <ErrorBoundary fallbackRender={ClientError}>
+            {client ? <div className={styles.client} style={{
+                '--lane-count': client.fight.opts.lanes,
+                ...animationVars,
+            } as CSSProperties}>
+                <ClientContext.Provider value={id}>
+                    <div className={styles.left}><LeftInfo /></div>
+                    <Board />
+                    <div className={styles.right}><RightInfo /></div>
+                    <div className={styles.middle}></div>
+                    <Hand />
+                    {debug && <><DebugEvents /><DebugInfo /></>}
+                    {client.errors[0] != null && <div className={styles.errorBackdrop} onClick={onDismissError}>
+                        <div className={styles.error} onClick={e => e.stopPropagation()}>
+                            <Box>
+                                <Text size={12}>{client.errors[0]}</Text>
+                            </Box>
+                        </div>
+                    </div>}
+                </ClientContext.Provider>
+            </div> : <Box className={styles.missing}>
+                <Text size={20}>CLIENT MISSING</Text>
+            </Box>}
+        </ErrorBoundary>
     </div>;
 });
+
+const realTrace = /^ *at ([\w$.]+) \((?:[\w\-]+:\/\/\/?)?(.+?\.tsx?):(\d+):(\d+)\)$/;
+const ClientError = ({ error }: FallbackProps) => {
+    let stack: string[] = [];
+    if (error instanceof Error && error.stack) {
+        for (const line of error.stack.split('\n').slice(1))
+            if (realTrace.test(line)) stack.push(line.replace(realTrace, '$1 @ $2:$3:$4'));
+    }
+    return <Box className={styles.missing}>
+        <Text size={20}>CLIENT ERROR</Text>
+        <Text size={14}>{`${error}`}</Text>
+        {stack.map((line, i) => <Text key={i}>{line}</Text>)}
+    </Box>;
+};

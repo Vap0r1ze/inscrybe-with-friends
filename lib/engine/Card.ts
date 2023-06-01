@@ -101,14 +101,14 @@ export function initCardFromPrint(prints: Record<string, CardPrint>, printId: st
     };
 }
 
-export function getCardPower<Side extends FightSide = FightSide>(prints: Record<string, CardPrint>, fight: Fight<Side>, pos: FieldPos): number | null {
-    const [side, lane] = pos as [Side, number];
+export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'player'>, pos: FieldPos): number | null {
+    const [side, lane] = pos;
     const card = fight.field[side][lane];
     if (card == null) return null;
     if (card.state.power === 'ants') {
         return fight.field[side].filter(card => card ? prints[card.print].traits?.includes('ant') : false).length;
     } else if (card.state.power === 'hand') {
-        return fight.hands[side].length;
+        return fight.players[side].handSize;
     } else if (card.state.power === 'bells') {
         let power = fight.opts.lanes - lane;
         const left = fight.field[side][lane - 1];

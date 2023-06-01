@@ -121,6 +121,15 @@ export default function Filters() {
                 />
                 <feBlend mode="overlay" in2="SourceGraphic" />
             </filter>
+            <filter id="dynamicValue">
+                <feColorMatrix
+                    values="0 0 0 0.247 0
+                            0 0 0 0.636 0
+                            0 0 0 0.451 0
+                            0 0 0 1 0"
+                    in="SourceGraphic"
+                />
+            </filter>
         </svg>
         <div style={{
             pointerEvents: 'none',

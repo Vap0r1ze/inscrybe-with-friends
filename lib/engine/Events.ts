@@ -57,6 +57,7 @@ export const eventSettlers: {
     },
     draw(fight, event) {
         fight.hands[event.side].push(event.card!);
+        fight.players[event.side].handSize++;
     },
     perish(fight, event) {
         const [side, lane] = event.pos;
@@ -84,6 +85,7 @@ export const eventSettlers: {
         if (event.fromHand) {
             const [side, idx] = event.fromHand;
             fight.hands[side].splice(idx, 1);
+            fight.players[side].handSize--;
             if (fight.mustPlay[side] === idx) {
                 fight.mustPlay[side] = null;
             } else if (fight.mustPlay[side] != null && fight.mustPlay[side]! > idx) {

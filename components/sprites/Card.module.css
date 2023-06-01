@@ -88,3 +88,7 @@
     right: 3em;
     bottom: 3em;
 }
+
+.dynamicStat {
+    filter: url(#dynamicValue);
+}

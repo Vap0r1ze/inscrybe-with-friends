@@ -36,9 +36,9 @@ const sigilsReal = {
         name: 'Ant Spawner',
         description: 'When this card is played, an Ant enters your hand.',
 
-        runAs: 'attackee',
-        readers: {
-            attack() {
+        runAs: 'played',
+        cleanup: {
+            play() {
                 this.createEvent('draw', {
                     side: this.side,
                     card: initCardFromPrint(prints, 'workerAnt'),
@@ -330,7 +330,6 @@ const sigilsReal = {
         runAs: 'played',
         readers: {
             perish(event) {
-                // TODO: check if perish cause matters
                 if (event.cause === 'sac') return;
                 const { evolution = 'opossum' } = this.cardPrint;
 
@@ -614,13 +613,19 @@ const sigilsReal = {
         cleanup: {
             phase(event) {
                 if (event.phase !== 'pre-turn') return;
+
                 const isRowTurn = this.tick.fight.turn.side === this.side;
                 const shouldFlip = +isRowTurn ^ +!this.card.state.flipped;
                 if (shouldFlip) this.createEvent('flip', { pos: this.fieldPos! });
+
                 const willEmerge = this.card.state.flipped && shouldFlip;
                 if (!willEmerge) return;
+
                 const tentacleCards = Object.entries(prints).filter(([id, card]) => card.traits?.includes('tentacle'));
-                const [tentacleCard] = tentacleCards[Math.floor(Math.random() * tentacleCards.length)];
+                const otherTentacleCards = tentacleCards.filter(([id]) => id !== this.card.print);
+                if (!otherTentacleCards.length) return;
+
+                const [tentacleCard] = otherTentacleCards[Math.floor(Math.random() * otherTentacleCards.length)];
                 this.createEvent('transform', {
                     pos: this.fieldPos!,
                     card: initCardFromPrint(prints, tentacleCard),
@@ -883,7 +888,7 @@ const sigilsReal = {
                 });
                 this.createEvent('draw', {
                     side,
-                    card: initCardFromPrint(prints, 'skeleton'),
+                    card: initCardFromPrint(prints, 'witheredCorpse'),
                 });
             },
         },

@@ -14,8 +14,32 @@ import { createFightHost } from '@/lib/engine/Host';
 import { oppositeSide } from '@/lib/engine/utils';
 import { clone, entries, fromEntries } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
 export default function PlayTest() {
+    return <ErrorBoundary fallbackRender={TheError}>
+        <PlayTestReal />
+    </ErrorBoundary>;
+}
+
+function TheError({ error }: FallbackProps) {
+    const onTryFix = () => {
+        localStorage.removeItem('games');
+        window.location.reload();
+    };
+
+    const message = (error?.stack ?? `${error}`).split('\n').slice(0, 5).join('\n');
+
+    return <Box>
+        <div>
+            <Text size={14}>Something is VERY Broken</Text>
+            <Text className={styles.borkStack}>{message}</Text>
+            <Button onClick={onTryFix}><Text size={20}>Delete Game and Refresh</Text></Button>
+        </div>
+    </Box>;
+}
+
+function PlayTestReal() {
     const deckStore = useStore(useDeckStore, state => state.decks);
     const game = useStore(useGameStore, state => state.games.playtest);
     const currentTurn = useStore(useGameStore, state => state.games.playtest?.host.fight.turn.side);

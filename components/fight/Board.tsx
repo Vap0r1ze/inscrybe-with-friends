@@ -3,14 +3,16 @@ import { Spritesheets } from '@/lib/spritesheets';
 import { Sprite } from '../sprites/Sprite';
 import classNames from 'classnames';
 import { useClientActions, useClientProp, useFight, useHolding } from '@/hooks/useClientStore';
-import { memo, useCallback, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { HoverBorder } from '../ui/HoverBorder';
 import { CardSprite } from '../sprites/CardSprite';
 import { prints } from '@/lib/defs/prints';
 import { useSet } from '@/hooks/useSet';
-import { getBloods } from '@/lib/engine/Card';
+import { FieldPos, getBloods } from '@/lib/engine/Card';
 import { PlayedCard } from './animations/PlayedCard';
 import { AnimatePresence } from 'framer-motion';
+import { FIGHT_SIDES } from '@/lib/engine/Fight';
+import { fromEntries } from '@/lib/utils';
 
 export const Board = memo(function Board() {
     const field = useFight(fight => fight.field);
@@ -78,6 +80,10 @@ export const Board = memo(function Board() {
         clearSacs();
     }, [holding, clearSacs]);
 
+    const fieldPos = useMemo(() => {
+        return fromEntries(FIGHT_SIDES.map(side => [side, field[side].map((card, i) => [side, i] as FieldPos)]));
+    }, [field.player.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
     return <div className={styles.board}>
         <div data-z-plane className={classNames(styles.boardRow, styles.playerRow)}>
             {field.player.map((card, i) => (
@@ -95,7 +101,11 @@ export const Board = memo(function Board() {
                         <AnimatePresence initial={false}>
                             {card && (
                                 <PlayedCard lane={i} key="player-card">
-                                    <CardSprite print={prints[card.print]} state={card.state} onActivate={onActivateLane[i]}/>
+                                    <CardSprite
+                                        print={prints[card.print]}
+                                        state={card.state}
+                                        onActivate={onActivateLane[i]}
+                                        fieldPos={fieldPos.player[i]}/>
                                 </PlayedCard>
                             )}
                         </AnimatePresence>
@@ -128,7 +138,12 @@ export const Board = memo(function Board() {
                         <AnimatePresence initial={false}>
                             {card && (
                                 <PlayedCard lane={i} opposing key="opposing-card">
-                                    {card && <CardSprite print={prints[card.print]} state={card.state} noCost />}
+                                    {card && <CardSprite
+                                        print={prints[card.print]}
+                                        state={card.state}
+                                        noCost
+                                        fieldPos={fieldPos.opposing[i]}
+                                    />}
                                 </PlayedCard>
                             )}
                         </AnimatePresence>

@@ -3,8 +3,10 @@ import { Number } from './Number';
 import { Sprite } from './Sprite';
 import { Spritesheets } from '@/lib/spritesheets';
 
-export default function StatSprite({ stat }: { stat: Stat }) {
-    if (typeof stat === 'number') return <Number n={stat} />;
+export default function StatSprite({ stat, className }: { stat: Stat, className?: string }) {
+    const statEl = typeof stat === 'number'
+        ? <Number n={stat} />
+        : <Sprite sheet={Spritesheets.stats} name={stat} />;
 
-    return <Sprite sheet={Spritesheets.stats} name={stat} />;
+    return <div className={className}>{statEl}</div>;
 }

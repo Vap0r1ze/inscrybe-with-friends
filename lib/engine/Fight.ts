@@ -47,6 +47,7 @@ export interface PlayerState {
     bones: number;
     energy: [number, number];
     deckSizes: Record<DeckType, number>;
+    handSize: number;
 }
 
 const initPlayerState = (lives: number): PlayerState => ({
@@ -54,6 +55,7 @@ const initPlayerState = (lives: number): PlayerState => ({
     bones: 0,
     energy: [0, 0],
     deckSizes: fromEntries(DECK_TYPES.map(type => [type, 0])),
+    handSize: 0,
 });
 
 export function createFight<Side extends FightSide = never>(opts: FightOptions, sides: readonly Side[], decks: Record<Side, Decks>): Fight<Side> {

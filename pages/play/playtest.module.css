@@ -5,3 +5,8 @@
     align-items: center;
     color: var(--flow);
 }
+
+.borkStack {
+    margin-top: 1em;
+    opacity: 0.5;
+}

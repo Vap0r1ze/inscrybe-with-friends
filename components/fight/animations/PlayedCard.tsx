@@ -64,10 +64,10 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
                 const dx = (event.to[1] - event.from[1]) / 2 * 100;
                 const dy = (yOf(event.to) - yOf(event.from)) / 2 * 100;
                 controls.push(animate(el, {
-                    scale: [1, 1.1, 1],
+                    scale: [1, 1.1, 1, 1, 1],
                     x: ['0%', `${dx}%`, '0%'],
                     y: ['0%', `${dy}%`, '0%'],
-                }, { duration: animationDurations.attack, ease: 'easeInOut' }));
+                }, { duration: animationDurations.attack, ease: 'easeOut' }));
                 zEls.forEach(zEl => zEl.style.zIndex = '1');
             } else if (event.type === 'attack' && is(event.to) && !event.direct) {
                 const dy = (yOf(event.to) - yOf(event.from)) * 3;
