@@ -5,7 +5,7 @@ import classNames from 'classnames';
 
 export interface SelectProps {
     options: [string, string][];
-    value?: string;
+    value?: string | null;
     content?: string;
     placeholder?: string;
     disabled?: boolean;
@@ -29,7 +29,7 @@ export function Select({
     const [valueInput, setValue] = useState(valueProp ?? '');
 
     const value = valueProp ?? valueInput;
-    const valueLabel = content ?? options.find(([v]) => v === value)?.[1];
+    const valueLabel = content ?? options.find(([v]) => v === value)?.[1] ?? '';
 
     const onSelectClick: MouseEventHandler<HTMLElement> = (e) => {
         if (disabled || editable) return;

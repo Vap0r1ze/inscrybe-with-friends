@@ -1,21 +1,21 @@
 import { Spritesheet } from '.';
 
 export const ActivatedSigilSprites: Spritesheet = {
-    path: '/assets/gbc/sigils.png',
-    size: [127, 167],
+    path: '/assets/gbc/activated_sigils.png',
+    size: [116, 23],
     tiled: {
         tileSize: [22, 10],
         borderWidth: { out: 1, in: 1 },
     },
     sprites: {
-        activatedDealDamage: [1, 127],
-        activatedDiceRollBone: [24, 127],
-        activatedDiceRollEnergy: [47, 127],
-        activatedDrawSkeleton: [70, 127],
-        activatedEnergyToBones: [93, 127],
-        activatedHeal: [1, 138],
-        activatedSacrificeDraw: [24, 138],
-        activatedStatsUp: [47, 138],
-        activatedStatsUpEnergy: [70, 138],
+        activatedDealDamage: [0, 0],
+        activatedDiceRollBone: [1, 0],
+        activatedDiceRollEnergy: [2, 0],
+        activatedDrawSkeleton: [3, 0],
+        activatedEnergyToBones: [4, 0],
+        activatedHeal: [0, 1],
+        activatedSacrificeDraw: [1, 1],
+        activatedStatsUp: [2, 1],
+        activatedStatsUpEnergy: [3, 1],
     },
 };

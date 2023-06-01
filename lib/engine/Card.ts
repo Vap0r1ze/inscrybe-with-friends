@@ -40,21 +40,24 @@ export function getSideDeckPrintIds(sideDeck: SideDeck): string[] {
     return ids;
 };
 
-export type Tribe = 'ant' | 'insect' | 'canine' | 'avian' | 'hooved' | 'reptile' | 'rodent' | 'mox';
+export type Trait = 'ant' | 'insect' | 'canine' | 'avian' | 'hooved' | 'reptile' | 'rodent' | 'mox' | 'bell';
 export interface CardPrint {
     name: string;
     desc?: string;
     portrait?: string;
-    face?: 'rare' | 'terrain' | 'rare_terrain';
+    face?: 'rare' | 'terrain' | 'rare_terrain' | 'common';
     frame?: 'nature_frame' | 'tech_frame' | 'undead_frame' | 'wizard_frame';
+
     fused?: boolean;
     banned?: boolean;
+    rare?: boolean;
+    scrybe?: 'nature' | 'tech' | 'undead' | 'wizard';
 
     health: number;
     power: Stat;
     cost?: Cost;
     noSac?: boolean;
-    tribes?: Tribe[];
+    traits?: Trait[];
 
     sigils?: Sigil[];
 
@@ -65,7 +68,7 @@ export interface CardState {
     health: number;
     sigils: Sigil[];
     flipped?: boolean;
-    forward?: boolean;
+    backward?: boolean;
     evolved?: boolean;
 }
 
@@ -98,17 +101,22 @@ export function getCardPower<Side extends FightSide = FightSide>(prints: Record<
     const card = fight.field[side][lane];
     if (card == null) return null;
     if (card.state.power === 'ants') {
-        return fight.field[side].filter(card => card ? prints[card.print].tribes?.includes('ant') : false).length;
+        return fight.field[side].filter(card => card ? prints[card.print].traits?.includes('ant') : false).length;
     } else if (card.state.power === 'hand') {
         return fight.hands[side].length;
     } else if (card.state.power === 'bells') {
-        // TODO
-        return lane + 1;
+        let power = fight.opts.lanes - lane;
+        const left = fight.field[side][lane - 1];
+        const right = fight.field[side][lane + 1];
+        if (left && prints[left.print].traits?.includes('bell')) power++;
+        if (right && prints[right.print].traits?.includes('bell')) power++;
+        return power;
     } else if (card.state.power === 'mirror') {
         const opposingPos = positions.opposing(pos);
         const opposing = fight.field[opposingPos[0]][opposingPos[1]];
         if (opposing == null) return 0;
         // NOTE: https://youtu.be/lbeG5LjqCT4?t=521
+        if (opposing.state.power === 'mirror') return 0;
         return getCardPower(prints, fight, opposingPos);
     } else if (card.state.power === 'moxes') {
         return fight.field[side].filter(card => card?.state.sigils.includes('gainGemGreen')).length;
@@ -127,4 +135,16 @@ export function getMoxes(cards: (Card | null)[]): number {
         if (gainAll || card.state.sigils.includes('gainGemBlue')) moxes |= MoxType.Blue;
     }
     return moxes;
+}
+
+export function getBloods(prints: Record<string, CardPrint>, cards: (Card | null)[]): number {
+    let bloods = 0;
+    for (const card of cards) {
+        if (!card) continue;
+        const print = prints[card.print];
+        if (print.noSac) continue;
+        if (card.state.sigils.includes('threeSacs')) bloods += 3;
+        else bloods += 1;
+    }
+    return bloods;
 }

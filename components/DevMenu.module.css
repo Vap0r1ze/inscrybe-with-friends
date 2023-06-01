@@ -1,0 +1,25 @@
+.menu {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(2px) saturate(0.8) brightness(.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24em;
+    padding: 24em;
+}
+
+.actions,
+.willSpawn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3em;
+}
+
+.prints {
+    flex: 1;
+    max-height: 100%;
+    overflow: auto;
+}

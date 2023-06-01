@@ -4,7 +4,9 @@ import { SigilSprites } from './sigils';
 import { ActivatedSigilSprites } from './activatedSigils';
 import { CostSprites } from './costs';
 import { CharSprites } from './text';
+import { BorderCharSprites } from './textBorder';
 import { StatSprites } from './stats';
+import { BattleSprites } from './battle';
 
 export interface Spritesheet {
     path: string;
@@ -23,5 +25,7 @@ export const Spritesheets = {
     cards: CardSprites,
     costs: CostSprites,
     chars: CharSprites,
+    borderChars: BorderCharSprites,
     stats: StatSprites,
+    battle: BattleSprites,
 };

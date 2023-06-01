@@ -1,0 +1,28 @@
+.bell {
+    position: relative;
+    cursor: pointer;
+}
+
+.bell.disabled {
+    pointer-events: none;
+}
+
+.bell:hover .normal,
+.bell:active .normal {
+    visibility: hidden;
+}
+
+.active,
+.hover {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+}
+
+.bell:hover:not(:active) .hover {
+    visibility: visible;
+}
+
+.bell:active .active {
+    visibility: visible;
+}

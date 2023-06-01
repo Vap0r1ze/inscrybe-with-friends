@@ -6,7 +6,7 @@
 
 .content {
     position: absolute;
-    transition: transform 0.5s ease-in-out;
+    transition: transform var(--event-flip-duration, 0.5s) ease-in-out;
     backface-visibility: hidden;
     transform-style: preserve-3d;
 
@@ -60,7 +60,16 @@
 }
 
 .sigil {
+    transition: transform var(--event-move-duration, 0.5s) ease-in-out;
     cursor: help;
+}
+
+.sigil.backward {
+    transform: rotateY(180deg);
+}
+
+.sigil.upsideDown {
+    transform: rotateX(180deg);
 }
 
 .noSac {

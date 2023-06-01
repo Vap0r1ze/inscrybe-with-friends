@@ -11,6 +11,7 @@ const authOptions: AuthOptions = {
     adapter,
     callbacks: {
         signIn({ profile }) {
+            // @ts-ignore
             return profile?.['verified'] || '/auth/error?error=not_verified';
         },
     },

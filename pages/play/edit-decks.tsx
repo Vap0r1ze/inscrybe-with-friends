@@ -1,21 +1,23 @@
 import styles from './edit-decks.module.css';
 import { sideDecks } from '@/lib/defs/prints';
 import { entries } from '@/lib/utils';
-import { useState } from 'react';
-import { Deck, useDeckStore } from '@/hooks/useDeckStore';
+import { useCallback, useState } from 'react';
+import { useDeckStore } from '@/hooks/useDeckStore';
 import { useStore } from '@/hooks/useStore';
-import PrintList from '@/components/ui/PrintList';
+import { PrintList } from '@/components/ui/PrintList';
 import { AssetButton } from '@/components/inputs/AssetButton';
 import { Select } from '@/components/inputs/Select';
 import { Text } from '@/components/Text';
 import { Button } from '@/components/inputs/Button';
 import { getSideDeckPrintIds } from '@/lib/engine/Card';
+import { Box } from '@/components/ui/Box';
+import { Decks } from '@/lib/engine/Deck';
 
-function useDeck(init: Deck = { main: [], side: 'squirrels' }) {
+function useDeck(init: Decks = { main: [], side: getSideDeckPrintIds(sideDecks.squirrels) }) {
     const [deck, setDeck] = useState(init);
-    const addCard = (id: string) => setDeck({ ...deck, main: [...deck.main, id] });
-    const removeCard = (idx: number) => setDeck({ ...deck, main: deck.main.filter((_, i) => i !== idx) });
-    const setSide = (id: string) => setDeck({ ...deck, side: id });
+    const addCard = (id: string) => setDeck(deck => ({ ...deck, main: [...deck.main, id] }));
+    const removeCard = (idx: number) => setDeck(deck => ({ ...deck, main: deck.main.filter((_, i) => i !== idx) }));
+    const setSide = (ids: string[]) => setDeck(deck => ({ ...deck, side: ids }));
     return [deck, { addCard, removeCard, setSide, setDeck }] as const;
 }
 
@@ -23,6 +25,7 @@ export default function EditDecks() {
     const [deck, { addCard, removeCard, setSide, setDeck }] = useDeck();
     const [selectedDeck, setSelectedDeck] = useState('');
     const [deckNameInput, setDeckName] = useState('');
+    const [selectedSideDeck, setSelectedSideDeck] = useState('squirrels');
     const decks = useStore(useDeckStore, state => state.decks);
 
     const deckName = deckNameInput.trim();
@@ -52,11 +55,21 @@ export default function EditDecks() {
     };
     const deleteDeck = (name: string) => {
         if (name === selectedDeck) {
-            setDeck({ main: [], side: 'squirrels' });
+            setDeck({ main: [], side: getSideDeckPrintIds(sideDecks.squirrels) });
             setSelectedDeck('');
         }
         useDeckStore.getState().deleteDeck(name);
     };
+
+    /* eslint-disable react-hooks/exhaustive-deps */
+    const onSideDeckSelect = useCallback((id: string) => {
+        setSelectedSideDeck(id);
+        setSide(getSideDeckPrintIds(sideDecks[id]));
+    }, []);
+    const onPrintSelect = useCallback((id: string) => addCard(id), []);
+    const onDeckPrintSelect = useCallback((id: string, idx: number) => removeCard(idx), []);
+    const onClearDeck = useCallback(() => setDeck(deck => ({ ...deck, main: [] })), []);
+    /* eslint-enable react-hooks/exhaustive-deps */
 
     const sideEntries = entries(sideDecks);
     const deckEntries = entries(decks ?? {});
@@ -65,9 +78,8 @@ export default function EditDecks() {
 
     return (
         <div className={styles.editor}>
-            <div className={styles.controls}>
+            <Box className={styles.controls}>
                 <div className={styles.controlsRow}>
-                    {/* <Text text="Deck:    " size={14} /> */}
                     <Select
                         options={deckEntries.map(([name]) => [name, name])}
                         disabled={!deckEntries.length}
@@ -79,8 +91,8 @@ export default function EditDecks() {
                         onEdit={name => onDeckNameChange(name)}
                     />
                     <div style={{ flex: 1 }} />
-                    <Button onClick={() => setDeck({ ...deck, main: [] })}>
-                        <Text text="Clear Deck" size={12} />
+                    <Button onClick={onClearDeck}>
+                        <Text size={12}>Clear Deck</Text>
                     </Button>
                 </div>
                 <div className={styles.controlsRow}>
@@ -90,28 +102,28 @@ export default function EditDecks() {
                         <AssetButton path="/assets/trash.png" title="Delete Deck" disabled={noDeckSelected} onClick={() => deleteDeck(selectedDeck!)} />
                     </div>
                     <div style={{ flex:1 }} />
-                    <Text text={`${deck.main.length} card${deck.main.length === 1 ? '' : 's'}`} size={14} />
+                    <Text size={14}>{`${deck.main.length}`} card{deck.main.length === 1 ? '' : 's'}</Text>
                 </div>
-            </div>
+            </Box>
             <div className={styles.deck}>
                 {!deck.main.length && <div className={styles.emptyDeck}>
-                    <Text text="No cards in your deck, add them by selecting them on the right" size={14} />
+                    <Text size={14}>No cards in your deck, add them by selecting them on the right</Text>
                 </div>}
-                <PrintList editable prints={deck.main} onSelect={(id, idx) => removeCard(idx)} />
+                <PrintList editable prints={deck.main} onSelect={onDeckPrintSelect} />
             </div>
-            <div className={styles.sideDeck}>
-                <PrintList stacked prints={getSideDeckPrintIds(sideDecks[deck.side])} />
+            <Box className={styles.sideDeck}>
+                <PrintList stacked prints={deck.side} />
                 <div className={styles.sideDeckSelector}>
-                    <Text text="Side Deck:" size={14} />
+                    <Text size={14}>Side Deck:</Text>
                     <Select
                         options={sideEntries.map(([id, sideDeck]) => [id, sideDeck.name])}
-                        value={deck.side}
-                        onSelect={id => setSide(id)}
+                        value={selectedSideDeck}
+                        onSelect={onSideDeckSelect}
                     />
                 </div>
-            </div>
+            </Box>
             <div className={styles.prints}>
-                <PrintList editable showNames onSelect={id => addCard(id)} />
+                <PrintList editable showNames onSelect={onPrintSelect} />
             </div>
         </div>
     );

@@ -23,12 +23,11 @@ export const INTERNAL_ERRORS = [
 ];
 
 export class FightError extends Error {
-    constructor(public type: ErrorType, message: string) {
+    private constructor(public type: ErrorType, message: string) {
         super(message);
     }
     get name() { return this.type + 'Error'; }
-}
-
-export function createError(type: ErrorType, message?: string): FightError {
-    return new FightError(type, message ?? ErrorMessages[type]);
+    static create(type: ErrorType, message?: string): FightError {
+        return new FightError(type, message ?? ErrorMessages[type]);
+    };
 }

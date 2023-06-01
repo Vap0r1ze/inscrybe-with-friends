@@ -17,15 +17,6 @@
 
 .controls {
     grid-area: controls;
-    background: var(--ui);
-    margin: 2em;
-    border: solid var(--flow);
-    border-width: 1em 1em 3em;
-
-    display: flex;
-    flex-direction: column;
-    padding: 2em 6em;
-    gap: 4em;
 }
 
 .controlsRow {
@@ -47,7 +38,7 @@
     justify-content: flex-start;
 
     border: 1em dashed var(--ui-dark);
-    margin: 4em 6em;
+    margin: 4em 8em;
     overflow: auto;
 }
 
@@ -74,15 +65,8 @@
 
 .sideDeck {
     grid-area: side;
-
-    display: flex;
+    flex-direction: row;
     justify-content: space-between;
-
-    background: var(--ui);
-    margin: 4em 4em;
-    padding: 4em;
-    border: solid var(--flow);
-    border-width: 1em 1em 3em;
 }
 
 .prints {

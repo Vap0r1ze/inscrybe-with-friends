@@ -5,10 +5,6 @@
     gap: 2em 1em;
 }
 
-.prints.stacked {
-    gap: 0;
-}
-
 .print {
     display: flex;
     position: relative;
@@ -16,14 +12,8 @@
     /* align-items: center; */
 }
 
-.prints.stacked .print {
+.print.stacked {
     width: 8em;
-    transition: width 0.5s;
-}
-
-.prints.stacked .print:hover,
-.prints.stacked .print:last-child {
-    width: 44em;
 }
 
 .prints.editable .print {
@@ -43,6 +33,7 @@
     width: 42em;
     height: 8em;
     padding: 1em;
+    margin: 0 auto;
     background: var(--ui);
     border: 1em solid var(--flow);
     cursor: help;

@@ -1,0 +1,12 @@
+.box {
+    display: flex;
+    flex-direction: column;
+    gap: 4em;
+
+    margin: 4em;
+    padding: 4em;
+
+    background: var(--ui);
+    border: solid var(--flow);
+    border-width: 1em 1em 3em;
+}

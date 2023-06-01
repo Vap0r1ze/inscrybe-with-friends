@@ -4,6 +4,8 @@
     position: relative;
     align-items: center;
     justify-content: center;
+    background-color: var(--ui);
+    color: var(--flow);
     border: solid var(--flow);
     border-width: 1em 1em 2em;
     padding: 0 2em;
@@ -15,20 +17,8 @@
     transform: translateY(1em);
 }
 
-.button .hover {
-    visibility: hidden;
-    position: absolute;
-    inset: -2em;
-    width: calc(100% + 4em);
-    height: calc(100% + 5em);
+.button.disabled {
+    opacity: 0.5;
     pointer-events: none;
-    image-rendering: pixelated;
-}
-
-.button:hover .hover {
-    visibility: visible;
-}
-
-.button:active .hover {
-    visibility: hidden;
+    color: var(--ui-dark);
 }

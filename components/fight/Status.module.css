@@ -1,0 +1,37 @@
+.status {
+    display: flex;
+    flex-direction: column;
+    gap: 4em;
+    width: 110em;
+}
+
+.statusRow {
+    display: flex;
+    justify-content: space-between;
+}
+
+.bones {
+    display: flex;
+    align-items: flex-end;
+}
+
+.boneAmount {
+    margin-left: -4em;
+    margin-bottom: 1em;
+}
+
+.energy {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.moxes {
+    display: flex;
+    gap: 3em;
+}
+
+.bloods {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 0em;
+}

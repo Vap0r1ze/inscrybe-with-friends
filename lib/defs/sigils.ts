@@ -1,8 +1,9 @@
 import { ActionReq, ActionRes } from '../engine/Actions';
-import { FieldPos, CardPos, initCardFromPrint } from '../engine/Card';
+import { FieldPos, CardPos, initCardFromPrint, getMoxes, MoxType } from '../engine/Card';
 import { EffectContext, EffectTarget, EffectTriggers } from '../engine/Effects';
-import { ErrorType, createError } from '../engine/Errors';
+import { ErrorType, FightError } from '../engine/Errors';
 import { lists, positions } from '../engine/utils';
+import { entries } from '../utils';
 import { prints } from './prints';
 
 export type SigilPos = [CardPos, Sigil];
@@ -70,6 +71,25 @@ const sigilsReal = {
                     pos: [this.side, event.pos[1] - 1],
                     card: initCardFromPrint(prints, 'chime'),
                 });
+            },
+        },
+    },
+    bombSpewer: {
+        name: 'Bomb Spewer',
+        description: 'When this card is played, fill all empty spaces with Explode Bots.',
+
+        runAs: 'played',
+        cleanup: {
+            play(event) {
+                for (const [side, lanes] of entries(this.tick.fight.field)) {
+                    for (let lane = 0; lane < lanes.length; lane++) {
+                        if (lanes[lane]) continue;
+                        this.createEvent('play', {
+                            pos: [side, lane],
+                            card: initCardFromPrint(prints, 'explodeBot'),
+                        });
+                    }
+                }
             },
         },
     },
@@ -148,7 +168,7 @@ const sigilsReal = {
                 const [side, idx] = this.handPos!;
                 this.createEvent('play', {
                     pos: event.pos,
-                    card: this.ctx.fight.hands[side][idx],
+                    card: this.tick.fight.hands[side][idx],
                     fromHand: this.handPos!,
                 });
             },
@@ -336,13 +356,14 @@ const sigilsReal = {
                     return [this.side, {
                         type: 'chooseDraw',
                         deck: 'main',
-                        choices: this.ctx.fight.decks[this.side].main.slice().sort((a, b) => a - b),
+                        choices: this.tick.host.decks[this.side].main.slice().sort((a, b) => a - b),
                     }];
                 },
                 async onResponse(event, res: ActionRes<'chooseDraw'>, req: ActionReq<'chooseDraw'>) {
-                    if (!req.choices.includes(res.idx)) throw createError(ErrorType.InvalidAction, 'Cannot draw card that is not in deck');
+                    if (!req.choices.includes(res.idx)) throw FightError.create(ErrorType.InvalidAction, 'Cannot draw card that is not in deck');
                     const side = event.pos[0];
-                    const [card] = await this.ctx.adapter.getCardsFromDeck.call(this.ctx, side, req.deck, [res.idx]);
+                    const printId = this.tick.fight.decks[side][req.deck][res.idx];
+                    const card = initCardFromPrint(prints, printId);
                     this.createEvent('draw', {
                         side,
                         card,
@@ -406,7 +427,6 @@ const sigilsReal = {
         runAs: 'attackee',
         readers: {
             attack(event) {
-                if (this.card.state.health <= 0) return;
                 this.createEvent('attack', {
                     from: this.fieldPos!,
                     to: event.from,
@@ -471,10 +491,16 @@ const sigilsReal = {
             phase(event) {
                 if (event.phase !== 'post-attack') return;
                 const [side, lane] = this.fieldPos!;
-                // TODO: try to turn around if necessary
+                let toLane =  lane + (this.card.state.backward ? -1 : 1);
+                let turnAround = false;
+                if (this.getCard([side, toLane]) || toLane < 0 || toLane >= this.tick.fight.opts.lanes) {
+                    turnAround = true;
+                    toLane = lane + (!this.card.state.backward ? -1 : 1);
+                };
                 this.createEvent('move', {
                     from: this.fieldPos!,
-                    to: [side, lane + (this.card.state.forward ? 1 : -1)],
+                    to: [side, toLane],
+                    turnAround,
                 });
             },
         },
@@ -488,9 +514,10 @@ const sigilsReal = {
             phase(event) {
                 if (event.phase !== 'post-attack') return;
                 const [side, lane] = this.fieldPos!;
+                // TODO do push check etc
                 this.createEvent('move', {
                     from: this.fieldPos!,
-                    to: [side, lane + (this.card.state.forward ? 1 : -1)],
+                    to: [side, lane + (this.card.state.backward ? -1 : 1)],
                 });
             },
         },
@@ -560,7 +587,7 @@ const sigilsReal = {
         cleanup: {
             phase(event) {
                 if (event.phase !== 'pre-turn') return;
-                const isRowTurn = this.ctx.fight.turn.side === this.side;
+                const isRowTurn = this.tick.fight.turn.side === this.side;
                 const shouldFlip = +isRowTurn ^ +!this.card.state.flipped;
                 if (shouldFlip) this.createEvent('flip', { pos: this.fieldPos! });
             },
@@ -610,7 +637,7 @@ const sigilsReal = {
         description: 'When a card moves into the space opposing this card, they are dealt 1 damage.',
 
         runAs: 'opposing',
-        readers: {
+        cleanup: {
             play(event) {
                 if (event.transient) return;
 
@@ -658,7 +685,7 @@ const sigilsReal = {
 
         buffs(source, target) {
             const { print } = this.getCardInfo(target)!;
-            if (print.tribes?.includes('mox')) return { power: 1 };
+            if (print.traits?.includes('mox')) return { power: 1 };
         },
     },
     dropRubyOnDeath: {
@@ -699,8 +726,8 @@ const sigilsReal = {
         cleanup: {
             play() {
                 const [side] = this.fieldPos!;
-                const moxCount = this.ctx.fight.field[side].filter((pos) => {
-                    return pos?.print && prints[pos.print].tribes?.includes('mox');
+                const moxCount = this.tick.fight.field[side].filter((pos) => {
+                    return pos?.print && prints[pos.print].traits?.includes('mox');
                 }).length;
                 for (let i = 0; i < moxCount; i++) {
                     this.createEvent('draw', {
@@ -716,12 +743,11 @@ const sigilsReal = {
         description: 'If this card\'s owner controls no Mox cards, this card perishes.',
 
         runAt: 'field',
-        runAs: 'global',
         cleanup: {
             play() {
                 const [side] = this.fieldPos!;
-                const moxCount = this.ctx.fight.field[side].filter((pos) => {
-                    return pos?.print && prints[pos.print].tribes?.includes('mox');
+                const moxCount = this.tick.fight.field[side].filter((pos) => {
+                    return pos?.print && prints[pos.print].traits?.includes('mox');
                 }).length;
                 if (moxCount > 0) return;
                 this.createEvent('perish', {
@@ -730,11 +756,165 @@ const sigilsReal = {
                 });
             },
             phase() {
-                if (this.ctx.fight.turn.phase !== 'pre-turn' && this.ctx.fight.turn.phase !== 'post-attack') return;
+                if (this.tick.fight.turn.phase !== 'pre-turn' && this.tick.fight.turn.phase !== 'post-attack') return;
                 sigilsReal.gemDependant.cleanup.play.call(this);
             },
         },
     },
+
+    // Buttons
+    activatedStatsUp: {
+        name: 'Enlarge',
+        description: '[Activate]: Pay 2 [Bones] to increase the [Power] and [Health] of this card by 1.',
+
+        runAs: 'played',
+        readers: {
+            activate(event) {
+                const [side] = event.pos;
+                if (this.tick.fight.players[side].bones < 2) throw FightError.create(ErrorType.InsufficientResources, 'Not enough bones.');
+                this.createEvent('bones', {
+                    side,
+                    amount: -2,
+                });
+                this.createEvent('stats', {
+                    pos: event.pos,
+                    power: this.getPower(event.pos)! + 1,
+                    health: this.card.state.health + 1,
+                });
+            },
+        },
+    },
+    activatedStatsUpEnergy: {
+        name: 'Stimulate',
+        description: '[Activate]: Pay 3 [Energy] to increase the [Power] and [Health] of this card by 1.',
+
+        runAs: 'played',
+        readers: {
+            activate(event) {
+                const [side] = event.pos;
+                if (this.tick.fight.players[side].energy[0] < 3) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
+                this.createEvent('energySpend', {
+                    side,
+                    amount: 2,
+                });
+                this.createEvent('stats', {
+                    pos: event.pos,
+                    power: this.getPower(event.pos)! + 1,
+                    health: this.card.state.health + 1,
+                });
+            },
+        },
+    },
+    activatedEnergyToBones: {
+        name: 'Bonehorn',
+        description: '[Activate]: Pay 1 [Energy] to gain 1 [Bone].',
+
+        runAs: 'played',
+        readers: {
+            activate(event) {
+                const [side] = event.pos;
+                if (this.tick.fight.players[side].energy[0] < 1) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
+                this.createEvent('energySpend', {
+                    side,
+                    amount: 1,
+                });
+                this.createEvent('bones', {
+                    side,
+                    amount: 1,
+                });
+            },
+        },
+    },
+    activatedDiceRollEnergy: {
+        name: 'Power Dice',
+        description: '[Activate]: Pay 1 [Energy] to set the [Power] of this card randomly between 1 and 6.',
+
+        runAs: 'played',
+        readers: {
+            activate(event) {
+                const [side] = event.pos;
+                if (this.tick.fight.players[side].energy[0] < 1) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
+                this.createEvent('energySpend', {
+                    side,
+                    amount: 1,
+                });
+                const power = Math.floor(Math.random() * 6) + 1;
+                this.createEvent('stats', {
+                    pos: event.pos,
+                    power,
+                });
+            },
+        },
+    },
+    activatedDrawSkeleton: {
+        name: 'Disentomb',
+        description: '[Activate]: Pay 1 [Energy] to create a [Skeleton] in your hand.',
+
+        runAs: 'played',
+        readers: {
+            activate(event) {
+                const [side] = event.pos;
+                if (this.tick.fight.players[side].energy[0] < 1) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
+                this.createEvent('energySpend', {
+                    side,
+                    amount: 1,
+                });
+                this.createEvent('draw', {
+                    side,
+                    card: initCardFromPrint(prints, 'skeleton'),
+                });
+            },
+        },
+    },
+    activatedSacrificeDraw: {
+        name: 'True Scholar',
+        description: '[Activate]: If you have a Blue gem, destroy this card to draw 3 cards.',
+
+        runAs: 'played',
+        readers: {
+            activate(event) {
+                const [side] = event.pos;
+                if (!(getMoxes(this.tick.fight.field[side]) & MoxType.Blue))
+                    throw FightError.create(ErrorType.InsufficientResources, 'Requires a blue gem.');
+
+                this.createEvent('perish', {
+                    pos: event.pos,
+                    cause: 'attack',
+                });
+                for (let i = 0; i < 3; i++) {
+                    this.createEvent('draw', {
+                        side,
+                        source: 'main',
+                    });
+                }
+            },
+        },
+    },
+    activatedDealDamage: {
+        name: 'Energy Gun',
+        description: '[Activate]: Pay 1 [Energy] to deal 1 damage to the space across from this card.',
+
+        runAs: 'played',
+        readers: {
+            activate(event) {
+                const [side] = event.pos;
+                if (this.tick.fight.players[side].energy[0] < 1) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
+                const targetPos = positions.opposing(event.pos);
+                const target = this.getCard(targetPos);
+                if (!target) throw FightError.create(ErrorType.InvalidPositionAccess, 'Energy Gun must attack a card.');
+                this.createEvent('energySpend', {
+                    side,
+                    amount: 1,
+                });
+                this.createEvent('shoot', {
+                    from: event.pos,
+                    to: targetPos,
+                    damage: 1,
+                });
+            },
+        },
+    },
+
 
     // Custom
     vampiric: {

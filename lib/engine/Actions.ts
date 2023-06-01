@@ -1,6 +1,7 @@
 import { FieldPos } from './Card';
-import { DeckType, FightSide } from './Fight';
-import { FightContext } from './Context';
+import { FightSide } from './Fight';
+import { FightTick } from './Tick';
+import { DeckType } from './Deck';
 
 export type Action<T extends keyof ActionMap = keyof ActionMap> = T extends keyof ActionMap ? (ActionMap[T] & { type: T }) : never;
 export type ActionRes<T extends keyof ResponseMap = keyof ResponseMap> = T extends keyof ResponseMap ? (ResponseMap[T] & { type: T }) : never;
@@ -29,8 +30,8 @@ type RequestMap = {
 
 const DRAW_ACTIONS: Action['type'][] = ['draw'];
 const PLAY_ACTIONS: Action['type'][] = ['play', 'activate', 'hammer', 'bellRing'];
-export function isActionInvalid(ctx: FightContext, action: Action) {
-    switch (ctx.fight.turn.phase) {
+export function isActionInvalid(tick: FightTick, action: Action) {
+    switch (tick.fight.turn.phase) {
         case 'draw':
             return !DRAW_ACTIONS.includes(action.type);
         case 'play':

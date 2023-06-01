@@ -25,18 +25,19 @@ function Fit({ children, size }: FitProps) {
 }
 
 interface TextProps {
-    text: string;
+    children: ReactNode;
+    className?: string;
     fit?: boolean;
     size?: number;
 }
-export function Text({ text, fit, size = 9 }: TextProps) {
+export function Text({ className, children, fit, size = 9 }: TextProps) {
     const innerSize = fit ? 1 : size;
     const wrapper = (content: JSX.Element) => {
         if (fit) return <Fit size={size}>{content}</Fit>;
         return <>{content}</>;
     };
 
-    return wrapper(<span className={classNames(styles.text, {
+    return wrapper(<span className={classNames(styles.text, className, {
         [styles.fit]: fit,
-    })} style={{ fontSize: `${innerSize}em` }}>{text}</span>);
+    })} style={{ fontSize: `${innerSize}em` }}>{children}</span>);
 }

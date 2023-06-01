@@ -1,0 +1,45 @@
+.button {
+    pointer-events: none;
+}
+
+.buttonBase {
+    border: 1em solid var(--flow);
+    padding: 1em;
+    background: rgba(0, 0, 0, .4);
+}
+
+.buttonBottom {
+    background: var(--flow);
+    border: 1em solid var(--flow);
+    height: 3em;
+    border-top-width: 0;
+}
+
+:global([data-can-activate]) .button {
+    pointer-events: auto;
+}
+
+:global([data-can-activate]) .buttonBase {
+    background: rgba(0, 0, 0, .2);
+}
+
+:global([data-can-activate]) .buttonBottom {
+    background: rgba(0, 0, 0, .4);
+}
+
+:global([data-can-activate]) .button:hover .buttonBase {
+    background: rgba(255, 255, 255, .8);
+}
+
+:global([data-can-activate]) .button:hover .buttonBottom {
+    background: transparent;
+}
+
+:global([data-can-activate]) .button:active .buttonBase {
+    margin-top: 3em;
+    background: rgba(255, 255, 255, .8);
+}
+
+:global([data-can-activate]) .button:active .buttonBottom {
+    visibility: hidden;
+}

@@ -1,0 +1,12 @@
+.number {
+    display: flex;
+    gap: 1em;
+}
+
+.number.x {
+    gap: 0em;
+}
+
+.number.x .digit:not(:first-child) {
+    margin-left: -1em;
+}

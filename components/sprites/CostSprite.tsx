@@ -1,5 +1,5 @@
 import { Spritesheets } from '@/lib/spritesheets';
-import Sprite from './Sprite';
+import { Sprite } from './Sprite';
 import { Cost } from '@/lib/engine/Card';
 
 export default function CostSprite({ cost }: { cost: Cost }) {

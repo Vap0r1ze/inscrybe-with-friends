@@ -1,14 +1,13 @@
+import { sideDecks } from '@/lib/defs/prints';
+import { getSideDeckPrintIds } from '@/lib/engine/Card';
+import { Decks } from '@/lib/engine/Deck';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-export interface Deck {
-    main: string[]
-    side: string
-}
-interface DeckStore {
-    decks: Record<string, Deck>,
+export interface DeckStore {
+    decks: Record<string, Decks>,
     getNames: () => string[]
-    saveDeck: (name: string, deck: Deck) => void
+    saveDeck: (name: string, deck: Decks) => void
     deleteDeck: (name: string) => void
 }
 
@@ -23,6 +22,14 @@ export const useDeckStore = create(
         {
             name: 'decks',
             storage: createJSONStorage(() => localStorage),
+            version: 1,
+            migrate(persistedState: any, version) {
+                if (version <= 0) {
+                    const { decks } = persistedState as { decks: Record<string, any> };
+                    for (const [, deck] of Object.entries(decks)) deck.side = getSideDeckPrintIds(sideDecks[deck.side]);
+                }
+                return persistedState as DeckStore;
+            },
         }
     )
 );

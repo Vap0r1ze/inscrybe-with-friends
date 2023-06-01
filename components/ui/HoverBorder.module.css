@@ -1,0 +1,17 @@
+:global([data-hover-target])>.hover {
+    visibility: hidden;
+    position: absolute;
+    inset: -2em;
+    width: calc(100% + 4em);
+    height: calc(100% + 5em);
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+
+:global([data-hover-target]):hover>.hover {
+    visibility: visible;
+}
+
+:global([data-hover-target]):active>.hover {
+    visibility: hidden;
+}

@@ -1,0 +1,86 @@
+.board {
+    grid-area: board;
+    background: var(--client-dark);
+    /* width: calc(44em * var(--lane-count) + 2em); */
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-start;
+    padding: 0 1em;
+}
+
+.boardRow {
+    display: flex;
+    position: relative;
+}
+
+.playerRow {
+    margin-top: 6em;
+}
+
+.played,
+.sacs,
+.targets {
+    display: flex;
+    position: absolute;
+    pointer-events: none;
+    inset: 0;
+}
+
+.played .card:not(.empty) {
+    pointer-events: auto;
+}
+
+.cardSlot {
+    position: relative;
+}
+
+.cardSlotHover {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+}
+
+.cardSlot:hover .cardSlotBase {
+    visibility: hidden;
+}
+
+.cardSlot:hover .cardSlotHover {
+    visibility: visible;
+}
+
+.sacs .slot,
+.played .card {
+    width: 44em;
+}
+
+.sacs .slot:not(.canSac, .empty) {
+    background-color: rgba(0, 0, 0, .8);
+}
+
+.sacs .slot .sac:not(.selected) {
+    visibility: hidden;
+}
+
+.sacs .slot.canSac {
+    pointer-events: auto;
+}
+
+.sacs .slot.canSac:not(.selected):hover {
+    background-color: rgba(0, 0, 0, .4);
+}
+
+.sacs .slot.selected .sac {
+    visibility: visible;
+}
+
+.targets .slot {
+    pointer-events: auto;
+}
+
+.targets .slot .target {
+    visibility: hidden;
+}
+
+.targets .slot:hover .target {
+    visibility: visible;
+}

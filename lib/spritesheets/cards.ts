@@ -25,9 +25,10 @@ export const CardSprites: Spritesheet = {
         wizard_frame: [4, 3],
 
         common_back: [2, 2],
-        submerged_back: [2, 2],
+        submerged_back: [1, 2],
 
         sac: [0, 2],
-        slot: [2, 3],
+        target: [1, 3],
+        slot: [3, 2],
     },
 };

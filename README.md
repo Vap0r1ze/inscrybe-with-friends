@@ -1,34 +1,24 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Inscrybe With Friends
 
-## Getting Started
+## Codebase Terms
 
-First, run the development server:
+If you're looking to contribute, first: thank you very much ^^!
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+To make things *hopefully* easier for you, here's a breakdown of terms I use around the codebase.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `Fight` - A battle, keeps track of basic rules (hammer limits, lives, etc), which cards are on field/in hand, player score, who's turn it is, etc.
+- `Side` - At the moment, either `player` or `opposing`[^1]
+- `Turn` / `Phase` - At any given moment of a `Fight` it is one of the `Side`'s turn
+- `Event` - Represents any action that mutates a `Fight`
+- `Effect` - Something that reacts to an `Event`, either by mutating/canceling it or creating new events
+- **"settling" an event** - Calling all the effects of an event, and then taking the finalized event and applying it's mutations to a `Fight`
+- `Action` - Any type of routine user-input from the `Side` of the current turn.
+- `Request` + `Response` - An event may call for immediate user input of either `Side`, for example: the [Bomb Latch] sigil may ask it's owner where to place [Detonator], in which case all game logic is halted until it receives a `Response`.
+- `FightPacket` - Represents a summary of fight progress resulting from an `Action` or `Response`. Eg: every `Event` after your `bellRing` action: starting with the `phase: [player, pre-attack]` event, and ending with `phase: [opponent, draw]` Event.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `Host` - The `Host` is where the Fight logic is ran, usually server-side unless its a local game.
+- `Client` - The client keeps track of it's own `Fight` instance, and updates it every `FightPacket`
+- `Adapter` - In charge of retrieving anything that may be externally stored: the player's decks, their shuffle order, etc.
+- `Tick` - A short-lived wrapper around a `Fight`, keeps track of which `Event`s are **settled** and which still need to be **settled**. When a `Request` is raised, this will also store a `backlog` of `Event`s that still need to be **settled** *after* the respective `Response` is received
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+[^1]: yes, server-side, one of the players is the canonically the antagonist

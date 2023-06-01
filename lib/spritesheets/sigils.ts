@@ -28,7 +28,7 @@ export const SigilSprites: Spritesheet = {
         detonatorFlipped: [5, 2],
         airborne: [0, 3],
         gainBattery: [1, 3],
-        gainGemAll: [5, 3, 29, 17],
+        gainGemAll: [91, 55, 29, 17],
         gainGemBlue: [2, 3],
         gainGemGreen: [3, 3],
         gainGemOrange: [4, 3],
