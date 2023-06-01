@@ -1062,12 +1062,6 @@ export const prints: Record<string, CardPrint> = {
         cost: { type: 'energy', amount: 1 },
         noSac: true,
     },
-    epic: {
-        name: 'WOW',
-        portrait: 'empty',
-        power: 0,
-        health: 100,
-    },
 };
 export const sideDecks: Record<string, SideDeck> = {
     squirrels: {
