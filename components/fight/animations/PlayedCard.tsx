@@ -69,7 +69,7 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
                     y: ['0%', `${dy}%`, '0%'],
                 }, { duration: animationDurations.attack, ease: 'easeInOut' }));
                 zEls.forEach(zEl => zEl.style.zIndex = '1');
-            } else if (event.type === 'attack' && is(event.to)) {
+            } else if (event.type === 'attack' && is(event.to) && !event.direct) {
                 const dy = (yOf(event.to) - yOf(event.from)) * 3;
                 controls.push(animate(el, {
                     x: ['0%', '10%', '-10%', '0%'],

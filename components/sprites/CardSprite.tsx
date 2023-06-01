@@ -19,6 +19,10 @@ const horizonalSigils: Sigil[] = [
 const verticalSigils: Sigil[] = [
     'detonator',
 ];
+const waterborneSigils: Sigil[] = [
+    'waterborne',
+    'waterborneTentacle',
+];
 
 export interface CardSpriteProps {
     print: CardPrint;
@@ -40,7 +44,7 @@ export const CardSprite = memo(function CardSprite({
     const face = print.face ?? 'common';
 
     let back = 'common_back';
-    if ((state?.sigils ?? print.sigils)?.includes('waterborne')) back = 'submerged_back';
+    if ((state?.sigils ?? print.sigils)?.some(sigil => waterborneSigils.includes(sigil))) back = 'submerged_back';
 
     return <div className={classNames(styles.card, className)} onContextMenu={e => e.preventDefault()}>
         <div className={classNames({
