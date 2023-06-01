@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createContext, useCallback, useContext, useEffect } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 import { Fight } from '@/lib/engine/Fight';
 import { FightPacket } from '@/lib/engine/Tick';
 import { Event, eventSettlers } from '@/lib/engine/Events';
@@ -111,11 +111,21 @@ export function useClient<T = FightClient>(throwIfMissing?: boolean, selector: (
 export function useClientActions() {
     const id = useContext(ClientContext);
     if (!id) throw new Error('Missing client context!');
+    const ratelimitRef = useRef<number[]>([]);
     type Data<T extends 'action' | 'response'> = T extends 'action' ? Action : ActionRes;
     const send = useCallback(<T extends 'action' | 'response'>(type: T, data: Data<T>) => {
         if (useClientStore.getState().clients[id]?.pending) return;
         useClientStore.getState().setClient(id, client => ({ ...client, pending: true }));
+
         const startTime = Date.now();
+        ratelimitRef.current.push(startTime);
+        if (ratelimitRef.current.length >= 5) {
+            const first = ratelimitRef.current[0];
+            const last = ratelimitRef.current.at(-1)!;
+            if (last - first < 2000) throw new Error(`Caught client in an action loop! Please report this! [${type}:${data.type}]`);
+            ratelimitRef.current.shift();
+        }
+
         const promise = type === 'action'
             ? useGameStore.getState().sendAction(id, data as Action)
             : useGameStore.getState().sendResponse(id, data as ActionRes);
