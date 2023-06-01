@@ -8,7 +8,7 @@ import { HoverBorder } from '../ui/HoverBorder';
 import { CardSprite } from '../sprites/CardSprite';
 import { prints } from '@/lib/defs/prints';
 import { useSet } from '@/hooks/useSet';
-import { FieldPos, getBloods } from '@/lib/engine/Card';
+import { FieldPos, getBloods, getRoomOnSac } from '@/lib/engine/Card';
 import { PlayedCard } from './animations/PlayedCard';
 import { AnimatePresence } from 'framer-motion';
 import { FIGHT_SIDES } from '@/lib/engine/Fight';
@@ -28,24 +28,40 @@ export const Board = memo(function Board() {
 
     const holding = holdingIdx == null ? null : hand[holdingIdx];
     const holdingPrint = holding && prints[holding.print];
-    const laneBloods = field.player.map((card) => getBloods(prints, [card]));
-    let needsSac = false;
-    if (holdingPrint?.cost?.type === 'blood') needsSac = laneBloods.reduce((a, b) => a + b) >= holdingPrint.cost.amount;
-
-    const canPlayRef = useRef(false);
-    canPlayRef.current = !!(isPlayTurn && !pending && holding);
-
+    let canPlay = !!(isPlayTurn && !pending && holding);
     if (holdingPrint?.cost?.type === 'blood' && holdingIdx !== mustPlay) {
-        canPlayRef.current = false;
+        canPlay = false;
     }
 
+    const laneBloods = field.player.map((card) => getBloods(prints, [card]));
+    const sacBloods = getBloods(prints, sacs.map(i => field.player[i]));
+    const laneCanSac = field.player.map((card, i) => {
+        if (!card) return false;
+        if (laneBloods[i] <= 0) return false;
+        if (sacs.includes(i)) return true;
+        if (getRoomOnSac([card, ...sacs.map(i => field.player[i])]) < 1) return false;
+        return true;
+    });
+
+    let needsSac = false;
+    if (holdingPrint?.cost?.type === 'blood') needsSac = laneBloods.reduce((a, b) => a + b) >= holdingPrint.cost.amount;
+    if (mustPlay != null) needsSac = false;
+
     const onTryPlay = useCallback((lane: number) => {
-        if (holdingIdx == null || pending || !canPlayRef.current) return;
+        if (holdingIdx == null || pending || !canPlay) return;
+        sendAction('play', { lane, card: holdingIdx, sacs });
+        clearSacs();
+        setHolding(null);
+        setHammering(false);
+    }, [clearSacs, holdingIdx, pending, sacs, sendAction, setHolding, setHammering, canPlay]);
+    const onTrySac = useCallback((lane: number) => {
+        if (holdingIdx == null || pending) return;
         sendAction('play', { lane, card: holdingIdx, sacs });
         clearSacs();
         setHolding(null);
         setHammering(false);
     }, [clearSacs, holdingIdx, pending, sacs, sendAction, setHolding, setHammering]);
+
     const onTarget = (lane: number) => {
         if (!wantsTarget) return;
         sendResponse('snipe', { lane });
@@ -70,11 +86,10 @@ export const Board = memo(function Board() {
         if (holdingPrint?.cost?.type === 'blood') {
             const bloods = getBloods(prints, sacs.map(i => field.player[i]));
             if (bloods >= holdingPrint.cost.amount) {
-                canPlayRef.current = true;
-                onTryPlay(holdingIdx!);
+                onTrySac(holdingIdx!);
             };
         }
-    }, [field.player, holdingIdx, sacs, onTryPlay, holdingPrint?.cost]);
+    }, [field.player, holdingIdx, sacs, onTrySac, holdingPrint?.cost]);
 
     useEffect(() => {
         clearSacs();
@@ -90,7 +105,7 @@ export const Board = memo(function Board() {
                 <div key={i} data-hover-target className={styles.cardSlot} onClick={() => onTryPlay(i)}>
                     <Sprite className={styles.cardSlotBase} sheet={Spritesheets.battle} name="slot" />
                     <Sprite className={styles.cardSlotHover} sheet={Spritesheets.battle} name="slotHover" />
-                    {canPlayRef.current && <HoverBorder color="#d7e2a3" />}
+                    {canPlay && <HoverBorder color="#d7e2a3" />}
                 </div>
             ))}
             <div className={styles.played} data-can-activate={(isPlayTurn && !pending) || null}>
@@ -116,7 +131,7 @@ export const Board = memo(function Board() {
             {needsSac && <div className={styles.sacs}>
                 {field.player.map((card, i) => (
                     <div key={i} className={classNames(styles.slot, {
-                        [styles.canSac]: laneBloods[i] > 0,
+                        [styles.canSac]: laneCanSac[i],
                         [styles.selected]: sacs.includes(i),
                         [styles.empty]: !card,
                     })} onClick={() => toggleSac(i)}>

@@ -153,3 +153,18 @@ export function getBloods(prints: Record<string, CardPrint>, cards: (Card | null
     }
     return bloods;
 }
+
+export function getRoomOnSac(cards: (Card | null)[]) {
+    let room = 0;
+    for (const card of cards) {
+        if (!card) {
+            room += 1;
+            continue;
+        };
+        if (card.state.sigils.includes('manyLives')) {
+            continue;
+        }
+        room += 1;
+    }
+    return room;
+}
