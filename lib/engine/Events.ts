@@ -68,13 +68,13 @@ export const eventSettlers: {
         event.damage ??= power;
         const [toSide, toLane] = event.to;
         const target = fight.field[toSide][toLane];
-        if (event.direct || !target || target.state.flipped) fight.points[event.from[0]] += event.damage;
+        if (event.direct || !target) fight.points[event.from[0]] += event.damage;
         else target.state.health = Math.max(0, target.state.health - event.damage);
     },
     shoot(fight, event) {
         const [toSide, toLane] = event.to;
         const target = fight.field[toSide][toLane];
-        if (!target) return;
+        if (!target || target.state.flipped) return;
         target.state.health = Math.max(0, target.state.health - event.damage);
     },
     play(fight, event) {

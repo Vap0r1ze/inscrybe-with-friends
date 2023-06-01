@@ -39,6 +39,7 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
         const zEls = [el, ...getParents(el, '[data-z-plane]')];
 
         const controls: AnimationPlaybackControls[] = [];
+        const cleanup: (() => void)[] = [];
 
         // Exit animations
         if (!isPresent) {
@@ -58,7 +59,7 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
                 controls.push(animate(el, { opacity: 1 }, { duration: animationDurations.play }));
             } else if (event.type === 'move' && is(event.to) && !fight.field[event.from[0]][event.from[1]]) {
                 el.style.opacity = '0';
-                controls.push(animate(el, { opacity: 1 }, { duration: 0, delay: animationDurations.move, ease: 'easeInOut' }));
+                cleanup.push(() => el.style.opacity = '');
             } else if (event.type === 'attack' && is(event.from)) {
                 const dx = (event.to[1] - event.from[1]) / 2 * 100;
                 const dy = (yOf(event.to) - yOf(event.from)) / 2 * 100;
@@ -79,6 +80,7 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
 
         return () => {
             controls.forEach(c => c.complete());
+            cleanup.forEach(c => c());
             zEls.forEach(zEl => zEl.style.zIndex = '');
         };
     }, [isPresent, animation, safeToRemove, animate, scope, lane, opposing, getFight]);

@@ -34,12 +34,14 @@ export interface FightAdapter {
     initDeck(this: FightTick, side: FightSide, deck: DeckType): Promise<number[]>;
 }
 
-export function createTick(host: FightHost, adapter: FightAdapter): FightTick {
+export type TickOpts = Pick<FightTick, 'adapter' | 'logger'>;
+
+export function createTick(host: FightHost, opts: TickOpts): FightTick {
     return {
         fight: host.fight,
         host,
         settled: [],
         queue: [],
-        adapter,
+        ...opts,
     };
 }

@@ -437,6 +437,7 @@ export const prints: Record<string, CardPrint> = {
     bellTentacle: {
         name: 'Bell Tentacle',
         banned: true,
+        traits: ['tentacle'],
         power: 'bells',
         health: 3,
         cost: { type: 'blood', amount: 2 },
@@ -445,6 +446,7 @@ export const prints: Record<string, CardPrint> = {
     handTentacle: {
         name: 'Hand Tentacle',
         banned: true,
+        traits: ['tentacle'],
         power: 'hand',
         health: 1,
         cost: { type: 'blood', amount: 1 },
@@ -453,6 +455,7 @@ export const prints: Record<string, CardPrint> = {
     mirrorTentacle: {
         name: 'Mirror Tentacle',
         banned: true,
+        traits: ['tentacle'],
         power: 'mirror',
         health: 3,
         cost: { type: 'blood', amount: 1 },

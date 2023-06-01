@@ -241,19 +241,19 @@ function createTrap<T extends object>(root: T) {
 }
 
 export const animationDurations: Record<Event['type'], number> = {
-    activate: 10,
+    activate: 0.1,
     attack: 0.5,
     bones: 0.1,
-    draw: 0.5,
+    draw: 0.25,
     energy: 0.1,
     energySpend: 0.1,
     flip: 0.5,
     heal: 1,
     move: 0.5,
     newSigil: 1,
-    perish: 1,
+    perish: 0.5,
     phase: 0.1,
-    play: 0.5,
+    play: 0.25,
     request: 0.1,
     response: 0.1,
     shoot: 1,

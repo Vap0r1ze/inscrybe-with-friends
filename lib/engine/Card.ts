@@ -8,6 +8,11 @@ export const enum MoxType {
     Orange = 1 << 1,
     Blue = 1 << 2,
 };
+export const MOX_TYPES: Record<string, MoxType> = {
+    Green: MoxType.Green,
+    Orange: MoxType.Orange,
+    Blue: MoxType.Blue,
+};
 export type SpecialStat =
     | 'ants'
     | 'hand'
@@ -40,7 +45,7 @@ export function getSideDeckPrintIds(sideDeck: SideDeck): string[] {
     return ids;
 };
 
-export type Trait = 'ant' | 'insect' | 'canine' | 'avian' | 'hooved' | 'reptile' | 'rodent' | 'mox' | 'bell';
+export type Trait = 'ant' | 'insect' | 'canine' | 'avian' | 'hooved' | 'reptile' | 'rodent' | 'mox' | 'bell' | 'tentacle';
 export interface CardPrint {
     name: string;
     desc?: string;

@@ -2,7 +2,7 @@ import { Spritesheet } from '.';
 
 export const BattleSprites: Spritesheet = {
     path: '/assets/gbc/fight/nature.png',
-    size: [128, 252],
+    size: [573, 252],
     sprites: {
         slot: [0, 0, 44, 58],
         slotHover: [45, 0, 44, 58],

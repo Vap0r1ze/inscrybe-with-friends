@@ -52,9 +52,18 @@ export const useGameStore = create(
                 const host = get().games[gameId]?.host;
                 if (!host) throw new Error('Missing game!');
                 return createTick(host, {
-                    async initDeck(side, deck) {
-                        const idxs = this.fight.decks[side][deck].map((_, idx) => idx);
-                        return shuffle(idxs);
+                    adapter: {
+                        async initDeck(side, deck) {
+                            const idxs = this.fight.decks[side][deck].map((_, idx) => idx);
+                            return shuffle(idxs);
+                        },
+                    },
+                    logger: {
+                        error: (message) => console.error(`[${gameId}] ${message}`),
+                        debug: (message) => console.debug(`[${gameId}] ${message}`),
+                        info: (message) => console.info(`[${gameId}] ${message}`),
+                        log: (message) => console.log(`[${gameId}] ${message}`),
+                        warn: (message) => console.warn(`[${gameId}] ${message}`),
                     },
                 });
             },

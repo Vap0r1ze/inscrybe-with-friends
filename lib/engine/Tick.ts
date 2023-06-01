@@ -128,7 +128,7 @@ export async function handleAction(tick: FightTick, side: FightSide, action: Act
                 break;
             } else if (print.cost?.type === 'bone') {
                 if (tick.fight.players[side].bones < print.cost.amount)
-                    throw FightError.create(ErrorType.InsufficientResources, `Requires ${print.cost.amount} bones`);
+                    throw FightError.create(ErrorType.InsufficientResources, `Requires ${print.cost.amount} bone(s)`);
 
                 stack.push({ type: 'bones', side, amount: -print.cost.amount });
             } else if (print.cost?.type === 'energy') {
@@ -137,9 +137,15 @@ export async function handleAction(tick: FightTick, side: FightSide, action: Act
 
                 stack.push({ type: 'energySpend', side, amount: print.cost.amount });
             } else if (print.cost?.type === 'mox') {
+                const needs = print.cost.needs;
                 // TODO: better error message
-                if ((getMoxes(tick.fight.field[side]) & print.cost.needs) === print.cost.needs)
-                    throw FightError.create(ErrorType.InsufficientResources, `Requires ${print.cost.needs} mox`);
+                if ((getMoxes(tick.fight.field[side]) & needs) !== needs) {
+                    const needsDisplay = Object.entries(print.cost.needs)
+                        .filter(([name, gem]) => needs | gem)
+                        .map(([name, gem]) => name)
+                        .join(' + ');
+                    throw FightError.create(ErrorType.InsufficientResources, `Requires ${needsDisplay} gem(s)`);
+                }
             }
 
             stack.push({ type: 'play', card, pos: [side, action.lane], fromHand: [side, action.card] });
@@ -182,10 +188,13 @@ async function fillEvent(tick: FightTick, event: Event) {
         const printId = tick.fight.decks[event.side][event.source!][idx];
         const card = initCardFromPrint(prints, printId);
         event.card = card;
+    } else if (event.type === 'attack') {
+        const target = tick.fight.field[event.to[0]][event.to[1]];
+        if (target?.state.flipped) event.direct = true;
     }
 }
 
-const MAX_STACK_SIZE = 1000;
+const MAX_STACK_SIZE = 100;
 
 async function settleEvents(tick: FightTick) {
     const backlog = tick.host.backlog.splice(0, tick.host.backlog.length);
@@ -208,7 +217,7 @@ async function settleEvents(tick: FightTick) {
             for (const side of FIGHT_SIDES) {
                 for (const [lane, card] of tick.fight.field[side].entries()) {
                     if (card?.state.health === 0) {
-                        tick.queue.unshift({ type: 'perish', pos: [side, lane], cause: 'attack' });
+                        tick.queue.unshift({ type: 'perish', pos: [side, lane], cause: 'attack' }, event);
                         tick.logger?.debug(`Postponing for death at [${side}, ${lane}]`);
                         continue eventLoop;
                     }

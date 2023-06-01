@@ -240,8 +240,16 @@ const sigilsReal = {
 
         runAs: 'played',
         writers: {
-            attack(event) {
-                // FIXME
+            triggerAttack(event) {
+                this.cancelDefault();
+                this.createEvent('attack', {
+                    from: event.pos,
+                    to: positions.opposing(event.pos),
+                });
+                this.createEvent('attack', {
+                    from: event.pos,
+                    to: positions.opposing(event.pos),
+                });
             },
         },
     },
@@ -282,7 +290,9 @@ const sigilsReal = {
         runAt: 'field',
         cleanup: {
             phase(event) {
-                if (event.phase !== 'post-attack') return;
+                if (event.phase !== 'pre-turn') return;
+                const [side] = this.fieldPos!;
+                if (this.tick.fight.turn.side !== side) return;
                 // TODO: Impl default evolution, maybe a self-buff using CardState['evolved']?
                 if (!this.cardPrint.evolution) return;
 
@@ -491,6 +501,7 @@ const sigilsReal = {
             phase(event) {
                 if (event.phase !== 'post-attack') return;
                 const [side, lane] = this.fieldPos!;
+                if (this.tick.fight.turn.side !== side) return;
                 let toLane =  lane + (this.card.state.backward ? -1 : 1);
                 let turnAround = false;
                 if (this.getCard([side, toLane]) || toLane < 0 || toLane >= this.tick.fight.opts.lanes) {
@@ -563,9 +574,11 @@ const sigilsReal = {
         readers: {
             perish() {
                 // TODO: find out if double-death check is necessary
+                const card = initCardFromPrint(prints, this.card.print);
+                card.state.sigils = this.card.state.sigils;
                 this.createEvent('draw', {
                     side: this.side,
-                    card: this.card,
+                    card,
                 });
             },
         },
@@ -601,8 +614,17 @@ const sigilsReal = {
         cleanup: {
             phase(event) {
                 if (event.phase !== 'pre-turn') return;
-                sigilsReal.waterborne.cleanup.phase.call(this, event);
-                // TODO implement
+                const isRowTurn = this.tick.fight.turn.side === this.side;
+                const shouldFlip = +isRowTurn ^ +!this.card.state.flipped;
+                if (shouldFlip) this.createEvent('flip', { pos: this.fieldPos! });
+                const willEmerge = this.card.state.flipped && shouldFlip;
+                if (!willEmerge) return;
+                const tentacleCards = Object.entries(prints).filter(([id, card]) => card.traits?.includes('tentacle'));
+                const [tentacleCard] = tentacleCards[Math.floor(Math.random() * tentacleCards.length)];
+                this.createEvent('transform', {
+                    pos: this.fieldPos!,
+                    card: initCardFromPrint(prints, tentacleCard),
+                });
             },
         },
     },
@@ -848,16 +870,16 @@ const sigilsReal = {
     },
     activatedDrawSkeleton: {
         name: 'Disentomb',
-        description: '[Activate]: Pay 1 [Energy] to create a [Skeleton] in your hand.',
+        description: '[Activate]: Pay 1 [Bone] to create a [Skeleton] in your hand.',
 
         runAs: 'played',
         readers: {
             activate(event) {
                 const [side] = event.pos;
-                if (this.tick.fight.players[side].energy[0] < 1) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
-                this.createEvent('energySpend', {
+                if (this.tick.fight.players[side].bones < 1) throw FightError.create(ErrorType.InsufficientResources, 'Not enough bones.');
+                this.createEvent('bones', {
                     side,
-                    amount: 1,
+                    amount: -1,
                 });
                 this.createEvent('draw', {
                     side,
