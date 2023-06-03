@@ -3,9 +3,9 @@ import { useFight } from '@/hooks/useClientStore';
 import { prints } from '@/lib/defs/prints';
 import { MoxType, getBloods, getMoxes } from '@/lib/engine/Card';
 import { FightSide } from '@/lib/engine/Fight';
-import { Sprite } from '../sprites/Sprite';
+import { Sprite } from '../../sprites/Sprite';
 import { Spritesheets } from '@/lib/spritesheets';
-import { Number } from '../sprites/Number';
+import { Number } from '../../sprites/Number';
 import { memo } from 'react';
 
 export const Status = memo(function Status({ side }: { side: FightSide }) {

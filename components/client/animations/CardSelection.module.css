@@ -13,11 +13,11 @@
 .card {
     --c-dx: calc(var(--dxm) * var(--dx));
     transform: translate(var(--c-dx), 0);
-    transition: transform 0.5s;
+    transition: transform var(--event-draw-duration, 0.5s);
 }
 
 .card.selected {
-    transform: translate(var(--c-dx), -6em);
+    transform: translate(var(--c-dx), -8em);
     box-shadow: inset 0 0 0 1em var(--ui);
     z-index: 5;
 }

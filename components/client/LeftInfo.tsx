@@ -1,6 +1,6 @@
 import styles from './LeftInfo.module.css';
-import { Bell } from './Bell';
-import { Status } from './Status';
+import { Bell } from './ui/Bell';
+import { Status } from './ui/Status';
 import { useClientActions, useClientProp, useFight } from '@/hooks/useClientStore';
 import { memo } from 'react';
 import { Button } from '../inputs/Button';

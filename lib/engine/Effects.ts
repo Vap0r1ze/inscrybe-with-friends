@@ -153,9 +153,10 @@ export function getTargets(fight: Fight<FightSide> | null, event: Event): Effect
             break;
         case 'move':
             targets.played = ['field', event.from];
+            targets.opposing = ['field', positions.opposing(event.to)];
             break;
     }
-    if (targets.played) targets.opposing = ['field', positions.opposing(targets.played[1])];
+    if (targets.played && !targets.opposing) targets.opposing = ['field', positions.opposing(targets.played[1])];
     return targets;
 }
 

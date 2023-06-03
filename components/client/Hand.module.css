@@ -18,11 +18,13 @@
     align-items: center;
     padding: 0 6em;
     width: 100em;
+    z-index: 5;
 }
 
 .noDraw {
     pointer-events: none;
-    opacity: 0.5;
+    /* opacity: 0.5; */
+    filter: brightness(0.7);
 }
 
 .choices {

@@ -659,7 +659,8 @@ const sigilsReal = {
         name: 'Double Death',
         description: 'When another creature you own dies, it dies again.',
 
-        runAs: 'played',
+        // runAfter: [],
+        runAt: 'field',
         readers: {
             perish(event) {
                 if (event.cause === 'transient') return;

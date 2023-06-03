@@ -1,7 +1,7 @@
 import { DevMenu } from '@/components/DevMenu';
 import styles from './playtest.module.css';
 import { Text } from '@/components/Text';
-import { Client } from '@/components/fight/Client';
+import { Client } from '@/components/client/Client';
 import { Button } from '@/components/inputs/Button';
 import { Select } from '@/components/inputs/Select';
 import { Box } from '@/components/ui/Box';

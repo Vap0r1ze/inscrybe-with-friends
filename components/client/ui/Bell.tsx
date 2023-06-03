@@ -1,6 +1,6 @@
 import styles from './Bell.module.css';
 import { Spritesheets } from '@/lib/spritesheets';
-import { Sprite } from '../sprites/Sprite';
+import { Sprite } from '../../sprites/Sprite';
 import classNames from 'classnames';
 
 export interface BellProps {

@@ -111,8 +111,6 @@ export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'pl
     if (card == null) return null;
     let power = 0;
 
-    console.log('Checking %s power', card.print);
-
     // Base damage
     if (card.state.power === 'ants') {
         const antCount = fight.field[side].filter(card => card ? prints[card.print].traits?.includes('ant') : false).length;
@@ -137,8 +135,6 @@ export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'pl
         power += card.state.power;
     }
 
-    console.log('Base damage:', power);
-
     // (De)buffs
     for (const side of FIGHT_SIDES) {
         for (let lane = 0; lane < fight.opts.lanes; lane++) {
@@ -150,9 +146,6 @@ export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'pl
             }
         }
     }
-
-    console.log('(De)buffed damage:', power);
-
 
     return Math.max(0, power);
 }

@@ -43,6 +43,8 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
         const controls: AnimationPlaybackControls[] = [];
         const cleanup: (() => void)[] = [];
 
+        console.log('animating', animation.event, isPresent, lane);
+
         // Exit animations
         if (!isPresent) {
             if (event.type === 'move') { // NOTE: The moving card should be the only exiting element in the move event
@@ -53,7 +55,7 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
             } else if (event.type === 'perish' && is(event.pos)) {
                 // Die
                 controls.push(animate(el, { opacity: 0 }, { duration: animationDurations.perish }));
-            } else if (event.type === 'push') { // NOTE: The moving cards should be the only exiting element in the move event
+            } else if (event.type === 'push') { // NOTE: The moving cards should be the only exiting element in the push event
                 // Move away
                 const dx = event.dx * 100;
                 controls.push(animate(el, { x: `${dx}%` }, { duration: animationDurations.push }));
@@ -73,25 +75,25 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
                 // Shake
                 controls.push(animate(el, {
                     x: ['0%', '10%', '-10%', '0%'],
-                }, { duration: animationDurations.attack, ease: 'easeInOut' }));
+                }, { duration: animationDurations.move, ease: 'easeInOut' }));
             } else if (event.type === 'attack' && is(event.from)) {
                 // Attack
-                const dx = (event.to[1] - event.from[1]) * 100;
+                const dx = (event.to[1] - event.from[1]) * 1;
                 const dy = (yOf(event.to) - yOf(event.from)) * 100;
                 controls.push(animate(el, {
                     // scale: [1, 1.1, 1, 1, 1],
-                    // x: ['0%', `${dx/2}%`, '0%'],
+                    x: ['0', '0', '0', `${dx}em`, '0'],
                     y: ['0%', `${-dy/8}%`, `${-dy/8}%`, `${dy/4}%`, `${dy/4}%`, '0%'],
                 }, { duration: animationDurations.attack, ease: 'easeOut' }));
                 zEls.forEach(zEl => zEl.style.zIndex = '1');
             } else if (event.type === 'attack' && is(event.to) && !event.direct) {
                 // Hit
-                const dy = (yOf(event.to) - yOf(event.from)) * 3;
+                const dy = (yOf(event.to) - yOf(event.from)) * 1;
                 controls.push(animate(el, {
                     x: ['0%', '10%', '-10%', '0%'],
                     y: ['0%', `${dy}%`, '0%'],
-                }, { duration: animationDurations.attack, ease: 'easeInOut' }));
-            } else if (event.type === 'push' && is(event.from) && !event.failed) {
+                }, { duration: animationDurations.attack*2/5, delay: animationDurations.attack*3/5, ease: 'easeOut' }));
+            } else if (event.type === 'push' && is([event.from[0], event.from[1] + event.dx]) && !event.failed) {
                 // Pop in
                 el.style.opacity = '0';
                 cleanup.push(() => el.style.opacity = '');
@@ -99,7 +101,7 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
                 // Shake
                 controls.push(animate(el, {
                     x: ['0%', '10%', '-10%', '0%'],
-                }, { duration: animationDurations.attack, ease: 'easeInOut' }));
+                }, { duration: animationDurations.push, ease: 'easeInOut' }));
             }
         }
 
