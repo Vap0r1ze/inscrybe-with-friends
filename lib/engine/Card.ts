@@ -130,7 +130,7 @@ export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'pl
         if (opposing != null && opposing.state.power !== 'mirror')
             power += getCardPower(prints, fight, opposingPos) ?? 0;
     } else if (card.state.power === 'moxes') {
-        power += fight.field[side].filter(card => card?.state.sigils.includes('gainGemGreen')).length;
+        power += fight.field[side].map<number>(card => getMoxes([card]) & MoxType.Green ? 1 : 0).reduce((a, b) => a + b, 0);
     } else {
         power += card.state.power;
     }
