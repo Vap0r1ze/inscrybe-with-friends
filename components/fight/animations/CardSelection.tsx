@@ -50,6 +50,7 @@ export const CardSelection = memo(function CardSelection({
                     key={key}
                     initial={{ width: 0, opacity: 0 }}
                     animate={{ width: 'auto', opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
                     className={classNames(styles.card, {
                         [styles.selected]: value === i,
                     })}
