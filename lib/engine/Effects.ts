@@ -90,19 +90,7 @@ export function createEffectContext(tick: FightTick, event: Event, targets: Effe
             return tick.fight.field[pos[0]][pos[1]] ?? null;
         },
         getPower(pos) {
-            let power = getCardPower(prints, this.tick.fight, pos)!;
-            // TODO move buffs to somewhere separate
-            for (const side of FIGHT_SIDES) {
-                for (let lane = 0; lane < tick.fight.opts.lanes; lane++) {
-                    const card = tick.fight.field[side][lane];
-                    if (card == null) continue;
-                    for (const sigil of card.state.sigils) {
-                        const sigilDef = sigils[sigil];
-                        power += sigilDef.buffs?.call(this, [side, lane], pos)?.power ?? 0;
-                    }
-                }
-            }
-            return Math.max(0, power);
+            return getCardPower(prints, this.tick.fight, pos);
         },
     };
     return effectCtx;

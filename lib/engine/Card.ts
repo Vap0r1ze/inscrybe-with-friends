@@ -1,6 +1,6 @@
-import { Fight, FightSide } from './Fight';
+import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { positions } from './utils';
-import { Sigil } from '../defs/sigils';
+import { Sigil, sigils } from '../defs/sigils';
 
 // Bitfields
 export const enum MoxType {
@@ -109,30 +109,46 @@ export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'pl
     const [side, lane] = pos;
     const card = fight.field[side][lane];
     if (card == null) return null;
+    let power = 0;
+
+    // Base damage
     if (card.state.power === 'ants') {
         const antCount = fight.field[side].filter(card => card ? prints[card.print].traits?.includes('ant') : false).length;
-        return Math.min(2, antCount);
+        power += Math.min(2, antCount);
     } else if (card.state.power === 'hand') {
-        return fight.players[side].handSize;
+        power += fight.players[side].handSize;
     } else if (card.state.power === 'bells') {
         let power = fight.opts.lanes - lane;
         const left = fight.field[side][lane - 1];
         const right = fight.field[side][lane + 1];
         if (left && prints[left.print].traits?.includes('bell')) power++;
         if (right && prints[right.print].traits?.includes('bell')) power++;
-        return power;
+        power += power;
     } else if (card.state.power === 'mirror') {
         const opposingPos = positions.opposing(pos);
         const opposing = fight.field[opposingPos[0]][opposingPos[1]];
-        if (opposing == null) return 0;
         // NOTE: https://youtu.be/lbeG5LjqCT4?t=521
-        if (opposing.state.power === 'mirror') return 0;
-        return getCardPower(prints, fight, opposingPos);
+        if (opposing != null && opposing.state.power !== 'mirror')
+            power += getCardPower(prints, fight, opposingPos) ?? 0;
     } else if (card.state.power === 'moxes') {
-        return fight.field[side].filter(card => card?.state.sigils.includes('gainGemGreen')).length;
+        power += fight.field[side].filter(card => card?.state.sigils.includes('gainGemGreen')).length;
     } else {
-        return card.state.power;
+        power += card.state.power;
     }
+
+    // (De)buffs
+    for (const side of FIGHT_SIDES) {
+        for (let lane = 0; lane < fight.opts.lanes; lane++) {
+            const card = fight.field[side][lane];
+            if (card == null) continue;
+            for (const sigil of card.state.sigils) {
+                const sigilDef = sigils[sigil];
+                power += sigilDef.buffs?.(fight, [side, lane], pos)?.power ?? 0;
+            }
+        }
+    }
+
+    return Math.max(0, power);
 }
 
 export function getMoxes(cards: (Card | null)[]): number {

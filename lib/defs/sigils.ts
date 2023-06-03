@@ -2,6 +2,7 @@ import { ActionReq, ActionRes } from '../engine/Actions';
 import { FieldPos, CardPos, initCardFromPrint, getMoxes, MoxType } from '../engine/Card';
 import { EffectContext, EffectTarget, EffectTriggers } from '../engine/Effects';
 import { ErrorType, FightError } from '../engine/Errors';
+import { Fight } from '../engine/Fight';
 import { cardCanPush, lists, positions } from '../engine/utils';
 import { entries } from '../utils';
 import { prints } from './prints';
@@ -16,7 +17,7 @@ export interface SigilDef extends EffectTriggers {
     runAs?: EffectTarget;
     runAt?: CardPos[0];
 
-    buffs?: (this: EffectContext, source: FieldPos, target: FieldPos) => {
+    buffs?: (fight: Fight<'player'>, source: FieldPos, target: FieldPos) => {
         power?: number;
     } | void;
 }
@@ -392,7 +393,7 @@ const sigilsReal = {
         name: 'Leader',
         description: 'Creatures adjacent to this card gain 1 Power.',
 
-        buffs(source, target) {
+        buffs(fight, source, target) {
             return {
                 power: positions.isAdjacent(source, target) ? 1 : 0,
             };
@@ -454,8 +455,9 @@ const sigilsReal = {
         name: 'Stinky',
         description: 'The creature opposing this card loses 1 Power.',
 
-        buffs(source, target) {
-            const targetCard = this.getCard(target);
+        buffs(fight, source, target) {
+            const [targetFrom, targetTo] = target;
+            const targetCard = fight.field[targetFrom][targetTo];
             if (targetCard?.state.sigils.includes('stone')) return;
             return {
                 power: -1,
@@ -733,9 +735,11 @@ const sigilsReal = {
         name: 'Gem Animator',
         description: 'Mox cards on the owner\'s side of the board gain 1 Power.',
 
-        buffs(source, target) {
-            const { print } = this.getCardInfo(target)!;
-            if (print.traits?.includes('mox')) return { power: 1 };
+        buffs(fight, source, target) {
+            const [targetFrom, targetTo] = target;
+            const targetCard = fight.field[targetFrom][targetTo];
+            const targetPrint = targetCard ? prints[targetCard.print] : null;
+            if (targetPrint?.traits?.includes('mox')) return { power: 1 };
         },
     },
     dropRubyOnDeath: {
