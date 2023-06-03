@@ -6,6 +6,7 @@ import { Event, eventSettlers } from '@/lib/engine/Events';
 import { useGameStore } from './useGameStore';
 import { Action, ActionRes } from '@/lib/engine/Actions';
 import { clone } from '@/lib/utils';
+import { ErrorType, FightError } from '@/lib/engine/Errors';
 
 export const ClientContext = createContext<string | null>(null);
 
@@ -88,7 +89,7 @@ export const useClientStore = create<FightStore>((set, get) => ({
         const client = get().clients[id];
         if (!client) return;
 
-        commitEvents(client, [event]);
+        commitEvents(client, [clone(event)]);
         useClientStore.getState().setClient(id, client => client);
     },
 }));
@@ -113,16 +114,20 @@ export function useClientActions() {
     if (!id) throw new Error('Missing client context!');
     const ratelimitRef = useRef<number[]>([]);
     type Data<T extends 'action' | 'response'> = T extends 'action' ? Action : ActionRes;
-    const send = useCallback(<T extends 'action' | 'response'>(type: T, data: Data<T>) => {
+    const send = useCallback(<T extends 'action' | 'response'>(
+        type: T,
+        data: Data<T>,
+        handlers?: Partial<Record<ErrorType, (error: FightError) => Promise<void>>>,
+    ) => {
         if (useClientStore.getState().clients[id]?.pending) return;
         useClientStore.getState().setClient(id, client => ({ ...client, pending: true }));
 
         const startTime = Date.now();
         ratelimitRef.current.push(startTime);
-        if (ratelimitRef.current.length >= 5) {
+        if (ratelimitRef.current.length >= 10) {
             const first = ratelimitRef.current[0];
             const last = ratelimitRef.current.at(-1)!;
-            if (last - first < 2000) throw new Error(`Caught client in an action loop! Please report this! [${type}:${data.type}]`);
+            if (last - first < 3000) throw new Error(`Caught client in an action loop! Please report this! [${type}:${data.type}]`);
             ratelimitRef.current.shift();
         }
 
@@ -137,6 +142,12 @@ export function useClientActions() {
                 id,
                 Date.now() - startTime
             );
+        }).catch(error => {
+            if (error instanceof FightError) {
+                const handler = handlers?.[error.type];
+                if (handler) return handler(error);
+            };
+            throw error;
         }).catch(error => {
             if (typeof error.message !== 'string') throw error;
             useClientStore.getState().setClient(id, client => ({
@@ -260,6 +271,7 @@ export const animationDurations: Record<Event['type'], number> = {
     flip: 0.5,
     heal: 1,
     move: 0.5,
+    push: 0.5,
     newSigil: 1,
     perish: 0.5,
     phase: 0.1,

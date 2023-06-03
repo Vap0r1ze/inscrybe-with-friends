@@ -92,3 +92,7 @@
 .dynamicStat {
     filter: url(#dynamicValue);
 }
+
+.warningStat {
+    filter: url(#warningValue);
+}

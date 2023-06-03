@@ -1,6 +1,6 @@
 import { CardPrint, MoxType, SideDeck } from '../engine/Card';
 
-export const prints: Record<string, CardPrint> = {
+export const prints: Record<string, Readonly<CardPrint>> = {
     starvation: {
         name: 'Starvation',
         banned: true,
@@ -1095,7 +1095,7 @@ export const sideDecks: Record<string, SideDeck> = {
 };
 
 // Check validity of references
-for (const [id, card] of Object.entries(prints)) {
+for (const [id, card] of Object.entries(prints) as [string, CardPrint][]) {
     if (card.evolution && !Object.hasOwn(prints, card.evolution))
         throw new Error(`Card ${card.name} references invalid evolution ${card.evolution}`);
     if (!card.portrait) card.portrait = id;

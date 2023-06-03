@@ -81,6 +81,10 @@ export type Card = {
     print: string;
     state: CardState;
 };
+export type CardOrPrint = {
+    print: string;
+    state?: CardState;
+};
 export type CardInfo = {
     print: Readonly<CardPrint>;
     state: CardState;
@@ -106,7 +110,8 @@ export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'pl
     const card = fight.field[side][lane];
     if (card == null) return null;
     if (card.state.power === 'ants') {
-        return fight.field[side].filter(card => card ? prints[card.print].traits?.includes('ant') : false).length;
+        const antCount = fight.field[side].filter(card => card ? prints[card.print].traits?.includes('ant') : false).length;
+        return Math.min(2, antCount);
     } else if (card.state.power === 'hand') {
         return fight.players[side].handSize;
     } else if (card.state.power === 'bells') {
@@ -154,16 +159,15 @@ export function getBloods(prints: Record<string, CardPrint>, cards: (Card | null
     return bloods;
 }
 
-export function getRoomOnSac(cards: (Card | null)[]) {
+export function getRoomOnSac(field: (Card | null)[], sacs: (Card | null)[]) {
     let room = 0;
-    for (const card of cards) {
+    for (const card of field) {
         if (!card) {
             room += 1;
             continue;
         };
-        if (card.state.sigils.includes('manyLives')) {
-            continue;
-        }
+        if (sacs.includes(card) && card.state.sigils.includes('manyLives')) continue;
+        if (!sacs.includes(card)) continue;
         room += 1;
     }
     return room;

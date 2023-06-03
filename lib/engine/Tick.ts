@@ -10,6 +10,7 @@ import { clone } from '../utils';
 import { FightAdapter, FightHost } from './Host';
 import { pick } from 'lodash';
 import { DECK_TYPES } from './Deck';
+import { cardCanPush } from './utils';
 
 export interface FightTick {
     fight: Fight<FightSide>;
@@ -117,8 +118,9 @@ export async function handleAction(tick: FightTick, side: FightSide, action: Act
 
                 const sacBloods = sacs.map(sac => getBloods(prints, [sac]));
                 sacBloods.sort((a, b) => b - a);
-                const isExcessive = sacBloods.slice(0, -1).reduce((a, b) => a + b, 0) >= print.cost.amount;
-                if (isExcessive) throw FightError.create(ErrorType.InvalidAction, 'You cannot sacrifice more than the required amount');
+                // FIXME: Prevent excessive sacs, not sure the best way to do this yet
+                // const isExcessive = sacBloods.slice(0, -1).reduce((a, b) => a + b, 0) >= print.cost.amount;
+                // if (isExcessive) throw FightError.create(ErrorType.InvalidAction, 'You cannot sacrifice more than the required amount');
 
                 const sacsAmount = sacBloods.reduce((a, b) => a + b, 0);
                 if (sacsAmount < print.cost.amount) throw sacError;
@@ -152,6 +154,7 @@ export async function handleAction(tick: FightTick, side: FightSide, action: Act
             break;
         }
         case 'hammer': {
+            if (tick.fight.mustPlay[side] != null) throw FightError.create(ErrorType.InvalidAction, 'You must play your card');
             const card = tick.fight.field[side][action.lane];
             if (card == null) throw FightError.create(ErrorType.InvalidAction, 'You cannot hammer a lane that is empty');
             stack.push({ type: 'perish', pos: [side, action.lane], cause: 'hammer' });
@@ -191,10 +194,17 @@ async function fillEvent(tick: FightTick, event: Event) {
     } else if (event.type === 'attack') {
         const target = tick.fight.field[event.to[0]][event.to[1]];
         if (target?.state.flipped) event.direct = true;
+    } else if (event.type === 'move') {
+        const [toSide, toLane] = event.to;
+        if (tick.fight.field[toSide][toLane] != null) event.failed = true;
+        if (toLane < 0 || toLane >= tick.fight.opts.lanes) event.failed = true;
+    } else if (event.type === 'push') {
+        const [side, lane] = event.from;
+        if (!cardCanPush(lane, event.dx, tick.fight.field[side])) event.failed = true;
     }
 }
 
-const MAX_STACK_SIZE = 100;
+const MAX_STACK_SIZE = 1000;
 
 async function settleEvents(tick: FightTick) {
     const backlog = tick.host.backlog.splice(0, tick.host.backlog.length);
@@ -212,19 +222,6 @@ async function settleEvents(tick: FightTick) {
             continue;
         };
 
-        // FIXME: KILL EVENTS TIED TO DEAD CARDS **AFTER** PERISH SETTLE
-        if (event.type !== 'perish') {
-            for (const side of FIGHT_SIDES) {
-                for (const [lane, card] of tick.fight.field[side].entries()) {
-                    if (card?.state.health === 0) {
-                        tick.queue.unshift({ type: 'perish', pos: [side, lane], cause: 'attack' }, event);
-                        tick.logger?.debug(`Postponing for death at [${side}, ${lane}]`);
-                        continue eventLoop;
-                    }
-                }
-            }
-        }
-
         const targets = getTargets(tick.fight, event);
 
         const preSettleSigils = getActiveSigils(tick, event, targets, ['writers', 'readers']);
@@ -239,7 +236,7 @@ async function settleEvents(tick: FightTick) {
 
         for (const sigilPos of preSettleSigils.writers) {
             sigilCtx.pos = sigilPos[0];
-            sigils[sigilPos[1]].writers![event.type]!.call(sigilCtx, event as never);
+            sigils[sigilPos[1]].writers![event.type]!.call(sigilCtx, clone(event as never));
         }
         if (signals.event) {
             tick.logger?.debug('Event was cancelled!');
@@ -256,33 +253,33 @@ async function settleEvents(tick: FightTick) {
         }
 
         if (signals.default) tick.logger?.debug('Default effect was cancelled!');
-        else defaultEffects.preSettle[event.type]?.call(tick, event as never);
+        else defaultEffects.preSettle[event.type]?.call(tick, clone(event as never));
 
         for (const sigilPos of preSettleSigils.readers) {
             sigilCtx.pos = sigilPos[0];
-            sigils[sigilPos[1]].readers![event.type]!.call(sigilCtx, event as never);
+            sigils[sigilPos[1]].readers![event.type]!.call(sigilCtx, clone(event as never));
         }
 
         await fillEvent(tick, event);
 
         // TODO: maybe group some events?
 
-        eventSettlers[event.type](tick.fight, event as never);
+        eventSettlers[event.type](tick.fight, clone(event as never));
         tick.settled.push(event);
 
-        if (!signals.default) defaultEffects.postSettle[event.type]?.call(tick, event as never);
+        if (!signals.default) defaultEffects.postSettle[event.type]?.call(tick, clone(event as never));
 
         const postSettleSigils = getActiveSigils(tick, event, targets, ['cleanup', 'requests']);
 
         for (const sigilPos of postSettleSigils.cleanup) {
             sigilCtx.pos = sigilPos[0];
-            sigils[sigilPos[1]].cleanup![event.type]!.call(sigilCtx, event as never);
+            sigils[sigilPos[1]].cleanup![event.type]!.call(sigilCtx, clone(event as never));
         }
 
         let waitingFor: FightHost['waitingFor'] | null = null;
         for (const sigilPos of postSettleSigils.requests) {
             sigilCtx.pos = sigilPos[0];
-            const request = sigils[sigilPos[1]].requests![event.type]!.callFor.call(sigilCtx, event as never);
+            const request = sigils[sigilPos[1]].requests![event.type]!.callFor.call(sigilCtx, clone(event as never));
             if (!request) continue;
             waitingFor = {
                 side: request[0],
@@ -297,10 +294,23 @@ async function settleEvents(tick: FightTick) {
             tick.host.backlog = tick.queue.splice(0, tick.queue.length);
             tick.host.waitingFor = waitingFor;
             const reqEvent = { type: 'request', ...pick(waitingFor, ['side', 'req']) } as const;
-            eventSettlers.request(tick.fight, reqEvent);
+            eventSettlers.request(tick.fight, clone(reqEvent));
             tick.settled.push(reqEvent);
             tick.logger?.debug('Halting for request');
             break;
+        }
+
+        // FIXME: KILL EVENTS TIED TO DEAD CARDS **AFTER** PERISH SETTLE
+        if (event.type !== 'perish') {
+            for (const side of FIGHT_SIDES) {
+                for (const [lane, card] of tick.fight.field[side].entries()) {
+                    if (card?.state.health === 0) {
+                        tick.queue.unshift({ type: 'perish', pos: [side, lane], cause: 'attack' });
+                        tick.logger?.debug(`Postponing for death at [${side}, ${lane}]`);
+                        // continue eventLoop;
+                    }
+                }
+            }
         }
     }
 }

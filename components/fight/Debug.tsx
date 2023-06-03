@@ -63,6 +63,7 @@ const Event = forwardRef<HTMLDivElement, EventProps>(function Event({ event, i }
             fontFamily: 'var(--font-gbc)',
             fontSize: '8em',
             lineHeight: '.6em',
+            overflow: 'hidden',
         }}>{stringify(data, {}).trim()}</pre>
     </Box>;
 });

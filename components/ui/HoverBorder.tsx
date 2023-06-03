@@ -1,3 +1,4 @@
+import { isClient } from '@/utils/next';
 import styles from './HoverBorder.module.css';
 import { memo, useEffect, useRef } from 'react';
 
@@ -24,12 +25,22 @@ export const HoverBorder = memo(function HoverBorder({ color, top, left, right, 
     bottom ??= inset ?? 0;
     left ??= inset ?? 0;
 
+    const observerRef = useRef(isClient ? new ResizeObserver((entries) => {
+        for (const { target } of entries) {
+            if (!(target instanceof HTMLCanvasElement)) continue;
+            const scale = parseFloat(getComputedStyle(target, null).getPropertyValue('font-size')) / 2;
+            target.width = target.clientWidth / scale;
+            target.height = target.clientHeight / scale;
+        }
+    }) : null);
+
     const canvasRef = (canvas: HTMLCanvasElement | null) => {
-        if (!canvas) return;
-        const scale = parseFloat(getComputedStyle(canvas, null).getPropertyValue('font-size')) / 2;
-        canvas.width = canvas.clientWidth / scale;
-        canvas.height = canvas.clientHeight / scale;
-        ctxRef.current = canvas.getContext('2d') ?? null;
+        if (!canvas) {
+            ctxRef.current = null;
+            return observerRef.current?.disconnect();
+        }
+        observerRef.current?.observe(canvas);
+        ctxRef.current = canvas.getContext('2d');
     };
 
     const draw = () => {

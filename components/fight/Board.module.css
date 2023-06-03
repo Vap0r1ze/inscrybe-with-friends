@@ -53,20 +53,13 @@
     width: 44em;
 }
 
-.sacs .slot:not(.canSac, .empty) {
-    background-color: rgba(0, 0, 0, .8);
-}
-
 .sacs .slot .sac:not(.selected) {
     visibility: hidden;
 }
 
 .sacs .slot.canSac {
     pointer-events: auto;
-}
-
-.sacs .slot.canSac:not(.selected):hover {
-    background-color: rgba(0, 0, 0, .4);
+    cursor: pointer;
 }
 
 .sacs .slot.selected .sac {

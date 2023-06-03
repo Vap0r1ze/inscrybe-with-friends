@@ -45,7 +45,7 @@ export function DevMenu({ id, onClose }: DevMenuProps) {
             <Button onClick={onGiveBone}><Text size={14}>Bones +1</Text></Button>
         </div>
         {spawning && <div className={styles.prints}>
-            <PrintList editable onSelect={onSpawnCard} />
+            <PrintList editable onSelect={onSpawnCard} showNames />
         </div>}
     </div>;
 }

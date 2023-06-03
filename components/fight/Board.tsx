@@ -34,12 +34,11 @@ export const Board = memo(function Board() {
     }
 
     const laneBloods = field.player.map((card) => getBloods(prints, [card]));
-    const sacBloods = getBloods(prints, sacs.map(i => field.player[i]));
     const laneCanSac = field.player.map((card, i) => {
         if (!card) return false;
         if (laneBloods[i] <= 0) return false;
         if (sacs.includes(i)) return true;
-        if (getRoomOnSac([card, ...sacs.map(i => field.player[i])]) < 1) return false;
+        if (getRoomOnSac(field.player, [card, ...sacs.map(i => field.player[i])]) < 1) return false;
         return true;
     });
 
@@ -130,12 +129,18 @@ export const Board = memo(function Board() {
             </div>
             {needsSac && <div className={styles.sacs}>
                 {field.player.map((card, i) => (
-                    <div key={i} className={classNames(styles.slot, {
-                        [styles.canSac]: laneCanSac[i],
-                        [styles.selected]: sacs.includes(i),
-                        [styles.empty]: !card,
-                    })} onClick={() => toggleSac(i)}>
+                    <div
+                        key={i}
+                        data-hover-target
+                        className={classNames(styles.slot, {
+                            [styles.canSac]: laneCanSac[i],
+                            [styles.selected]: sacs.includes(i),
+                            [styles.empty]: !card,
+                        })}
+                        onClick={() => toggleSac(i)}
+                    >
                         <Sprite className={styles.sac} sheet={Spritesheets.cards} name="sac" />
+                        {laneCanSac[i] && <HoverBorder color="#d7e2a3" />}
                     </div>
                 ))}
             </div>}

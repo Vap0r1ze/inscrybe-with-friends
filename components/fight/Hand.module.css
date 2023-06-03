@@ -4,13 +4,20 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
+}
+
+.cardsArea {
+    flex: 1;
+    max-width: calc(100% - 100em);
 }
 
 .decks {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-right: 2em;
+    padding: 0 6em;
+    width: 100em;
 }
 
 .noDraw {
@@ -18,36 +25,9 @@
     opacity: 0.5;
 }
 
-.cards {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    position: relative;
-}
-
 .choices {
-    display: flex;
     position: absolute;
-    flex-wrap: wrap;
-}
-
-.cards.noPlay>.card {
-    opacity: 0.5;
-}
-
-.card {
-    transform: translate(var(--dx), 0);
-    transition: transform 0.5s;
-}
-
-.cards:not(.noPlay) .card:not(.selected):hover,
-.card.noPlay:not(.selected):hover {
-    transform: translate(var(--dx), -10em);
-    z-index: 1;
-}
-
-.card.selected {
-    transform: translate(calc(var(--dx) * 1), -12em);
-    box-shadow: inset 0 0 0 1em var(--ui);
-    z-index: 2;
+    left: 44em;
+    right: 44em;
+    top: -15em;
 }

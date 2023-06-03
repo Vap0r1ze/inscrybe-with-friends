@@ -1,4 +1,4 @@
-import { CardPos, FieldPos } from './Card';
+import { Card, CardPos, FieldPos } from './Card';
 import { FightSide } from './Fight';
 
 export const positions = {
@@ -34,3 +34,10 @@ export const lists ={
 };
 
 export const oppositeSide = (side: FightSide): FightSide => side === 'player' ? 'opposing' : 'player';
+
+export const cardCanPush = (lane: number, dx: number, lanes: (Card | null)[]) => {
+    // Line of Sight
+    const los = dx < 0 ? lanes.slice(0, lane) : lanes.slice(lane + 1);
+    const empty = los.filter(l => !l).length;
+    return empty >= Math.abs(dx);
+};

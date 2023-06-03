@@ -2,7 +2,7 @@ import { ActionReq, ActionRes } from '../engine/Actions';
 import { FieldPos, CardPos, initCardFromPrint, getMoxes, MoxType } from '../engine/Card';
 import { EffectContext, EffectTarget, EffectTriggers } from '../engine/Effects';
 import { ErrorType, FightError } from '../engine/Errors';
-import { lists, positions } from '../engine/utils';
+import { cardCanPush, lists, positions } from '../engine/utils';
 import { entries } from '../utils';
 import { prints } from './prints';
 
@@ -162,10 +162,16 @@ const sigilsReal = {
         description: 'If a card that you own dies by combat, this card is played from your hand on its space.',
 
         runAt: 'hand',
+        runAs: 'global',
         cleanup: {
             perish(event) {
                 if (event.cause === 'sac' || event.cause === 'hammer') return;
+                // @ts-ignore
+                if (event[Symbol.for('corpseEater')]) return;
+                // @ts-ignore
+                event[Symbol.for('corpseEater')] = true;
                 const [side, idx] = this.handPos!;
+                if (side !== event.pos[0]) return;
                 this.createEvent('play', {
                     pos: event.pos,
                     card: this.tick.fight.hands[side][idx],
@@ -439,6 +445,7 @@ const sigilsReal = {
                 this.createEvent('attack', {
                     from: this.fieldPos!,
                     to: event.from,
+                    damage: 1,
                 });
             },
         },
@@ -524,10 +531,14 @@ const sigilsReal = {
             phase(event) {
                 if (event.phase !== 'post-attack') return;
                 const [side, lane] = this.fieldPos!;
-                // TODO do push check etc
-                this.createEvent('move', {
+                if (this.tick.fight.turn.side !== side) return;
+                let dx = this.card.state.backward ? -1 : 1;
+                const canPush = cardCanPush(lane, dx, this.tick.fight.field[side]);
+                if (!canPush) dx = -dx;
+                this.createEvent('push', {
                     from: this.fieldPos!,
-                    to: [side, lane + (this.card.state.backward ? -1 : 1)],
+                    dx,
+                    turnAround: !canPush,
                 });
             },
         },
@@ -572,9 +583,13 @@ const sigilsReal = {
         runAs: 'played',
         readers: {
             perish() {
-                // TODO: find out if double-death check is necessary
                 const card = initCardFromPrint(prints, this.card.print);
                 card.state.sigils = this.card.state.sigils;
+                // TODO - Redo this using a card print effect system
+                if (this.card.print === 'ouroboros' && typeof card.state.power === 'number') {
+                    card.state.power += 1;
+                    card.state.health += 1;
+                }
                 this.createEvent('draw', {
                     side: this.side,
                     card,
@@ -616,20 +631,23 @@ const sigilsReal = {
 
                 const isRowTurn = this.tick.fight.turn.side === this.side;
                 const shouldFlip = +isRowTurn ^ +!this.card.state.flipped;
-                if (shouldFlip) this.createEvent('flip', { pos: this.fieldPos! });
 
                 const willEmerge = this.card.state.flipped && shouldFlip;
-                if (!willEmerge) return;
+                transform: if (willEmerge) {
+                    const tentacleCards = Object.entries(prints).filter(([id, card]) => card.traits?.includes('tentacle'));
+                    const otherTentacleCards = tentacleCards.filter(([id]) => id !== this.card.print);
+                    if (!otherTentacleCards.length) break transform;
 
-                const tentacleCards = Object.entries(prints).filter(([id, card]) => card.traits?.includes('tentacle'));
-                const otherTentacleCards = tentacleCards.filter(([id]) => id !== this.card.print);
-                if (!otherTentacleCards.length) return;
+                    const [tentacleCard] = otherTentacleCards[Math.floor(Math.random() * otherTentacleCards.length)];
+                    const card = initCardFromPrint(prints, tentacleCard);
+                    card.state.flipped = true;
+                    this.createEvent('transform', {
+                        pos: this.fieldPos!,
+                        card: card,
+                    });
+                };
 
-                const [tentacleCard] = otherTentacleCards[Math.floor(Math.random() * otherTentacleCards.length)];
-                this.createEvent('transform', {
-                    pos: this.fieldPos!,
-                    card: initCardFromPrint(prints, tentacleCard),
-                });
+                if (shouldFlip) this.createEvent('flip', { pos: this.fieldPos! });
             },
         },
     },
@@ -690,6 +708,11 @@ const sigilsReal = {
         description: 'You may choose which opposing spaces this card strikes.',
 
         runAs: 'played',
+        writers: {
+            triggerAttack(event) {
+                this.cancelDefault();
+            },
+        },
         requests: {
             triggerAttack: {
                 callFor: (event) => [event.pos[0], { type: 'snipe' }],

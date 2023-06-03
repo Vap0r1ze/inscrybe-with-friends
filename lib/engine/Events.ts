@@ -6,7 +6,7 @@ import { Card, CardPos, FieldPos, getCardPower } from './Card';
 import { FightTick } from './Tick';
 import { DeckType } from './Deck';
 import { Fight, FightSide, Phase } from './Fight';
-import { includes } from '../utils';
+import { clone, includes } from '../utils';
 import { oppositeSide } from './utils';
 
 export type Event<T extends keyof EventMap = keyof EventMap> = T extends keyof EventMap ? (EventMap[T] & { type: T }) : never;
@@ -26,7 +26,8 @@ type EventMap = {
     play: { pos: FieldPos; card: Card; fromHand?: [FightSide, number]; transient?: boolean };
     mustPlay: { side: FightSide; card: number };
     transform: { pos: FieldPos; card: Card; };
-    move: { from: FieldPos; to: FieldPos; turnAround?: boolean };
+    move: { from: FieldPos; to: FieldPos; turnAround?: boolean, failed?: boolean };
+    push: { from: FieldPos; dx: number, turnAround?: boolean, failed?: boolean };
     heal: { pos: FieldPos; amount: number };
     stats: { pos: FieldPos; power?: number; health?: number; };
     activate: { pos: FieldPos };
@@ -65,12 +66,19 @@ export const eventSettlers: {
     },
     triggerAttack(fight, event) {},
     attack(fight, event) {
-        const power = getCardPower(prints, fight, event.from)!;
-        event.damage ??= power;
+        event.damage ??= getCardPower(prints, fight, event.from)!;
         const [toSide, toLane] = event.to;
         const target = fight.field[toSide][toLane];
+        console.log(
+            'settling attack from %o to %o for %o dmg',
+            fight.field[event.from[0]][event.from[1]]?.print,
+            fight.field[toSide][toLane]?.print,
+            event.damage,
+        );
+        if (target) console.log('Pre-settle target:', clone(target));
         if (event.direct || !target) fight.points[event.from[0]] += event.damage;
         else target.state.health = Math.max(0, target.state.health - event.damage);
+        if (target) console.log('Post-settle target:', clone(target));
     },
     shoot(fight, event) {
         const [toSide, toLane] = event.to;
@@ -105,10 +113,25 @@ export const eventSettlers: {
         const [toSide, toLane] = event.to;
         const card = fight.field[fromSide][fromLane]!;
         if (event.turnAround) card.state.backward = !card.state.backward;
-        if (fight.field[toSide][toLane] != null) return;
-        if (toLane < 0 || toLane >= fight.opts.lanes) return;
+        if (event.failed) return;
         fight.field[toSide][toLane] = fight.field[fromSide][fromLane];
         fight.field[fromSide][fromLane] = null;
+    },
+    push(fight, event) {
+        const [fromSide, fromLane] = event.from;
+        const lanes = fight.field[fromSide];
+        const card = lanes[fromLane]!;
+        if (event.turnAround) card.state.backward = !card.state.backward;
+        if (event.failed) return;
+
+        // get hole for abs(dx) === 1
+        let lane = fromLane;
+        for (; lanes[lane]; lane += event.dx);
+        // move from hole to pusher
+        for (; lane !== fromLane; lane -= event.dx) {
+            const nextLane = lane - event.dx;
+            [lanes[lane], lanes[nextLane]] = [lanes[nextLane], lanes[lane]];
+        }
     },
     heal(fight, event) {
         const [side, lane] = event.pos;
@@ -143,8 +166,8 @@ export const eventSettlers: {
 export function isEventInvalid({ fight, host }: FightTick, event: Event) {
     switch (event.type) {
         case 'attack': {
-            const power = getCardPower(prints, fight, event.from);
-            if (!power) return true;
+            const damage = event.damage ?? getCardPower(prints, fight, event.from);
+            if (!damage) return true;
             const [side, lane] = event.from;
             if (!fight.field[side][lane]) return true;
             if (event.from[1] < 0 || event.from[1] >= fight.opts.lanes) return true;
@@ -171,6 +194,7 @@ export function isEventInvalid({ fight, host }: FightTick, event: Event) {
             if (fight.players[event.side].energy[0] < event.amount) return true;
             break;
         }
+        case 'push':
         case 'move': {
             const [fromSide, fromLane] = event.from;
             if (fight.field[fromSide][fromLane] == null) return true;
@@ -209,6 +233,8 @@ export function translateEvent(event: Event, side: FightSide, forClient: boolean
             return null;
         } else if (event.type === 'newSigil' && event.pos[0] === 'hand' && event.pos[1][0] !== side) {
             return null;
+        } else if (event.type === 'play' && event.fromHand?.[0] !== side) {
+            delete event.fromHand;
         }
         if ((event.type === 'request' || event.type === 'response') && event.side !== side) {
             if (event.req.type === 'chooseDraw') {
@@ -237,6 +263,8 @@ export function translateEvent(event: Event, side: FightSide, forClient: boolean
     } else if (shouldFlip && isEventType(['attack', 'shoot', 'move'], event)) {
         event.from[0] = oppositeSide(event.from[0]);
         event.to[0] = oppositeSide(event.to[0]);
+    } else if (shouldFlip && isEventType(['push'], event)) {
+        event.from[0] = oppositeSide(event.from[0]);
     }
     return event;
 }

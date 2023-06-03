@@ -130,6 +130,15 @@ export default function Filters() {
                     in="SourceGraphic"
                 />
             </filter>
+            <filter id="warningValue">
+                <feColorMatrix
+                    values="0 0 0 0.68 0
+                            0 0 0 0.24 0
+                            0 0 0 0.18 0
+                            0 0 0 0.9 0"
+                    in="SourceGraphic"
+                />
+            </filter>
         </svg>
         <div style={{
             pointerEvents: 'none',

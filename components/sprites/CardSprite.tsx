@@ -50,6 +50,7 @@ export const CardSprite = memo(function CardSprite({
     if ((state?.sigils ?? print.sigils)?.some(sigil => waterborneSigils.includes(sigil))) back = 'submerged_back';
 
     const isOpposing = fieldPos?.[0] === 'opposing';
+    const health = state?.health ?? print.health;
     let power = state?.power ?? print.power;
     let staticPower = power;
 
@@ -61,7 +62,7 @@ export const CardSprite = memo(function CardSprite({
     return <div className={classNames(styles.card, className)} onContextMenu={e => e.preventDefault()}>
         <div className={classNames({
             [styles.content]: true,
-            [styles.flipped]: !!state?.flipped,
+            [styles.flipped]: state?.flipped,
         })}>
             <div className={styles.front}>
                 <div className={styles.face}>
@@ -96,10 +97,11 @@ export const CardSprite = memo(function CardSprite({
                 </div>}
                 <div className={styles.stats}>
                     <StatSprite className={classNames({
-                        // [styles.dynamicStat]: true,
-                        [styles.dynamicStat]: staticPower !== power,
+                        [styles.dynamicStat]: power !== staticPower,
                     })} stat={power} />
-                    <StatSprite stat={state?.health ?? print.health} />
+                    <StatSprite className={classNames({
+                        [styles.warningStat]: health < print.health,
+                    })} stat={health} />
                 </div>
             </div>
             <div className={styles.back}>
