@@ -1,10 +1,8 @@
-import styles from './PlayedCard.module.css';
 import { usePresence, useAnimate, AnimationPlaybackControls } from 'framer-motion';
-import { animationDurations, useClientProp, useClientStore, useFightGetter } from '@/hooks/useClientStore';
-import { ReactNode, useEffect } from 'react';
-import { getTargets } from '@/lib/engine/Effects';
+import { animationDurations, useClientProp, useFightGetter } from '@/hooks/useClientStore';
+import { ReactNode, useEffect, useRef } from 'react';
 import { positions } from '@/lib/engine/utils';
-import { CardPos, FieldPos } from '@/lib/engine/Card';
+import { FieldPos } from '@/lib/engine/Card';
 
 const getParents = (el: HTMLElement, selector?: string) => {
     const parents: HTMLElement[] = [];
@@ -13,8 +11,6 @@ const getParents = (el: HTMLElement, selector?: string) => {
     }
     return parents;
 };
-
-const animations = {};
 
 export interface PlayedCardProps {
     opposing?: boolean
@@ -26,10 +22,11 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
     const [isPresent, safeToRemove] = usePresence();
     const [scope, animate] = useAnimate<HTMLDivElement>();
     const getFight = useFightGetter();
+    const lastAnimationRef = useRef<typeof animation>();
 
     useEffect(() => {
-        if (!isPresent && !animation) return safeToRemove();
-        if (!animation) return;
+        if (!isPresent && !animation) return safeToRemove?.();
+        if (!animation) return void (lastAnimationRef.current = null);
 
         const el = scope.current;
 
@@ -43,11 +40,9 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
         const controls: AnimationPlaybackControls[] = [];
         const cleanup: (() => void)[] = [];
 
-        console.log('animating', animation.event, isPresent, lane);
-
         // Exit animations
         if (!isPresent) {
-            if (event.type === 'move') { // NOTE: The moving card should be the only exiting element in the move event
+            if (event.type === 'move') {
                 // Move away
                 const dx = (event.to[1] - event.from[1]) * 100;
                 const dy = (yOf(event.to) - yOf(event.from)) * 100;
@@ -109,6 +104,8 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
             controls.forEach(c => c.complete());
             cleanup.forEach(c => c());
             zEls.forEach(zEl => zEl.style.zIndex = '');
+            if (lastAnimationRef.current !== animation) safeToRemove?.();
+            lastAnimationRef.current = animation;
         };
     }, [isPresent, animation, safeToRemove, animate, scope, lane, opposing, getFight]);
 

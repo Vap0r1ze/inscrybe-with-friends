@@ -5,10 +5,11 @@ import { ErrorType, FightError } from '../engine/Errors';
 import { Fight } from '../engine/Fight';
 import { cardCanPush, lists, positions } from '../engine/utils';
 import { entries } from '../utils';
+import { Buff } from './buffs';
 import { prints } from './prints';
 
 export type SigilPos = [CardPos, Sigil];
-export type Sigil = keyof typeof sigilsReal;
+export type Sigil = keyof typeof SIGILS;
 export interface SigilDef extends EffectTriggers {
     name: string;
     description: string;
@@ -16,13 +17,10 @@ export interface SigilDef extends EffectTriggers {
     runAfter?: readonly string[];
     runAs?: EffectTarget;
     runAt?: CardPos[0];
-
-    buffs?: (fight: Fight<'player'>, source: FieldPos, target: FieldPos) => {
-        power?: number;
-    } | void;
+    buffs?: readonly Buff[];
 }
 
-const sigilsReal = {
+const SIGILS = {
     // Act I
     airborne: {
         name: 'Airborne',
@@ -66,10 +64,14 @@ const sigilsReal = {
         description: 'When this card is played, Chimes are created on adjacent empty spaces.',
 
         runAs: 'played',
-        readers: {
+        cleanup: {
             play(event) {
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] - 1],
+                    card: initCardFromPrint(prints, 'chime'),
+                });
+                this.createEvent('play', {
+                    pos: [this.side, event.pos[1] + 1],
                     card: initCardFromPrint(prints, 'chime'),
                 });
             },
@@ -133,13 +135,14 @@ const sigilsReal = {
         writers: {
             attack(event) {
                 if (event.direct) return;
-                const targetPos = positions.opposing(event.to);
-                const target = this.getCard(targetPos);
+                if (event.to[0] !== this.side) return;
+                console.log('attack');
+                const target = this.getCard(event.to);
                 if (target) return;
 
                 this.prependEvent('move', {
                     from: this.fieldPos!,
-                    to: targetPos,
+                    to: event.to,
                 });
             },
         },
@@ -186,10 +189,14 @@ const sigilsReal = {
         description: 'When this card is played, Dams are created on adjacent empty spaces.',
 
         runAs: 'played',
-        readers: {
+        cleanup: {
             play(event) {
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] - 1],
+                    card: initCardFromPrint(prints, 'dam'),
+                });
+                this.createEvent('play', {
+                    pos: [this.side, event.pos[1] + 1],
                     card: initCardFromPrint(prints, 'dam'),
                 });
             },
@@ -393,11 +400,7 @@ const sigilsReal = {
         name: 'Leader',
         description: 'Creatures adjacent to this card gain 1 Power.',
 
-        buffs(fight, source, target) {
-            return {
-                power: positions.isAdjacent(source, target) ? 1 : 0,
-            };
-        },
+        buffs: ['incrAdjPower'],
     },
     looter: {
         name: 'Looter',
@@ -455,14 +458,7 @@ const sigilsReal = {
         name: 'Stinky',
         description: 'The creature opposing this card loses 1 Power.',
 
-        buffs(fight, source, target) {
-            const [targetFrom, targetTo] = target;
-            const targetCard = fight.field[targetFrom][targetTo];
-            if (targetCard?.state.sigils.includes('stone')) return;
-            return {
-                power: -1,
-            };
-        },
+        buffs: ['decrOppPower'],
     },
     stone: {
         name: 'Made of Stone',
@@ -476,7 +472,7 @@ const sigilsReal = {
         cleanup: {
             phase(event) {
                 if (event.phase !== 'post-attack') return;
-                sigilsReal.strafe.cleanup.phase.call(this, event);
+                SIGILS.strafe.cleanup.phase.call(this, event);
                 this.createEvent('play', {
                     pos: this.fieldPos!,
                     card: initCardFromPrint(prints, 'skeleton'),
@@ -492,7 +488,7 @@ const sigilsReal = {
         cleanup: {
             phase(event) {
                 if (event.phase !== 'post-attack') return;
-                sigilsReal.strafe.cleanup.phase.call(this, event);
+                SIGILS.strafe.cleanup.phase.call(this, event);
                 this.createEvent('play', {
                     pos: this.fieldPos!,
                     card: initCardFromPrint(prints, 'squirrel'),
@@ -736,12 +732,7 @@ const sigilsReal = {
         name: 'Gem Animator',
         description: 'Mox cards on the owner\'s side of the board gain 1 Power.',
 
-        buffs(fight, source, target) {
-            const [targetFrom, targetTo] = target;
-            const targetCard = fight.field[targetFrom][targetTo];
-            const targetPrint = targetCard ? prints[targetCard.print] : null;
-            if (targetPrint?.traits?.includes('mox')) return { power: 1 };
-        },
+        buffs: ['incrMoxPower'],
     },
     dropRubyOnDeath: {
         name: 'Ruby Heart',
@@ -812,7 +803,7 @@ const sigilsReal = {
             },
             phase() {
                 if (this.tick.fight.turn.phase !== 'pre-turn' && this.tick.fight.turn.phase !== 'post-attack') return;
-                sigilsReal.gemDependant.cleanup.play.call(this);
+                SIGILS.gemDependant.cleanup.play.call(this);
             },
         },
     },
@@ -993,4 +984,4 @@ const sigilsReal = {
         },
     },
 } satisfies Record<string, SigilDef>;
-export const sigils: Record<string, SigilDef> = sigilsReal;
+export const sigils: Record<string, SigilDef> = SIGILS;

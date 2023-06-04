@@ -9,6 +9,13 @@
     font-size: 0.1875em;
 }
 
+.version {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    color: var(--ui-dark);
+}
+
 /* @media screen and (max-width: 1200px) {
     .app {
         font-size: 0.15em;

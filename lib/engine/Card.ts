@@ -1,6 +1,7 @@
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { positions } from './utils';
 import { Sigil, sigils } from '../defs/sigils';
+import { buffs } from '../defs/buffs';
 
 // Bitfields
 export const enum MoxType {
@@ -142,7 +143,9 @@ export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'pl
             if (card == null) continue;
             for (const sigil of card.state.sigils) {
                 const sigilDef = sigils[sigil];
-                power += sigilDef.buffs?.(fight, [side, lane], pos)?.power ?? 0;
+                if (!sigilDef.buffs) continue;
+                for (const buff of sigilDef.buffs)
+                    power += buffs[buff].check(fight, [side, lane], pos)?.power ?? 0;
             }
         }
     }

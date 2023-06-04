@@ -14,6 +14,10 @@ export function entries<K extends string | number | symbol, V>(obj: Record<K, V>
     return Object.entries(obj) as [K, V][];
 }
 
+export function assign<T extends object>(obj: T, ...sources: Partial<T>[]): T {
+    return Object.assign(obj, ...sources);
+}
+
 export function clone<T>(obj: T) {
     return JSON.parse(JSON.stringify(obj)) as T;
 }
