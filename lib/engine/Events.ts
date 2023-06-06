@@ -250,7 +250,7 @@ export function translateEvent(event: Event, side: FightSide, forClient: boolean
         event.pos[0] = oppositeSide(event.pos[0]);
     }
     // flip FieldPos
-    if (shouldFlip && isEventType(['perish', 'triggerAttack', 'transform', 'heal', 'activate', 'flip'], event)) {
+    if (shouldFlip && isEventType(['perish', 'triggerAttack', 'transform', 'heal', 'activate', 'flip', 'stats'], event)) {
         event.pos[0] = oppositeSide(event.pos[0]);
     } else if (shouldFlip && isEventType(['attack', 'shoot', 'move'], event)) {
         event.from[0] = oppositeSide(event.from[0]);

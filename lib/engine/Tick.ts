@@ -212,7 +212,7 @@ async function settleEvents(tick: FightTick) {
 
     let iterations = 0;
 
-    eventLoop: for (let event = tick.queue.shift(); event; event = tick.queue.shift()) {
+    for (let event = tick.queue.shift(); event; event = tick.queue.shift()) {
         if (iterations++ >= MAX_STACK_SIZE)
             throw FightError.create(ErrorType.MaxStackSize);
 
@@ -236,7 +236,7 @@ async function settleEvents(tick: FightTick) {
 
         for (const sigilPos of preSettleSigils.writers) {
             sigilCtx.pos = sigilPos[0];
-            sigils[sigilPos[1]].writers![event.type]!.call(sigilCtx, clone(event as never));
+            sigils[sigilPos[1]].writers![event.type]!.call(sigilCtx, event as never);
         }
         if (signals.event) {
             tick.logger?.debug('Event was cancelled!');
@@ -300,14 +300,13 @@ async function settleEvents(tick: FightTick) {
             break;
         }
 
-        // FIXME: KILL EVENTS TIED TO DEAD CARDS **AFTER** PERISH SETTLE
+        // FIXME: KILL EVENTS TIED TO DEAD CARDS
         if (event.type !== 'perish') {
             for (const side of FIGHT_SIDES) {
                 for (const [lane, card] of tick.fight.field[side].entries()) {
                     if (card?.state.health === 0) {
                         tick.queue.unshift({ type: 'perish', pos: [side, lane], cause: 'attack' });
                         tick.logger?.debug(`Postponing for death at [${side}, ${lane}]`);
-                        // continue eventLoop;
                     }
                 }
             }

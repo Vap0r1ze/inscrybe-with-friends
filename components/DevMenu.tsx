@@ -14,14 +14,12 @@ export interface DevMenuProps {
 export function DevMenu({ id, onClose }: DevMenuProps) {
     const [spawning, setSpawning] = useState(false);
     const onSpawnCard = useCallback((printId: string) => {
-        setSpawning(false);
-        onClose?.();
         useGameStore.getState().createEvent(id, {
             type: 'draw',
             side: 'player',
             card: initCardFromPrint(prints, printId),
         });
-    }, [onClose, id]);
+    }, [id]);
     const onGiveEnergy = () => {
         useGameStore.getState().createEvent(id, {
             type: 'energy',

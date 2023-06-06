@@ -1,6 +1,6 @@
 .hand {
     grid-area: hand;
-    background-color: var(--client-dark);
+    background-color: var(--client-muted);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -18,7 +18,7 @@
     align-items: center;
     padding: 0 6em;
     width: 100em;
-    z-index: 5;
+    z-index: 4;
 }
 
 .noDraw {
@@ -32,4 +32,5 @@
     left: 44em;
     right: 44em;
     top: -15em;
+    z-index: 5;
 }

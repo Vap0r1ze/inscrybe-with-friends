@@ -1,6 +1,6 @@
 import { DependencyList, useEffect, useState } from 'react';
 
-export function useAwaiter<T>(factory: () => Promise<T>, deps?: DependencyList[]) {
+export function useAwaiter<T>(factory: () => Promise<T>, deps: DependencyList[]) {
     const [state, setState] = useState<{
         value: T | null;
         error: unknown;

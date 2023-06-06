@@ -9,12 +9,15 @@ import { LeftInfo } from './LeftInfo';
 import { RightInfo } from './RightInfo';
 import { Hand } from './Hand';
 import { DebugEvents, DebugInfo } from './Debug';
+import { NSlice } from '../ui/NSlice';
+import { useBattleTheme } from '@/hooks/useBattleTheme';
 
 export interface ClientProps {
     id: string
     debug?: boolean
 }
 export const Client = memo(function Client({ id, debug }: ClientProps) {
+    const battleTheme = useBattleTheme();
     const client = useClientStore(state => state.clients[id]);
 
     const onDismissError = () => {
@@ -33,10 +36,16 @@ export const Client = memo(function Client({ id, debug }: ClientProps) {
                 ...animationVars,
             } as CSSProperties}>
                 <ClientContext.Provider value={id}>
-                    <div className={styles.left}><LeftInfo /></div>
+                    <LeftInfo />
                     <Board />
-                    <div className={styles.right}><RightInfo /></div>
-                    <div className={styles.middle}></div>
+                    <RightInfo />
+                    <NSlice
+                        className={styles.middle}
+                        sheet={battleTheme}
+                        name="middle"
+                        cols={[0]}
+                        rows={[4]}
+                    />
                     <Hand />
                     {debug && <><DebugEvents /><DebugInfo /></>}
                     {client.errors[0] != null && <div className={styles.errorBackdrop} onClick={onDismissError}>

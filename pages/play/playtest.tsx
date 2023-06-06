@@ -18,13 +18,13 @@ import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
 export default function PlayTest() {
     return <ErrorBoundary fallbackRender={TheError}>
-        <PlayTestReal />
+        <PlayTestPage />
     </ErrorBoundary>;
 }
 
 function TheError({ error }: FallbackProps) {
     const onTryFix = () => {
-        localStorage.removeItem('games');
+        useGameStore.getState().deleteGame('playtest');
         window.location.reload();
     };
 
@@ -39,7 +39,7 @@ function TheError({ error }: FallbackProps) {
     </Box>;
 }
 
-function PlayTestReal() {
+function PlayTestPage() {
     const deckStore = useStore(useDeckStore, state => state.decks);
     const game = useStore(useGameStore, state => state.games.playtest);
     const currentTurn = useStore(useGameStore, state => state.games.playtest?.host.fight.turn.side);

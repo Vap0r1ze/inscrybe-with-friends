@@ -61,7 +61,7 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
         if (isPresent) {
             if (event.type === 'play' && is(event.pos)) {
                 // Fade in
-                controls.push(animate(el, { opacity: 1 }, { duration: animationDurations.play }));
+                controls.push(animate(el, { opacity: [0, 1] }, { duration: animationDurations.play }));
             } else if (event.type === 'move' && is(event.to) && !event.failed) {
                 // Pop in
                 el.style.opacity = '0';
@@ -76,7 +76,6 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
                 const dx = (event.to[1] - event.from[1]) * 1;
                 const dy = (yOf(event.to) - yOf(event.from)) * 100;
                 controls.push(animate(el, {
-                    // scale: [1, 1.1, 1, 1, 1],
                     x: ['0', '0', '0', `${dx}em`, '0'],
                     y: ['0%', `${-dy/8}%`, `${-dy/8}%`, `${dy/4}%`, `${dy/4}%`, '0%'],
                 }, { duration: animationDurations.attack, ease: 'easeOut' }));

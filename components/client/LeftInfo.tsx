@@ -1,12 +1,13 @@
 import styles from './LeftInfo.module.css';
-import { Bell } from './ui/Bell';
+import { SpriteButton } from './ui/SpriteButton';
 import { Status } from './ui/Status';
 import { useClientActions, useClientProp, useFight } from '@/hooks/useClientStore';
 import { memo } from 'react';
-import { Button } from '../inputs/Button';
-import { Text } from '../Text';
+import { Sprite } from '../sprites/Sprite';
+import { useBattleTheme } from '@/hooks/useBattleTheme';
 
 export const LeftInfo = memo(function LeftInfo() {
+    const battleTheme = useBattleTheme();
     const isPlayTurn = useFight(fight => fight.turn.side === 'player' && fight.turn.phase === 'play');
     const [hammering, setHammering] = useClientProp('hammering');
     const { sendAction } = useClientActions();
@@ -14,12 +15,17 @@ export const LeftInfo = memo(function LeftInfo() {
     const onRing = () => {
         sendAction('bellRing', {});
     };
+    const onHammerToggle = () => {
+        setHammering(!hammering);
+    };
 
-    return <div className={styles.info}>
-        {/* <Sprite sheet={Spritesheets.cards} name="slot" /> */}
-        <Status side="opposing" />
-        <Bell disabled={!isPlayTurn} onClick={onRing} />
-        <Button disabled={!isPlayTurn} onClick={() => setHammering(!hammering)}><Text>Hammer</Text></Button>
-        <Status side="player" />
+    return <div className={styles.left}>
+        <Sprite className={styles.bg} sheet={battleTheme} name="boardLeft" />
+        <div className={styles.info}>
+            <Status side="opposing" />
+            <SpriteButton sheet={battleTheme} name="bell" disabled={!isPlayTurn} onClick={onRing} />
+            <SpriteButton sheet={battleTheme} name="hammer" disabled={!isPlayTurn} selected={hammering} onClick={onHammerToggle} />
+            <Status side="player" />
+        </div>
     </div>;
 });

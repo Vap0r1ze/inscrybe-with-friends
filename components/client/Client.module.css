@@ -1,22 +1,13 @@
 .root {
-    height: 220em;
-    width: 450em;
-    /* --client-accent-light: #f27423;
-    --client-accent: #f27423;
-    --client-muted: #47322d; */
-    --client-accent-light: #c5d483;
-    --client-accent: #56ad74;
-    --client-muted: #1d7f6d;
-    --client-dark: var(--ui-dark);
-    --client-bg: var(--flow-dark);
-    background-color: var(--client-bg);
+    --client-bg: var(--flow);
+    --client-muted: #3a2d2d;
 }
 
 .client {
     height: 100%;
     display: grid;
     grid-template-columns: 1fr auto 1fr auto;
-    grid-template-rows: 2fr auto 1fr;
+    grid-template-rows: 2fr auto 1fr auto;
     grid-template-areas:
         "left board right debug-events"
         "middle middle middle debug-events"
@@ -25,26 +16,11 @@
     position: relative;
     filter: url(#abberation);
     overflow: hidden;
-}
-
-.left {
-    grid-area: left;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.right {
-    grid-area: right;
-    display: flex;
-    justify-content: flex-start;
+    background: var(--client-bg);
 }
 
 .middle {
     grid-area: middle;
-    background: var(--client-accent);
-    border-top: 1em solid var(--client-accent-light);
-    border-bottom: 1em solid var(--flow);
-    height: 4em;
 }
 
 .missing {

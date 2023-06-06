@@ -224,20 +224,6 @@ export const prints: Record<string, Readonly<CardPrint>> = {
         cost: { type: 'blood', amount: 1 },
         sigils: ['waterborneTentacle'],
     },
-    // longElk: {
-    //     name: 'Long Elk',
-    //     rare: true,
-    //     scrybe: 'nature',
-    //     power: 1,
-    //     health: 2,
-    //     cost: { type: 'bone', amount: 4 },
-    //     sigils: [ 'strafe', 'deathTouch' ],
-    // },
-    // vertebrae: {
-    //     name: 'Vertebrae',
-    //     power: 0,
-    //     health: 1,
-    // },
     alpha: {
         name: 'Alpha',
         power: 1,

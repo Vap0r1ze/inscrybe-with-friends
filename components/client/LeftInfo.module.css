@@ -1,7 +1,24 @@
+.left {
+    grid-area: left;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    position: relative;
+}
+
 .info {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
     padding: 4em 2em;
+    max-height: 150em;
+    height: 100%;
+}
+
+.bg {
+    position: absolute;
+    bottom: 2em;
+    right: 0;
+    z-index: -10;
 }

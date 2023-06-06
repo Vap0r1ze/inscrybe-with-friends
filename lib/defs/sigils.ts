@@ -136,7 +136,6 @@ const SIGILS = {
             attack(event) {
                 if (event.direct) return;
                 if (event.to[0] !== this.side) return;
-                console.log('attack');
                 const target = this.getCard(event.to);
                 if (target) return;
 

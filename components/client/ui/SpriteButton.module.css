@@ -1,14 +1,14 @@
-.bell {
+.btn {
     position: relative;
     cursor: pointer;
 }
 
-.bell.disabled {
+.btn.disabled {
     pointer-events: none;
 }
 
-.bell:hover .normal,
-.bell:active .normal {
+.btn:hover .normal,
+.btn:active .normal {
     visibility: hidden;
 }
 
@@ -19,10 +19,10 @@
     visibility: hidden;
 }
 
-.bell:hover:not(:active) .hover {
+.btn:hover:not(:active) .hover {
     visibility: visible;
 }
 
-.bell:active .active {
+.btn:active .active {
     visibility: visible;
 }

@@ -3,7 +3,7 @@ import { Spritesheets } from '@/lib/spritesheets';
 import { Sprite } from '../sprites/Sprite';
 import classNames from 'classnames';
 import { useClientActions, useClientProp, useFight, useHolding } from '@/hooks/useClientStore';
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import { HoverBorder } from '../ui/HoverBorder';
 import { CardSprite } from '../sprites/CardSprite';
 import { prints } from '@/lib/defs/prints';
@@ -13,8 +13,12 @@ import { PlayedCard } from './animations/PlayedCard';
 import { AnimatePresence } from 'framer-motion';
 import { FIGHT_SIDES } from '@/lib/engine/Fight';
 import { fromEntries } from '@/lib/utils';
+import { NSlice } from '../ui/NSlice';
+import { useBattleTheme } from '@/hooks/useBattleTheme';
+import Asset from '../sprites/Asset';
 
 export const Board = memo(function Board() {
+    const battleTheme = useBattleTheme();
     const field = useFight(fight => fight.field);
     const hand = useFight(fight => fight.hands.player);
     const isPlayTurn = useFight(fight => fight.turn.side === 'player' && fight.turn.phase === 'play');
@@ -99,11 +103,19 @@ export const Board = memo(function Board() {
     }, [field.player.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return <div className={styles.board}>
+        <Sprite className={styles.boardBg} sheet={battleTheme} name="board" />
+        <NSlice
+            className={styles.border}
+            sheet={battleTheme}
+            name="boardBorder"
+            rows={[4, 0, 4, 60]}
+            cols={[4, 0, 4]}
+        />
         <div data-z-plane className={classNames(styles.boardRow, styles.playerRow)}>
             {field.player.map((card, i) => (
                 <div key={i} data-hover-target className={styles.cardSlot} onClick={() => onTryPlay(i)}>
-                    <Sprite className={styles.cardSlotBase} sheet={Spritesheets.battle} name="slot" />
-                    <Sprite className={styles.cardSlotHover} sheet={Spritesheets.battle} name="slotHover" />
+                    <Sprite className={styles.cardSlotBase} sheet={battleTheme} name="slot" />
+                    <Sprite className={styles.cardSlotHover} sheet={battleTheme} name="slotHover" />
                     {canPlay && <HoverBorder color="#d7e2a3" />}
                 </div>
             ))}
@@ -114,7 +126,7 @@ export const Board = memo(function Board() {
                     })} onClick={() => hammering && onHammer(i)}>
                         <AnimatePresence initial={false}>
                             {card && (
-                                <PlayedCard lane={i} key="player-card">
+                                <PlayedCard lane={i} key="player">
                                     <CardSprite
                                         print={prints[card.print]}
                                         state={card.state}
@@ -147,8 +159,8 @@ export const Board = memo(function Board() {
         </div>
         <div data-z-plane className={styles.boardRow}>
             {field.player.map((card, i) => <div key={i} className={styles.cardSlot}>
-                <Sprite className={styles.cardSlotBase} sheet={Spritesheets.battle} name="slot" />
-                <Sprite className={styles.cardSlotHover} sheet={Spritesheets.battle} name="slotHover" />
+                <Sprite className={styles.cardSlotBase} sheet={battleTheme} name="slot" />
+                <Sprite className={styles.cardSlotHover} sheet={battleTheme} name="slotHover" />
             </div>)}
             <div className={styles.played}>
                 {field.opposing.map((card, i) => (
@@ -157,7 +169,7 @@ export const Board = memo(function Board() {
                     })}>
                         <AnimatePresence initial={false}>
                             {card && (
-                                <PlayedCard lane={i} opposing key="opposing-card">
+                                <PlayedCard lane={i} opposing key="opposing">
                                     {card && <CardSprite
                                         print={prints[card.print]}
                                         state={card.state}
