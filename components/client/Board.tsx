@@ -6,7 +6,7 @@ import { useClientActions, useClientProp, useFight, useHolding } from '@/hooks/u
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { HoverBorder } from '../ui/HoverBorder';
 import { CardSprite } from '../sprites/CardSprite';
-import { prints } from '@/lib/defs/prints';
+import { rulesets } from '@/lib/defs/prints';
 import { useSet } from '@/hooks/useSet';
 import { FieldPos, getBloods, getRoomOnSac } from '@/lib/engine/Card';
 import { PlayedCard } from './animations/PlayedCard';
@@ -15,10 +15,10 @@ import { FIGHT_SIDES } from '@/lib/engine/Fight';
 import { fromEntries } from '@/lib/utils';
 import { NSlice } from '../ui/NSlice';
 import { useBattleTheme } from '@/hooks/useBattleTheme';
-import Asset from '../sprites/Asset';
 
 export const Board = memo(function Board() {
     const battleTheme = useBattleTheme();
+    const prints = useFight(fight => rulesets[fight.opts.ruleset].prints);
     const field = useFight(fight => fight.field);
     const hand = useFight(fight => fight.hands.player);
     const isPlayTurn = useFight(fight => fight.turn.side === 'player' && fight.turn.phase === 'play');
@@ -82,8 +82,10 @@ export const Board = memo(function Board() {
         setHolding(null);
         setHammering(false);
     }, [pending, sendAction, setHolding, setHammering]);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const onActivateLane = field.player.map((card, i) => useCallback((sigil: string) => onActivate(i, sigil), [i]));
+
+    const onActivateLane = useMemo(() => {
+        return Array.from({ length: field.player.length }, (card, i) => (sigil: string) => onActivate(i, sigil));
+    }, [field.player.length, onActivate]);
 
     useEffect(() => {
         if (holdingPrint?.cost?.type === 'blood') {
@@ -92,7 +94,7 @@ export const Board = memo(function Board() {
                 onTrySac(holdingIdx!);
             };
         }
-    }, [field.player, holdingIdx, sacs, onTrySac, holdingPrint?.cost]);
+    }, [field.player, holdingIdx, sacs, onTrySac, holdingPrint?.cost, prints]);
 
     useEffect(() => {
         clearSacs();
@@ -186,6 +188,7 @@ export const Board = memo(function Board() {
                 {field.player.map((card, i) => (
                     <div key={i} className={styles.slot} onClick={() => onTarget(i)}>
                         <Sprite className={styles.target} sheet={Spritesheets.cards} name="target" />
+                        <Sprite className={styles.targetHover} sheet={Spritesheets.cards} name="targetHover" />
                     </div>
                 ))}
             </div>}

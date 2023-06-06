@@ -1,7 +1,7 @@
 import { FieldPos } from '../engine/Card';
 import { Fight } from '../engine/Fight';
 import { positions } from '../engine/utils';
-import { prints } from './prints';
+import { rulesets } from './prints';
 
 export type BuffDef = {
     check(fight: Fight<'player'>, source: FieldPos, target: FieldPos): {
@@ -31,6 +31,7 @@ const BUFFS = {
     },
     incrMoxPower: {
         check(fight, source, target) {
+            const { prints } = rulesets[fight.opts.ruleset];
             const [targetSide, targetLane] = target;
             const targetCard = fight.field[targetSide][targetLane];
             if (targetSide !== source[0]) return null;

@@ -1,8 +1,7 @@
 import { Card } from './Card';
-import { entries, fromEntries } from '../utils';
+import { fromEntries } from '../utils';
 import { ActionReq } from './Actions';
-import { Event } from './Events';
-import { DECK_TYPES, DeckType, Decks } from './Deck';
+import { DECK_TYPES, DeckType, DeckCards } from './Deck';
 
 export enum FightFeatures {
     Anticipated = 'anticipated',
@@ -24,6 +23,7 @@ export interface FightOptions {
     startingHand: number;
     lives: number;
     hammersPerTurn: number;
+    ruleset: string;
 }
 
 export interface Fight<InclSide extends FightSide = never> {
@@ -39,7 +39,7 @@ export interface Fight<InclSide extends FightSide = never> {
 
     mustPlay: Record<InclSide, number | null>;
     hands: Record<InclSide, Card[]>;
-    decks: Record<InclSide, Decks>;
+    decks: Record<InclSide, DeckCards>;
 }
 
 export interface PlayerState {
@@ -58,7 +58,7 @@ const initPlayerState = (lives: number): PlayerState => ({
     handSize: 0,
 });
 
-export function createFight<Side extends FightSide = never>(opts: FightOptions, sides: readonly Side[], decks: Record<Side, Decks>): Fight<Side> {
+export function createFight<Side extends FightSide = never>(opts: FightOptions, sides: readonly Side[], decks: Record<Side, DeckCards>): Fight<Side> {
     const hands = fromEntries(sides.map(side => [side, []]));
     const mustPlay = fromEntries(sides.map(side => [side, null]));
     return {

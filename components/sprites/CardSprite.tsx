@@ -11,7 +11,7 @@ import { openInRulebook } from '@/hooks/useRulebook';
 import { memo } from 'react';
 import { SigilButton } from '../inputs/SigilButton';
 import { useClient } from '@/hooks/useClientStore';
-import { prints } from '@/lib/defs/prints';
+import { rulesets } from '@/lib/defs/prints';
 
 const horizonalSigils: Sigil[] = [
     'squirrelStrafe',
@@ -55,6 +55,7 @@ export const CardSprite = memo(function CardSprite({
     let staticPower = power;
 
     if (fieldPos && client) {
+        const { prints } = rulesets[client.fight.opts.ruleset];
         const calcPower = getCardPower(prints, client.fight, fieldPos);
         if (calcPower != null) power = calcPower;
     }

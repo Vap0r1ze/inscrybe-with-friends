@@ -12,3 +12,5 @@ declare namespace NodeJS {
         HCAPTCHA_SITEKEY: string;
     }
 }
+
+type Mutable<T> = { -readonly [P in keyof T]: T[P] };

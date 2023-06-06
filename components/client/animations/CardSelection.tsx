@@ -6,8 +6,9 @@ import { CardOrPrint } from '@/lib/engine/Card';
 import { CardSprite } from '@/components/sprites/CardSprite';
 import { HoverBorder } from '@/components/ui/HoverBorder';
 import { namespacedIndexes } from '@/lib/utils';
-import { prints } from '@/lib/defs/prints';
+import { rulesets } from '@/lib/defs/prints';
 import { isClient } from '@/utils/next';
+import { useFight } from '@/hooks/useClientStore';
 
 export interface CardSelectionProps {
     cards: CardOrPrint[];
@@ -25,6 +26,8 @@ export const CardSelection = memo(function CardSelection({
     prompt,
     padding = 0,
 }: CardSelectionProps) {
+    const prints = useFight(fight => rulesets[fight.opts.ruleset].prints);
+
     const observerRef = useRef(isClient ? new ResizeObserver((entries) => {
         for (const { target } of entries) {
             if (!(target instanceof HTMLElement)) continue;

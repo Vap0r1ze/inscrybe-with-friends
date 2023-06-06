@@ -2,7 +2,7 @@ import { Action, ActionRes, isActionInvalid } from './Actions';
 import { CardPos, getBloods, getMoxes, initCardFromPrint } from './Card';
 import { Event, eventSettlers, isEventInvalid } from './Events';
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
-import { prints } from '../defs/prints';
+import { rulesets } from '../defs/prints';
 import { Sigil, sigils } from '../defs/sigils';
 import { getActiveSigils, createEffectContext, createSigilContext, defaultEffects, getTargets, EffectSignals } from './Effects';
 import { ErrorType, FightError } from './Errors';
@@ -85,6 +85,7 @@ export async function handleAction(tick: FightTick, side: FightSide, action: Act
     if (isActionInvalid(tick, action)) throw FightError.create(ErrorType.InvalidAction);
 
     const stack: Event[] = [];
+    const { prints } = rulesets[tick.fight.opts.ruleset];
 
     switch (action.type) {
         case 'draw': {
@@ -186,6 +187,7 @@ function getPacket(tick: FightTick): FightPacket {
 }
 
 async function fillEvent(tick: FightTick, event: Event) {
+    const { prints } = rulesets[tick.fight.opts.ruleset];
     if (event.type === 'draw' && !event.card) {
         const idx = tick.host.decks[event.side][event.source!].pop()!;
         const printId = tick.fight.decks[event.side][event.source!][idx];

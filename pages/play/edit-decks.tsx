@@ -1,5 +1,5 @@
 import styles from './edit-decks.module.css';
-import { sideDecks } from '@/lib/defs/prints';
+import { rulesets } from '@/lib/defs/prints';
 import { entries } from '@/lib/utils';
 import { useCallback, useState } from 'react';
 import { useDeckStore } from '@/hooks/useDeckStore';
@@ -11,9 +11,9 @@ import { Text } from '@/components/Text';
 import { Button } from '@/components/inputs/Button';
 import { getSideDeckPrintIds } from '@/lib/engine/Card';
 import { Box } from '@/components/ui/Box';
-import { Decks } from '@/lib/engine/Deck';
+import { DeckCards } from '@/lib/engine/Deck';
 
-function useDeck(init: Decks = { main: [], side: getSideDeckPrintIds(sideDecks.squirrels) }) {
+function useDeck(init: DeckCards) {
     const [deck, setDeck] = useState(init);
     const addCard = (id: string) => setDeck(deck => ({ ...deck, main: [...deck.main, id] }));
     const removeCard = (idx: number) => setDeck(deck => ({ ...deck, main: deck.main.filter((_, i) => i !== idx) }));
@@ -22,11 +22,16 @@ function useDeck(init: Decks = { main: [], side: getSideDeckPrintIds(sideDecks.s
 }
 
 export default function EditDecks() {
-    const [deck, { addCard, removeCard, setSide, setDeck }] = useDeck();
     const [selectedDeck, setSelectedDeck] = useState('');
     const [deckNameInput, setDeckName] = useState('');
-    const [selectedSideDeck, setSelectedSideDeck] = useState('squirrels');
-    const decks = useStore(useDeckStore, state => state.decks);
+    const [selectedRuleset, setSelectedRuleset] = useState(Object.keys(rulesets)[0]);
+    const [defaultSideDeckId, defaultSideDeck] = Object.entries(rulesets[selectedRuleset].sideDecks)[0];
+    const [selectedSideDeck, setSelectedSideDeck] = useState(defaultSideDeckId);
+    const [deck, { addCard, removeCard, setSide, setDeck }] = useDeck({
+        main: [],
+        side: getSideDeckPrintIds(defaultSideDeck),
+    });
+    const decks = useStore(useDeckStore, state => state.rulesets)?.[selectedRuleset] ?? {};
 
     const deckName = deckNameInput.trim();
     const noDeckSelected = !(selectedDeck && decks?.[selectedDeck]);
@@ -36,7 +41,7 @@ export default function EditDecks() {
     const selectDeck = (name: string) => {
         setSelectedDeck(name);
         if (!name) return;
-        setDeck(useDeckStore.getState().decks[name]);
+        setDeck(useDeckStore.getState().rulesets[selectedRuleset][name]);
         setDeckName(name);
     };
     const onDeckNameChange = (name: string) => {
@@ -49,29 +54,38 @@ export default function EditDecks() {
         setDeckName(name);
 
         if (tryRename && selectedDeck && name !== selectedDeck)
-            useDeckStore.getState().deleteDeck(selectedDeck);
-        useDeckStore.getState().saveDeck(name, deck);
+            useDeckStore.getState().deleteDeck(selectedRuleset, selectedDeck);
+        useDeckStore.getState().saveDeck(selectedRuleset, name, deck);
         setSelectedDeck(name);
     };
     const deleteDeck = (name: string) => {
         if (name === selectedDeck) {
-            setDeck({ main: [], side: getSideDeckPrintIds(sideDecks.squirrels) });
+            setDeck({ main: [], side: getSideDeckPrintIds(defaultSideDeck) });
             setSelectedDeck('');
         }
-        useDeckStore.getState().deleteDeck(name);
+        useDeckStore.getState().deleteDeck(selectedRuleset, name);
+    };
+    const onChangeRuleset = (id: string) => {
+        if (id === selectedRuleset) return;
+        const defaultSideDeck = Object.keys(rulesets[id].sideDecks)[0];
+        setSelectedRuleset(id);
+        setSelectedSideDeck(defaultSideDeck);
+        setDeck({ main: [], side: getSideDeckPrintIds(rulesets[id].sideDecks[defaultSideDeck]) });
+        setDeckName('');
+        setSelectedDeck('');
     };
 
     /* eslint-disable react-hooks/exhaustive-deps */
     const onSideDeckSelect = useCallback((id: string) => {
         setSelectedSideDeck(id);
-        setSide(getSideDeckPrintIds(sideDecks[id]));
+        setSide(getSideDeckPrintIds(rulesets[selectedRuleset].sideDecks[id]));
     }, []);
     const onPrintSelect = useCallback((id: string) => addCard(id), []);
     const onDeckPrintSelect = useCallback((id: string, idx: number) => removeCard(idx), []);
     const onClearDeck = useCallback(() => setDeck(deck => ({ ...deck, main: [] })), []);
     /* eslint-enable react-hooks/exhaustive-deps */
 
-    const sideEntries = entries(sideDecks);
+    const sideEntries = entries(rulesets[selectedRuleset].sideDecks);
     const deckEntries = entries(decks ?? {});
 
     // TODO: figure out how to prevent deck select from flickering on create/rename
@@ -80,6 +94,12 @@ export default function EditDecks() {
         <div className={styles.editor}>
             <Box className={styles.controls}>
                 <div className={styles.controlsRow}>
+                    <Select
+                        options={entries(rulesets).map(([id, ruleset]) => [id, ruleset.name])}
+                        value={selectedRuleset}
+                        placeholder="Select Ruleset"
+                        onSelect={id => onChangeRuleset(id)}
+                    />
                     <Select
                         options={deckEntries.map(([name]) => [name, name])}
                         disabled={!deckEntries.length}
@@ -109,10 +129,10 @@ export default function EditDecks() {
                 {!deck.main.length && <div className={styles.emptyDeck}>
                     <Text size={14}>No cards in your deck, add them by selecting them on the right</Text>
                 </div>}
-                <PrintList editable prints={deck.main} onSelect={onDeckPrintSelect} />
+                <PrintList editable prints={deck.main} onSelect={onDeckPrintSelect} ruleset={selectedRuleset} />
             </div>
             <Box className={styles.sideDeck}>
-                <PrintList stacked prints={deck.side} />
+                <PrintList stacked prints={deck.side} ruleset={selectedRuleset} />
                 <div className={styles.sideDeckSelector}>
                     <Text size={14}>Side Deck:</Text>
                     <Select
@@ -123,7 +143,7 @@ export default function EditDecks() {
                 </div>
             </Box>
             <div className={styles.prints}>
-                <PrintList editable showNames onSelect={onPrintSelect} />
+                <PrintList editable showNames onSelect={onPrintSelect} ruleset={selectedRuleset} />
             </div>
         </div>
     );

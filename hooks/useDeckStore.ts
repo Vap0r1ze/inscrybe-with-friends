@@ -1,32 +1,39 @@
-import { sideDecks } from '@/lib/defs/prints';
-import { getSideDeckPrintIds } from '@/lib/engine/Card';
-import { Decks } from '@/lib/engine/Deck';
+import { DeckCards } from '@/lib/engine/Deck';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface DeckStore {
-    decks: Record<string, Decks>,
-    getNames: () => string[]
-    saveDeck: (name: string, deck: Decks) => void
-    deleteDeck: (name: string) => void
+    rulesets: Record<string, Record<string, DeckCards>>,
+    getNames: (ruleset: string) => string[]
+    saveDeck: (ruleset: string, name: string, deck: DeckCards) => void
+    deleteDeck: (ruleset: string, name: string) => void
 }
 
 export const useDeckStore = create(
     persist<DeckStore>(
         (set, get) => ({
-            decks: {},
-            getNames: () => Object.keys(get().decks),
-            deleteDeck: (name) => set({ decks: Object.fromEntries(Object.entries(get().decks).filter(([key]) => key !== name)) }),
-            saveDeck: (name, deck) => set({ decks: { ...get().decks, [name]: deck } }),
+            rulesets: {},
+            getNames: (ruleset) => Object.keys(get().rulesets[ruleset]),
+            deleteDeck: (ruleset, name) => set(state => ({ rulesets: {
+                ...state.rulesets,
+                [ruleset]: Object.fromEntries(Object.entries(state.rulesets[ruleset]).filter(([key]) => key !== name)),
+            } })),
+            saveDeck: (name, ruleset, deck) => set(state => ({ rulesets: {
+                ...state.rulesets,
+                [ruleset]: {
+                    ...state.rulesets[ruleset],
+                    [name]: deck,
+                },
+            } })),
         }),
         {
             name: 'decks',
             storage: createJSONStorage(() => localStorage),
-            version: 1,
+            version: 2,
             migrate(persistedState: any, version) {
-                if (version <= 0) {
+                if (version <= 1) {
                     const { decks } = persistedState as { decks: Record<string, any> };
-                    for (const [, deck] of Object.entries(decks)) deck.side = getSideDeckPrintIds(sideDecks[deck.side]);
+                    persistedState = { rulesets: { imfComp: decks } };
                 }
                 return persistedState as DeckStore;
             },

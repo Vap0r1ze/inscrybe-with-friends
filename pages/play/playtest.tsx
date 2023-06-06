@@ -13,8 +13,9 @@ import { FIGHT_SIDES, FightSide, createFight, translateFight } from '@/lib/engin
 import { createFightHost } from '@/lib/engine/Host';
 import { oppositeSide } from '@/lib/engine/utils';
 import { clone, entries, fromEntries } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
+import { rulesets } from '@/lib/defs/prints';
 
 export default function PlayTest() {
     return <ErrorBoundary fallbackRender={TheError}>
@@ -40,11 +41,12 @@ function TheError({ error }: FallbackProps) {
 }
 
 function PlayTestPage() {
-    const deckStore = useStore(useDeckStore, state => state.decks);
+    const deckStore = useStore(useDeckStore, state => state.rulesets);
     const game = useStore(useGameStore, state => state.games.playtest);
     const currentTurn = useStore(useGameStore, state => state.games.playtest?.host.fight.turn.side);
     const currentPhase = useStore(useGameStore, state => state.games.playtest?.host.fight.turn.phase);
 
+    const [ruleset, setRuleset] = useState<string>();
     const [selectedDecks, setSelectedDecks] = useState<Record<FightSide, string | null>>({
         player: null,
         opposing: null,
@@ -54,7 +56,20 @@ function PlayTestPage() {
     const [skipDraw, setSkipDraw] = useState(false);
     const [devMode, setDevMode] = useState(false);
 
-    const noDecks = !!deckStore && !Object.keys(deckStore).length;
+    const decks = useMemo(() => {
+        if (!deckStore || !ruleset) return [];
+        return entries(deckStore[ruleset] ?? []).map(([name, deck]) => ({ name, deck }));
+    }, [deckStore, ruleset]);
+
+    const noDecks = !decks.length;
+
+    const onChangeRuleset = (id: string) => {
+        setRuleset(id);
+        setSelectedDecks({
+            player: null,
+            opposing: null,
+        });
+    };
 
     useEffect(() => {
         if (currentTurn && currentSide !== currentTurn && autoSwitch) {
@@ -84,9 +99,9 @@ function PlayTestPage() {
     }, [game, currentSide]);
 
     const onFightStart = () => {
-        if (game || !deckStore || Object.values(selectedDecks).some(deck => !deck)) return;
+        if (game || !ruleset || !deckStore || Object.values(selectedDecks).some(deck => !deck)) return;
 
-        const decks = fromEntries(entries(selectedDecks).map(([side, deck]) => [side, deckStore[deck!]]));
+        const decks = fromEntries(entries(selectedDecks).map(([side, deck]) => [side, deckStore[ruleset][deck!]]));
 
         const fight = createFight({
             features: [],
@@ -94,6 +109,7 @@ function PlayTestPage() {
             lanes: 4,
             lives: 2,
             startingHand: 3,
+            ruleset: 'imfComp',
         }, FIGHT_SIDES, decks);
         const host = createFightHost(fight);
 
@@ -124,10 +140,16 @@ function PlayTestPage() {
         color: 'var(--ui)',
     }}>
         {!game ? <div>
+            <Select
+                options={entries(rulesets).map(([id, ruleset]) => [id, ruleset.name])}
+                placeholder="Select Ruleset"
+                onSelect={onChangeRuleset}
+                value={ruleset}
+            />
             {FIGHT_SIDES.map(side => <div key={side}>
                 <Text>{side[0].toUpperCase() + side.slice(1)}</Text>
                 <Select
-                    options={Object.keys(deckStore ?? []).map(key => [key, key])}
+                    options={decks.map((deck) => [deck.name, deck.name])}
                     disabled={noDecks}
                     placeholder={noDecks ? 'No decks' : 'Select Deck'}
                     onSelect={deck => setSelectedDecks({ ...selectedDecks, [side]: deck })}

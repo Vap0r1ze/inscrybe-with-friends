@@ -1,8 +1,5 @@
 import styles from './Hand.module.css';
-import { namespacedIndexes } from '@/lib/utils';
 import { useClientActions, useClientProp, useFight, useHolding } from '@/hooks/useClientStore';
-import { CardSprite } from '../sprites/CardSprite';
-import { prints } from '@/lib/defs/prints';
 import classNames from 'classnames';
 import { HoverBorder } from '../ui/HoverBorder';
 import { memo, useCallback, useMemo } from 'react';

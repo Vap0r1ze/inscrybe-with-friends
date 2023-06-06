@@ -1,7 +1,8 @@
 import styles from './Status.module.css';
 import { useFight } from '@/hooks/useClientStore';
-import { prints } from '@/lib/defs/prints';
-import { MoxType, getBloods, getMoxes } from '@/lib/engine/Card';
+import { rulesets } from '@/lib/defs/prints';
+import { getBloods, getMoxes } from '@/lib/engine/Card';
+import { MoxType } from '@/lib/engine/constants';
 import { FightSide } from '@/lib/engine/Fight';
 import { Sprite } from '../../sprites/Sprite';
 import { Number } from '../../sprites/Number';
@@ -12,6 +13,7 @@ export const Status = memo(function Status({ side }: { side: FightSide }) {
     const battleTheme = useBattleTheme();
     const player = useFight(fight => fight.players[side]);
     const lanes = useFight(fight => fight.field[side]);
+    const prints = useFight(fight => rulesets[fight.opts.ruleset].prints);
 
     const maxEnergy = 6;
     const [energy, totalEnergy] = player.energy;

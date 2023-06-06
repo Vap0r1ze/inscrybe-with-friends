@@ -1,15 +1,14 @@
 import styles from './PrintList.module.css';
-import { prints as allPrints } from '@/lib/defs/prints';
+import { rulesets } from '@/lib/defs/prints';
 import { entries } from '@/lib/utils';
 import { CardSprite } from '../sprites/CardSprite';
 import { Text } from '../Text';
 import classNames from 'classnames';
 import { openInRulebook } from '@/hooks/useRulebook';
-import { memo } from 'react';
-
-const allPrintEntries = entries(allPrints).filter(([, print]) => !print.banned);
+import { memo, useMemo } from 'react';
 
 export interface PrintListProps {
+    ruleset: string;
     onSelect?: (id: string, index: number) => void;
     editable?: boolean;
     stacked?: boolean;
@@ -17,8 +16,15 @@ export interface PrintListProps {
     prints?: string[];
     gap?: number;
 }
-export const PrintList = memo(function PrintList({ onSelect, editable, stacked, showNames, prints }: PrintListProps) {
+export const PrintList = memo(function PrintList({ onSelect, editable, stacked, showNames, prints, ruleset }: PrintListProps) {
+    const allPrints = useMemo(() => {
+        return rulesets[ruleset].prints;
+    }, [ruleset]);
+    const allPrintEntries = useMemo(() => {
+        return entries(allPrints).filter(([id, print]) => !print.banned);
+    }, [allPrints]);
     const printEntries = prints?.map(id => [id, allPrints[id]] as const) ?? allPrintEntries;
+
     return (
         <div className={classNames(styles.prints, {
             [styles.editable]: editable,

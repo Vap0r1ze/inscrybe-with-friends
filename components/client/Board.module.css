@@ -68,14 +68,15 @@
 
 .targets .slot {
     pointer-events: auto;
+    cursor: pointer;
 }
 
-.targets .slot .target {
-    visibility: hidden;
+.targets .slot:not(:hover) .targetHover {
+    display: none;
 }
 
 .targets .slot:hover .target {
-    visibility: visible;
+    display: none;
 }
 
 .border {

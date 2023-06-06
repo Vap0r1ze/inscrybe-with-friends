@@ -2,18 +2,8 @@ import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { positions } from './utils';
 import { Sigil, sigils } from '../defs/sigils';
 import { buffs } from '../defs/buffs';
+import { MoxType } from './constants';
 
-// Bitfields
-export const enum MoxType {
-    Green = 1 << 0,
-    Orange = 1 << 1,
-    Blue = 1 << 2,
-};
-export const MOX_TYPES: Record<string, MoxType> = {
-    Green: MoxType.Green,
-    Orange: MoxType.Orange,
-    Blue: MoxType.Blue,
-};
 export type SpecialStat =
     | 'ants'
     | 'hand'
@@ -36,6 +26,11 @@ export type Cost = {
     needs: number;
 };
 
+export interface Ruleset {
+    name: string;
+    prints: Record<string, Readonly<CardPrint>>;
+    sideDecks: Record<string, Readonly<SideDeck>>;
+}
 export interface SideDeck {
     name: string;
     repeat?: [number, string];

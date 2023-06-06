@@ -29,6 +29,7 @@ export const CardSprites: Spritesheet = {
 
         sac: [0, 2],
         target: [1, 3],
+        targetHover: [2, 3],
         slot: [3, 2],
     },
 };

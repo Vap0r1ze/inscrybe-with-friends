@@ -1,12 +1,12 @@
 import { ActionReq, ActionRes } from './Actions';
-import { Card, CardInfo, CardPos, CardPrint, CardState, FieldPos, getCardPower } from './Card';
+import { Card, CardInfo, CardPos, CardPrint, CardState, FieldPos, Ruleset, getCardPower, initCardFromPrint } from './Card';
 import { Event } from './Events';
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { FightTick } from './Tick';
 import { SigilPos, sigils } from '../defs/sigils';
 import { positions } from './utils';
 import { ErrorType, FightError } from './Errors';
-import { prints } from '../defs/prints';
+import { rulesets } from '../defs/prints';
 import { clone, entries, fromEntries } from '../utils';
 
 export type EffectTargets = Partial<Record<Exclude<EffectTarget, 'global'>, CardPos>>;
@@ -51,6 +51,8 @@ export type EffectContext = {
     cancel(): void;
     cancelDefault(): void;
 
+    prints: Ruleset['prints'];
+    initCard(printId: string): Card;
     getCardState(pos: FieldPos): Readonly<CardState> | null;
     getCardInfo(pos: FieldPos): Readonly<CardInfo> | null;
     getCard(pos: FieldPos): Readonly<Card> | null;
@@ -78,19 +80,25 @@ export function createEffectContext(tick: FightTick, event: Event, targets: Effe
             signals.default = true;
         },
 
+        get prints() {
+            return rulesets[this.tick.fight.opts.ruleset].prints;
+        },
+        initCard(printId: string) {
+            return initCardFromPrint(this.prints, printId);
+        },
         getCardState(pos) {
             return effectCtx.getCard(pos)?.state ?? null;
         },
         getCardInfo(pos) {
             const card = effectCtx.getCard(pos);
             if (card == null) return null;
-            return { print: prints[card.print], state: card.state };
+            return { print: this.prints[card.print], state: card.state };
         },
         getCard(pos) {
             return tick.fight.field[pos[0]][pos[1]] ?? null;
         },
         getPower(pos) {
-            return getCardPower(prints, this.tick.fight, pos);
+            return getCardPower(this.prints, this.tick.fight, pos);
         },
     };
     return effectCtx;
@@ -111,7 +119,7 @@ export function createSigilContext(tick: FightTick, effectCtx: EffectContext, po
             if (area === 'hand') return pos;
         },
         get cardPrint() {
-            return prints[this.card.print];
+            return this.prints[this.card.print];
         },
         get card() {
             if (this.handPos != null) {

@@ -1,12 +1,11 @@
 import { ActionReq, ActionRes } from '../engine/Actions';
-import { FieldPos, CardPos, initCardFromPrint, getMoxes, MoxType } from '../engine/Card';
-import { EffectContext, EffectTarget, EffectTriggers } from '../engine/Effects';
+import { CardPos, getMoxes } from '../engine/Card';
+import { MoxType } from '../engine/constants';
+import { EffectTarget, EffectTriggers } from '../engine/Effects';
 import { ErrorType, FightError } from '../engine/Errors';
-import { Fight } from '../engine/Fight';
 import { cardCanPush, lists, positions } from '../engine/utils';
 import { entries } from '../utils';
 import { Buff } from './buffs';
-import { prints } from './prints';
 
 export type SigilPos = [CardPos, Sigil];
 export type Sigil = keyof typeof SIGILS;
@@ -40,7 +39,7 @@ const SIGILS = {
             play() {
                 this.createEvent('draw', {
                     side: this.side,
-                    card: initCardFromPrint(prints, 'workerAnt'),
+                    card: this.initCard('workerAnt'),
                 });
             },
         },
@@ -54,7 +53,7 @@ const SIGILS = {
             attack() {
                 this.createEvent('draw', {
                     side: this.side,
-                    card: initCardFromPrint(prints, 'bee'),
+                    card: this.initCard('bee'),
                 });
             },
         },
@@ -68,11 +67,11 @@ const SIGILS = {
             play(event) {
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] - 1],
-                    card: initCardFromPrint(prints, 'chime'),
+                    card: this.initCard('chime'),
                 });
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] + 1],
-                    card: initCardFromPrint(prints, 'chime'),
+                    card: this.initCard('chime'),
                 });
             },
         },
@@ -89,7 +88,7 @@ const SIGILS = {
                         if (lanes[lane]) continue;
                         this.createEvent('play', {
                             pos: [side, lane],
-                            card: initCardFromPrint(prints, 'explodeBot'),
+                            card: this.initCard('explodeBot'),
                         });
                     }
                 }
@@ -129,7 +128,6 @@ const SIGILS = {
     chaseAttack: {
         name: 'Burrower',
         description: 'This card will move to any empty space that is attacked by an enemy to block it.',
-
 
         runAt: 'field',
         writers: {
@@ -192,11 +190,11 @@ const SIGILS = {
             play(event) {
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] - 1],
-                    card: initCardFromPrint(prints, 'dam'),
+                    card: this.initCard('dam'),
                 });
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] + 1],
-                    card: initCardFromPrint(prints, 'dam'),
+                    card: this.initCard('dam'),
                 });
             },
         },
@@ -273,7 +271,7 @@ const SIGILS = {
         runAs: 'played',
         cleanup: {
             play() {
-                const card = initCardFromPrint(prints, this.card.print);
+                const card = this.initCard(this.card.print);
                 card.state.sigils = lists.subtract(this.card.state.sigils, ['drawCopy']);
                 this.createEvent('draw', {
                     side: this.side,
@@ -291,7 +289,7 @@ const SIGILS = {
             play() {
                 this.createEvent('draw', {
                     side: this.side,
-                    card: initCardFromPrint(prints, 'rabbit'),
+                    card: this.initCard('rabbit'),
                 });
             },
         },
@@ -311,7 +309,7 @@ const SIGILS = {
 
                 let extraSigils = lists.subtract(this.card.state.sigils, this.cardPrint.sigils ?? []);
                 extraSigils = lists.subtract(extraSigils, ['evolve']);
-                const card = initCardFromPrint(prints, this.cardPrint.evolution);
+                const card = this.initCard(this.cardPrint.evolution);
                 card.state.sigils.push(...extraSigils);
 
                 this.createEvent('transform', {
@@ -348,7 +346,7 @@ const SIGILS = {
 
                 this.createEvent('transform', {
                     pos: this.fieldPos!,
-                    card: initCardFromPrint(prints, evolution),
+                    card: this.initCard(evolution),
                 });
             },
         },
@@ -385,7 +383,7 @@ const SIGILS = {
                     if (!req.choices.includes(res.idx)) throw FightError.create(ErrorType.InvalidAction, 'Cannot draw card that is not in deck');
                     const side = event.pos[0];
                     const printId = this.tick.fight.decks[side][req.deck][res.idx];
-                    const card = initCardFromPrint(prints, printId);
+                    const card = this.initCard(printId);
                     this.createEvent('draw', {
                         side,
                         card,
@@ -474,7 +472,7 @@ const SIGILS = {
                 SIGILS.strafe.cleanup.phase.call(this, event);
                 this.createEvent('play', {
                     pos: this.fieldPos!,
-                    card: initCardFromPrint(prints, 'skeleton'),
+                    card: this.initCard('skeleton'),
                 });
             },
         },
@@ -490,7 +488,7 @@ const SIGILS = {
                 SIGILS.strafe.cleanup.phase.call(this, event);
                 this.createEvent('play', {
                     pos: this.fieldPos!,
-                    card: initCardFromPrint(prints, 'squirrel'),
+                    card: this.initCard('squirrel'),
                 });
             },
         },
@@ -580,7 +578,7 @@ const SIGILS = {
         runAs: 'played',
         readers: {
             perish() {
-                const card = initCardFromPrint(prints, this.card.print);
+                const card = this.initCard(this.card.print);
                 card.state.sigils = this.card.state.sigils;
                 // TODO - Redo this using a card print effect system
                 if (this.card.print === 'ouroboros' && typeof card.state.power === 'number') {
@@ -631,12 +629,12 @@ const SIGILS = {
 
                 const willEmerge = this.card.state.flipped && shouldFlip;
                 transform: if (willEmerge) {
-                    const tentacleCards = Object.entries(prints).filter(([id, card]) => card.traits?.includes('tentacle'));
+                    const tentacleCards = Object.entries(this.prints).filter(([id, card]) => card.traits?.includes('tentacle'));
                     const otherTentacleCards = tentacleCards.filter(([id]) => id !== this.card.print);
                     if (!otherTentacleCards.length) break transform;
 
                     const [tentacleCard] = otherTentacleCards[Math.floor(Math.random() * otherTentacleCards.length)];
-                    const card = initCardFromPrint(prints, tentacleCard);
+                    const card = this.initCard(tentacleCard);
                     card.state.flipped = true;
                     this.createEvent('transform', {
                         pos: this.fieldPos!,
@@ -742,7 +740,7 @@ const SIGILS = {
             perish() {
                 this.createEvent('play', {
                     pos: this.fieldPos!,
-                    card: initCardFromPrint(prints, 'moxO'),
+                    card: this.initCard('moxO'),
                 });
             },
         },
@@ -772,7 +770,7 @@ const SIGILS = {
             play() {
                 const [side] = this.fieldPos!;
                 const moxCount = this.tick.fight.field[side].filter((pos) => {
-                    return pos?.print && prints[pos.print].traits?.includes('mox');
+                    return pos?.print && this.prints[pos.print].traits?.includes('mox');
                 }).length;
                 for (let i = 0; i < moxCount; i++) {
                     this.createEvent('draw', {
@@ -792,7 +790,7 @@ const SIGILS = {
             play() {
                 const [side] = this.fieldPos!;
                 const moxCount = this.tick.fight.field[side].filter((pos) => {
-                    return pos?.print && prints[pos.print].traits?.includes('mox');
+                    return pos?.print && this.prints[pos.print].traits?.includes('mox');
                 }).length;
                 if (moxCount > 0) return;
                 this.createEvent('perish', {
@@ -906,7 +904,7 @@ const SIGILS = {
                 });
                 this.createEvent('draw', {
                     side,
-                    card: initCardFromPrint(prints, 'witheredCorpse'),
+                    card: this.initCard('witheredCorpse'),
                 });
             },
         },

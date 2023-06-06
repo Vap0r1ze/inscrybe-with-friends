@@ -5,13 +5,17 @@ import { Button } from './inputs/Button';
 import { PrintList } from './ui/PrintList';
 import { useGameStore } from '@/hooks/useGameStore';
 import { initCardFromPrint } from '@/lib/engine/Card';
-import { prints } from '@/lib/defs/prints';
+import { rulesets } from '@/lib/defs/prints';
+import { useFight } from '@/hooks/useClientStore';
 
 export interface DevMenuProps {
     id: string
     onClose?: () => void
 }
 export function DevMenu({ id, onClose }: DevMenuProps) {
+    const ruleset = useFight(fight => fight.opts.ruleset);
+    const { prints } = rulesets[ruleset];
+
     const [spawning, setSpawning] = useState(false);
     const onSpawnCard = useCallback((printId: string) => {
         useGameStore.getState().createEvent(id, {
@@ -19,7 +23,7 @@ export function DevMenu({ id, onClose }: DevMenuProps) {
             side: 'player',
             card: initCardFromPrint(prints, printId),
         });
-    }, [id]);
+    }, [id, prints]);
     const onGiveEnergy = () => {
         useGameStore.getState().createEvent(id, {
             type: 'energy',
@@ -43,7 +47,7 @@ export function DevMenu({ id, onClose }: DevMenuProps) {
             <Button onClick={onGiveBone}><Text size={14}>Bones +1</Text></Button>
         </div>
         {spawning && <div className={styles.prints}>
-            <PrintList editable onSelect={onSpawnCard} showNames />
+            <PrintList editable onSelect={onSpawnCard} showNames ruleset={ruleset} />
         </div>}
     </div>;
 }

@@ -1,12 +1,11 @@
 import { pick } from 'lodash';
-import { prints } from '../defs/prints';
+import { rulesets } from '../defs/prints';
 import { Sigil } from '../defs/sigils';
 import { ActionReq, ActionRes } from './Actions';
 import { Card, CardPos, FieldPos, getCardPower } from './Card';
 import { FightTick } from './Tick';
 import { DeckType } from './Deck';
 import { Fight, FightSide, Phase } from './Fight';
-import { clone, includes } from '../utils';
 import { oppositeSide } from './utils';
 
 export type Event<T extends keyof EventMap = keyof EventMap> = T extends keyof EventMap ? (EventMap[T] & { type: T }) : never;
@@ -66,6 +65,7 @@ export const eventSettlers: {
     },
     triggerAttack(fight, event) {},
     attack(fight, event) {
+        const { prints } = rulesets[fight.opts.ruleset];
         event.damage ??= getCardPower(prints, fight, event.from)!;
         const [toSide, toLane] = event.to;
         const target = fight.field[toSide][toLane];
@@ -156,6 +156,7 @@ export const eventSettlers: {
 };
 
 export function isEventInvalid({ fight, host }: FightTick, event: Event) {
+    const { prints } = rulesets[fight.opts.ruleset];
     switch (event.type) {
         case 'attack': {
             const damage = event.damage ?? getCardPower(prints, fight, event.from);
