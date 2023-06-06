@@ -1,5 +1,5 @@
 import { Action, ActionRes, isActionInvalid } from './Actions';
-import { CardPos, getBloods, getMoxes, initCardFromPrint } from './Card';
+import { CardPos, getBloods, getCardPower, getMoxes, initCardFromPrint } from './Card';
 import { Event, eventSettlers, isEventInvalid } from './Events';
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { rulesets } from '../defs/prints';
@@ -11,6 +11,7 @@ import { FightAdapter, FightHost } from './Host';
 import { pick } from 'lodash';
 import { DECK_TYPES } from './Deck';
 import { cardCanPush, positions } from './utils';
+import { MOX_TYPES } from './constants';
 
 export interface FightTick {
     fight: Fight<FightSide>;
@@ -143,8 +144,8 @@ export async function handleAction(tick: FightTick, side: FightSide, action: Act
                 const needs = print.cost.needs;
                 // TODO: better error message
                 if ((getMoxes(tick.fight.field[side]) & needs) !== needs) {
-                    const needsDisplay = Object.entries(print.cost.needs)
-                        .filter(([name, gem]) => needs | gem)
+                    const needsDisplay = Object.entries(MOX_TYPES)
+                        .filter(([name, gem]) => needs & gem)
                         .map(([name, gem]) => name)
                         .join(' + ');
                     throw FightError.create(ErrorType.InsufficientResources, `Requires ${needsDisplay} gem(s)`);
@@ -196,6 +197,7 @@ async function fillEvent(tick: FightTick, event: Event) {
     } else if (event.type === 'attack') {
         const target = tick.fight.field[event.to[0]][event.to[1]];
         if (target?.state.flipped) event.direct = true;
+        event.damage ??= getCardPower(prints, tick.fight, event.from)!;
     } else if (event.type === 'move') {
         const [toSide, toLane] = event.to;
         if (tick.fight.field[toSide][toLane] != null) event.failed = true;

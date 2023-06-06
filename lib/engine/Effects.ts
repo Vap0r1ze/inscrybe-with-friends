@@ -8,6 +8,7 @@ import { positions } from './utils';
 import { ErrorType, FightError } from './Errors';
 import { rulesets } from '../defs/prints';
 import { clone, entries, fromEntries } from '../utils';
+import { array as toposort } from 'toposort';
 
 export type EffectTargets = Partial<Record<Exclude<EffectTarget, 'global'>, CardPos>>;
 export type EffectTarget = 'played' | 'drawn' | 'attackee' | 'opposing' | 'global';
@@ -209,6 +210,15 @@ export function getActiveSigils<T extends keyof ActiveSigils>(
             const card = tick.fight.hands[side][handIdx];
             getActiveSigilsFromCard(card, ['hand', [side, handIdx]], event, targets, activeSigils);
         }
+    }
+    for (const [type, effects] of entries(activeSigils)) {
+        const edges: [SigilPos, SigilPos][] = [];
+        for (const pos1 of effects) {
+            for (const pos2 of effects.filter(pos => sigils[pos[1]].runAfter?.includes(pos1[1]))) {
+                edges.push([pos1, pos2]);
+            }
+        }
+        activeSigils[type] = toposort(effects, edges);
     }
     return activeSigils;
 }

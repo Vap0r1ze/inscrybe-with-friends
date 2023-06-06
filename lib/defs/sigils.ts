@@ -132,7 +132,8 @@ const SIGILS = {
         runAt: 'field',
         writers: {
             attack(event) {
-                if (event.direct) return;
+                // TODO: centralize this logic
+                if (event.direct && !this.card.state.sigils.includes('mightyLeap')) return;
                 if (event.to[0] !== this.side) return;
                 const target = this.getCard(event.to);
                 if (target) return;
@@ -410,7 +411,13 @@ const SIGILS = {
         runAs: 'played',
         cleanup: {
             attack(event) {
-                event.damage!;
+                if (!event.direct) return;
+                for (let i = 0; i < event.damage!; i++) {
+                    this.createEvent('draw', {
+                        side: this.side,
+                        source: 'main',
+                    });
+                }
             },
         },
     },

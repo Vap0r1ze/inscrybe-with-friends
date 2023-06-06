@@ -54,6 +54,8 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
                 // Move away
                 const dx = event.dx * 100;
                 controls.push(animate(el, { x: `${dx}%` }, { duration: animationDurations.push }));
+            } else if (event.type === 'transform' && is(event.pos)) {
+                controls.push(animate(el, { opacity: [1, 0] }, { duration: animationDurations.transform }));
             }
         }
 
@@ -96,6 +98,8 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
                 controls.push(animate(el, {
                     x: ['0%', '10%', '-10%', '0%'],
                 }, { duration: animationDurations.push, ease: 'easeInOut' }));
+            } else if (event.type === 'transform' && is(event.pos)) {
+                controls.push(animate(el, { opacity: [0, 1] }, { duration: animationDurations.transform }));
             }
         }
 
