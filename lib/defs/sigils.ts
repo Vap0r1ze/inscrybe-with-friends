@@ -222,22 +222,26 @@ const SIGILS = {
         description: 'When this card dies, adjacent and opposing cards are dealt 10 damage.',
 
         runAs: 'played',
-        readers: {
+        writers: {
             perish(event) {
                 if (event.cause === 'sac') return;
+                // @ts-ignore
+                if (event[Symbol.for('detonator')]) return;
+                // @ts-ignore
+                event[Symbol.for('detonator')] = true;
                 const opposing = positions.opposing(event.pos);
                 const [side, lane] = event.pos;
-                this.createEvent('shoot', {
-                    from: event.pos,
-                    to: opposing,
-                    damage: 5,
-                });
-                this.createEvent('shoot', {
+                this.prependEvent('shoot', {
                     from: event.pos,
                     to: [side, lane - 1],
                     damage: 5,
                 });
-                this.createEvent('shoot', {
+                this.prependEvent('shoot', {
+                    from: event.pos,
+                    to: opposing,
+                    damage: 5,
+                });
+                this.prependEvent('shoot', {
                     from: event.pos,
                     to: [side, lane + 1],
                     damage: 5,

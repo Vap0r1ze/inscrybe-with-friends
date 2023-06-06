@@ -1,0 +1,18 @@
+.slot {
+    position: absolute;
+    pointer-events: none;
+    width: 44em;
+    height: 58em;
+    left: 5em;
+    bottom: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.projectile {
+    background: var(--ui);
+    border: 1em solid var(--flow);
+    height: 4em;
+    width: 4em;
+}

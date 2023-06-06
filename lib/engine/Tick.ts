@@ -10,7 +10,7 @@ import { clone } from '../utils';
 import { FightAdapter, FightHost } from './Host';
 import { pick } from 'lodash';
 import { DECK_TYPES } from './Deck';
-import { cardCanPush } from './utils';
+import { cardCanPush, positions } from './utils';
 
 export interface FightTick {
     fight: Fight<FightSide>;
@@ -249,6 +249,8 @@ async function settleEvents(tick: FightTick) {
             throw FightError.create(ErrorType.InvalidEvent);
         }
         if (signals.prepend.length) {
+            // @ts-ignore
+            for (const key of Object.getOwnPropertySymbols(event)) originalEvent[key] = event[key];
             tick.queue.unshift(...signals.prepend, originalEvent);
             tick.logger?.debug(`Delayed by ${signals.prepend.length} events: ${JSON.stringify(signals.prepend.map(e => e.type))}`);
             continue;
@@ -307,8 +309,9 @@ async function settleEvents(tick: FightTick) {
             for (const side of FIGHT_SIDES) {
                 for (const [lane, card] of tick.fight.field[side].entries()) {
                     if (card?.state.health === 0) {
+                        if (tick.queue.some(event => event.type === 'perish' && positions.isSameField(event.pos, [side, lane]))) continue;
                         tick.queue.unshift({ type: 'perish', pos: [side, lane], cause: 'attack' });
-                        tick.logger?.debug(`Postponing for death at [${side}, ${lane}]`);
+                        tick.logger?.debug(`Triggered death at [${side}, ${lane}]`);
                     }
                 }
             }

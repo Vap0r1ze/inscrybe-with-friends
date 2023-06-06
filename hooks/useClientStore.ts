@@ -278,7 +278,7 @@ export const animationDurations: Record<Event['type'], number> = {
     play: 0.25,
     request: 0.1,
     response: 0.1,
-    shoot: 1,
+    shoot: 0.5,
     transform: 1,
     triggerAttack: 0.1,
     stats: 0.1,

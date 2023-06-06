@@ -166,6 +166,12 @@ export function isEventInvalid({ fight, host }: FightTick, event: Event) {
             if (event.from[1] < 0 || event.from[1] >= fight.opts.lanes) return true;
             break;
         }
+        case 'shoot': {
+            if (!fight.field[event.from[0]][event.from[1]]) return true;
+            if (!fight.field[event.to[0]][event.to[1]]) return true;
+            if (fight.field[event.to[0]][event.to[1]]?.state.health === 0) return true;
+            break;
+        }
         case 'play': {
             const [side, lane] = event.pos;
             if (fight.field[side][lane] != null) return true;

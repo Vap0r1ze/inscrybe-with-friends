@@ -15,6 +15,7 @@ import { FIGHT_SIDES } from '@/lib/engine/Fight';
 import { fromEntries } from '@/lib/utils';
 import { NSlice } from '../ui/NSlice';
 import { useBattleTheme } from '@/hooks/useBattleTheme';
+import { Projectiles } from './animations/Projectiles';
 
 export const Board = memo(function Board() {
     const battleTheme = useBattleTheme();
@@ -193,5 +194,6 @@ export const Board = memo(function Board() {
                 ))}
             </div>}
         </div>
+        <Projectiles />
     </div>;
 });
