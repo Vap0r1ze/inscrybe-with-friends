@@ -7,7 +7,7 @@ import { useStore } from '@/hooks/useStore';
 import { PrintList } from '@/components/ui/PrintList';
 import { AssetButton } from '@/components/inputs/AssetButton';
 import { Select } from '@/components/inputs/Select';
-import { Text } from '@/components/Text';
+import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/inputs/Button';
 import { getSideDeckPrintIds } from '@/lib/engine/Card';
 import { Box } from '@/components/ui/Box';

@@ -1,0 +1,63 @@
+.backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(0, 0, 0, .5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.rulebook {
+    background: var(--ui);
+    color: var(--flow-light);
+    border: 1em solid var(--flow);
+    border-bottom-width: 3em;
+    margin-bottom: 12em;
+    padding: 4em;
+    width: 350em;
+
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "display title" "display description";
+}
+
+.rulebook.missing {
+    display: flex;
+    justify-content: center;
+}
+
+.display {
+    grid-area: display;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 8em 0 4em;
+}
+
+.title {
+    grid-area: title;
+    color: var(--flow);
+}
+
+.description {
+    grid-area: description;
+}
+
+.link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.link:hover {
+    text-decoration: none;
+}
+
+.value {
+    color: var(--sapphire-dark);
+}
+
+.missing {
+    color: var(--blood-dark);
+}

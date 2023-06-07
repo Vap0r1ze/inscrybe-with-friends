@@ -1,6 +1,6 @@
 import { DevMenu } from '@/components/DevMenu';
 import styles from './playtest.module.css';
-import { Text } from '@/components/Text';
+import { Text } from '@/components/ui/Text';
 import { Client } from '@/components/client/Client';
 import { Button } from '@/components/inputs/Button';
 import { Select } from '@/components/inputs/Select';
@@ -160,8 +160,8 @@ function PlayTestPage() {
                 disabled={Object.values(selectedDecks).some(deck => !deck)}
                 onClick={onFightStart}
             ><Text>Start Fight</Text></Button>
-        </div> : <div style={{ position: 'relative' }}>
-            <Box>
+        </div> : <div className={styles.gameRoot} style={{ position: 'relative' }}>
+            <Box className={styles.controlsBox}>
                 <div className={styles.controls}>
                     <Button onClick={onKillGame}><Text>Kill Game</Text></Button>
                     <Button onClick={onSwitchSide}><Text>Switch Side</Text></Button>

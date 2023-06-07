@@ -36,7 +36,7 @@ const BUFFS = {
             const targetCard = fight.field[targetSide][targetLane];
             if (targetSide !== source[0]) return null;
             const targetPrint = targetCard ? prints[targetCard.print] : null;
-            if (targetPrint?.traits?.includes('mox')) return { power: 1 };
+            if (targetPrint?.tribes?.includes('mox')) return { power: 1 };
             return null;
         },
     },

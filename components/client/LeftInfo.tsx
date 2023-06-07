@@ -5,6 +5,7 @@ import { useClientActions, useClientProp, useFight } from '@/hooks/useClientStor
 import { memo } from 'react';
 import { Sprite } from '../sprites/Sprite';
 import { useBattleTheme } from '@/hooks/useBattleTheme';
+import { triggerSound } from '@/hooks/useAudio';
 
 export const LeftInfo = memo(function LeftInfo() {
     const battleTheme = useBattleTheme();
@@ -17,6 +18,7 @@ export const LeftInfo = memo(function LeftInfo() {
     };
     const onHammerToggle = () => {
         setHammering(!hammering);
+        if (!hammering) triggerSound('select');
     };
 
     return <div className={styles.left}>

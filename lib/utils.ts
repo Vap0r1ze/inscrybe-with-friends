@@ -22,6 +22,18 @@ export function clone<T>(obj: T) {
     return JSON.parse(JSON.stringify(obj)) as T;
 }
 
+export function intersperse<T, S>(list: T[], separator: S): (T | S)[] {
+    return list.flatMap((item, i) => i > 0 ? [separator, item] : [item]);
+}
+
+export function join<T, J = T>(lists: T[][], joiner: J): (T | J)[] {
+    return lists.flatMap((list, i) => i > 0 ? [joiner, ...list] : list);
+}
+
+export function random<T>(list: T[]) {
+    return list[Math.floor(Math.random() * list.length)];
+}
+
 export function* namespacedIndexes<T>(list: T[], namespaceFn: (obj: T) => string) {
     const namespaces = new Map<string, number>();
 

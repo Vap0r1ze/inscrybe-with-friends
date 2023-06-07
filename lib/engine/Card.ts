@@ -3,6 +3,7 @@ import { positions } from './utils';
 import { Sigil, SigilParamMap, sigilInfos } from '../defs/sigils';
 import { buffs } from '../defs/buffs';
 import { MoxType } from './constants';
+import { Trait } from '../defs/traits';
 
 export type SpecialStat =
     | 'ants'
@@ -26,11 +27,11 @@ export type Cost = {
     needs: number;
 };
 
-export interface Ruleset {
+export interface Ruleset<Strict = false> {
     name: string;
     prints: Record<string, Readonly<CardPrint>>;
     sideDecks: Record<string, Readonly<SideDeck>>;
-    sigilParams: OmitNever<SigilParamMap>;
+    sigilParams: Strict extends true ? OmitNever<SigilParamMap> : Record<string, SigilParamMap[keyof SigilParamMap][number][]>;
 }
 export interface SideDeck {
     name: string;
@@ -42,7 +43,7 @@ export function getSideDeckPrintIds(sideDeck: SideDeck): string[] {
     return ids;
 };
 
-export type Trait = 'ant' | 'insect' | 'canine' | 'avian' | 'hooved' | 'reptile' | 'rodent' | 'mox' | 'bell' | 'tentacle';
+export type Tribe = 'ant' | 'insect' | 'canine' | 'avian' | 'hooved' | 'reptile' | 'rodent' | 'mox' | 'bell' | 'tentacle';
 export interface CardPrint {
     name: string;
     desc?: string;
@@ -59,9 +60,10 @@ export interface CardPrint {
     power: Stat;
     cost?: Cost;
     noSac?: boolean;
-    traits?: Trait[];
+    tribes?: Tribe[];
 
     sigils?: Sigil[];
+    traits?: Trait[];
 
     evolution?: string;
 }
@@ -110,7 +112,7 @@ export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'pl
 
     // Base damage
     if (card.state.power === 'ants') {
-        const antCount = fight.field[side].filter(card => card ? prints[card.print].traits?.includes('ant') : false).length;
+        const antCount = fight.field[side].filter(card => card ? prints[card.print].tribes?.includes('ant') : false).length;
         power += Math.min(2, antCount);
     } else if (card.state.power === 'hand') {
         power += fight.players[side].handSize;
@@ -118,8 +120,8 @@ export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'pl
         power += fight.opts.lanes - lane;
         const left = fight.field[side][lane - 1];
         const right = fight.field[side][lane + 1];
-        if (left && prints[left.print].traits?.includes('bell')) power++;
-        if (right && prints[right.print].traits?.includes('bell')) power++;
+        if (left && prints[left.print].tribes?.includes('bell')) power++;
+        if (right && prints[right.print].tribes?.includes('bell')) power++;
     } else if (card.state.power === 'mirror') {
         const opposingPos = positions.opposing(pos);
         const opposing = fight.field[opposingPos[0]][opposingPos[1]];

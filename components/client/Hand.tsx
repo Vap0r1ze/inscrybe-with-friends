@@ -55,11 +55,11 @@ export const Hand = memo(function Hand() {
         })}>
             <div className={styles.deck} data-hover-target onClick={() => draw('main')}>
                 <Sprite sheet={Spritesheets.cards} name="common_back" />
-                <HoverBorder color="#d7e2a3" />
+                <HoverBorder color="--ui" />
             </div>
             <div className={styles.deck} data-hover-target onClick={() => draw('side')}>
                 <Sprite sheet={Spritesheets.cards} name="common_back" />
-                <HoverBorder color="#d7e2a3" />
+                <HoverBorder color="--ui" />
             </div>
         </div>
         {choices && (

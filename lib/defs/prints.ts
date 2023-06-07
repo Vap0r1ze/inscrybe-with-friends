@@ -1,5 +1,6 @@
 import { CardPrint, Ruleset, SideDeck } from '../engine/Card';
 import { MoxType } from '../engine/constants';
+import { sigilInfos } from './sigils';
 
 const RULESETS = {
     imfComp: {
@@ -127,7 +128,7 @@ const RULESETS = {
             chime: {
                 name: 'Chime',
                 banned: true,
-                traits: ['bell'],
+                tribes: ['bell'],
                 power: 0,
                 health: 1,
                 noSac: true,
@@ -427,7 +428,7 @@ const RULESETS = {
             bellTentacle: {
                 name: 'Bell Tentacle',
                 banned: true,
-                traits: ['tentacle'],
+                tribes: ['tentacle'],
                 power: 'bells',
                 health: 3,
                 cost: { type: 'blood', amount: 2 },
@@ -436,7 +437,7 @@ const RULESETS = {
             handTentacle: {
                 name: 'Hand Tentacle',
                 banned: true,
-                traits: ['tentacle'],
+                tribes: ['tentacle'],
                 power: 'hand',
                 health: 1,
                 cost: { type: 'blood', amount: 1 },
@@ -445,7 +446,7 @@ const RULESETS = {
             mirrorTentacle: {
                 name: 'Mirror Tentacle',
                 banned: true,
-                traits: ['tentacle'],
+                tribes: ['tentacle'],
                 power: 'mirror',
                 health: 3,
                 cost: { type: 'blood', amount: 1 },
@@ -501,14 +502,14 @@ const RULESETS = {
             },
             workerAnt: {
                 name: 'Worker Ant',
-                traits: ['ant'],
+                tribes: ['ant'],
                 power: 'ants',
                 health: 2,
                 cost: { type: 'blood', amount: 1 },
             },
             queenAnt: {
                 name: 'Ant Queen',
-                traits: ['ant'],
+                tribes: ['ant'],
                 power: 'ants',
                 health: 3,
                 cost: { type: 'blood', amount: 2 },
@@ -516,7 +517,7 @@ const RULESETS = {
             },
             flyingAnt: {
                 name: 'Flying Ant',
-                traits: ['ant'],
+                tribes: ['ant'],
                 power: 'ants',
                 health: 1,
                 cost: { type: 'blood', amount: 1 },
@@ -658,7 +659,7 @@ const RULESETS = {
                 health: 3,
                 cost: { type: 'energy', amount: 3 },
                 sigils: ['gainGemAll'],
-                traits: ['mox'],
+                tribes: ['mox'],
             },
             thickBot: {
                 name: 'Thick Droid',
@@ -964,7 +965,7 @@ const RULESETS = {
                 health: 1,
                 noSac: true,
                 sigils: ['gainGemGreen'],
-                traits: ['mox'],
+                tribes: ['mox'],
             },
             moxO: {
                 name: 'Ruby Mox',
@@ -974,7 +975,7 @@ const RULESETS = {
                 health: 1,
                 noSac: true,
                 sigils: ['gainGemOrange'],
-                traits: ['mox'],
+                tribes: ['mox'],
             },
             moxB: {
                 name: 'Sapphire Mox',
@@ -984,7 +985,7 @@ const RULESETS = {
                 health: 1,
                 noSac: true,
                 sigils: ['gainGemBlue'],
-                traits: ['mox'],
+                tribes: ['mox'],
             },
             moxAll: {
                 name: 'Magnus Mox',
@@ -995,7 +996,7 @@ const RULESETS = {
                 health: 2,
                 noSac: true,
                 sigils: ['gainGemAll'],
-                traits: ['mox'],
+                tribes: ['mox'],
             },
             muscleMage: {
                 name: 'Muscle Mage',
@@ -1084,7 +1085,7 @@ const RULESETS = {
             // TODO: add sigiled vessels
         },
         sigilParams: {
-            antSpawner: ['ant'],
+            antSpawner: ['workerAnt'],
             beesWithin: ['bee'],
             bellist: ['chime'],
             bombSpewer: ['explodeBot'],
@@ -1102,12 +1103,12 @@ const RULESETS = {
             activatedStatsUp: [3, 1],
         },
     },
-} satisfies Record<string, Ruleset>;
+} satisfies Record<string, Ruleset<true>>;
 
 export const rulesets: Record<string, Ruleset> = RULESETS;
 
-// Check validity of references
-for (const [, { prints, sideDecks }] of Object.entries(rulesets)) {
+// Check validity of references & fill in defaults
+for (const [ruleset, { prints, sideDecks, sigilParams }] of Object.entries(rulesets)) {
     for (const [id, card] of Object.entries(prints) as [string, CardPrint][]) {
         if (card.evolution && !Object.hasOwn(prints, card.evolution))
             throw new Error(`Card ${card.name} references invalid evolution ${card.evolution}`);
@@ -1122,5 +1123,11 @@ for (const [, { prints, sideDecks }] of Object.entries(rulesets)) {
     for (const [, sideDeck] of Object.entries(sideDecks) as [string, SideDeck][]) {
         if (sideDeck.repeat && !Object.hasOwn(prints, sideDeck.repeat[1]))
             throw new Error(`Side deck ${sideDeck.name} references invalid print ${sideDeck.repeat[1]}`);
+    }
+    for (const [sigil, params] of Object.entries(sigilParams)) {
+        for (let i = 0; i < params.length; i++) {
+            if (sigilInfos[sigil].params?.[i] === 'print' && !prints[params[i]])
+                throw new Error(`Params for ${sigil} in ${ruleset} references invalid print ${params[i]}`);
+        }
     }
 }

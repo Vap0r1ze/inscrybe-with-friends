@@ -14,7 +14,7 @@ export type PerishCause = 'attack' | 'sac' | 'transient' | 'hammer' | 'death-tou
 
 type EventMap = {
     phase: { phase: Phase; side?: FightSide };
-    energy: { side: FightSide, amount: number };
+    energy: { side: FightSide, amount: number; total?: number };
     energySpend: { side: FightSide, amount: number };
     bones: { side: FightSide; amount: number };
     draw: { side: FightSide; card?: Card; source?: DeckType };
@@ -47,6 +47,7 @@ export const eventSettlers: {
     energy(fight, event) {
         const { energy } = fight.players[event.side];
         energy[0] = Math.min(6, energy[0] + event.amount);
+        if (event.total) energy[1] = Math.min(6, energy[1] + event.total);
         energy[1] = Math.max(energy[1], energy[0]);
     },
     energySpend(fight, event) {

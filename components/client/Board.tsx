@@ -119,7 +119,7 @@ export const Board = memo(function Board() {
                 <div key={i} data-hover-target className={styles.cardSlot} onClick={() => onTryPlay(i)}>
                     <Sprite className={styles.cardSlotBase} sheet={battleTheme} name="slot" />
                     <Sprite className={styles.cardSlotHover} sheet={battleTheme} name="slotHover" />
-                    {canPlay && <HoverBorder color="#d7e2a3" />}
+                    {canPlay && <HoverBorder color="--ui" />}
                 </div>
             ))}
             <div className={styles.played} data-can-activate={(isPlayTurn && !pending) || null}>
@@ -138,7 +138,7 @@ export const Board = memo(function Board() {
                                 </PlayedCard>
                             )}
                         </AnimatePresence>
-                        {card && hammering && <HoverBorder color="#d7e2a3" />}
+                        {card && hammering && <HoverBorder color="--ui" />}
                     </div>
                 ))}
             </div>
@@ -155,7 +155,7 @@ export const Board = memo(function Board() {
                         onClick={() => toggleSac(i)}
                     >
                         <Sprite className={styles.sac} sheet={Spritesheets.cards} name="sac" />
-                        {laneCanSac[i] && <HoverBorder color="#d7e2a3" />}
+                        {laneCanSac[i] && <HoverBorder color="--ui" />}
                     </div>
                 ))}
             </div>}

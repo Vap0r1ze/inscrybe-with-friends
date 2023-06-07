@@ -11,6 +11,7 @@
     transform-style: preserve-3d;
 
     inset: 0;
+    pointer-events: none;
 }
 
 .content.flipped {
@@ -42,12 +43,14 @@
     position: absolute;
     top: 2em;
     left: 2em;
+    pointer-events: auto;
 }
 
 .cost {
     position: absolute;
     top: 1em;
     right: 1em;
+    pointer-events: auto;
 }
 
 .sigils {
@@ -62,6 +65,7 @@
 .sigil {
     transition: transform var(--event-move-duration, 0.5s) ease-in-out;
     cursor: help;
+    pointer-events: auto;
 }
 
 .sigil.backward {
@@ -87,6 +91,10 @@
     left: 3em;
     right: 3em;
     bottom: 3em;
+}
+
+.stat {
+    pointer-events: auto;
 }
 
 .dynamicStat {

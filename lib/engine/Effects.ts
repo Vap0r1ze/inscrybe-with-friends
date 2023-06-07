@@ -19,13 +19,13 @@ export type EffectTriggers<S extends Sigil = never> = {
             onResponse(this: EffectContext, event: Event<T>, res: ActionRes, req: ActionReq): Promise<void>;
         };
     };
-    writers?: {
+    preSettleWrite?: {
         [T in Event['type']]?: (this: CardContext, event: Event<T>, params: SigilParamMap[S]) => void;
     };
-    readers?: {
+    preSettleRead?: {
         [T in Event['type']]?: (this: ReaderCardContext, event: Readonly<Event<T>>, params: SigilParamMap[S]) => void;
     };
-    cleanup?: {
+    postSettle?: {
         // TODO: type as Readonly<SettledEvent<T>>
         [T in Event['type']]?: (this: ReaderCardContext, event: Readonly<Event<T>>, params: SigilParamMap[S]) => void;
     };

@@ -7,6 +7,7 @@ import { useGameStore } from './useGameStore';
 import { Action, ActionRes } from '@/lib/engine/Actions';
 import { clone } from '@/lib/utils';
 import { ErrorType, FightError } from '@/lib/engine/Errors';
+import { triggerActionSound, triggerEventSound } from './useAudio';
 
 export const ClientContext = createContext<string | null>(null);
 
@@ -89,6 +90,7 @@ export const useClientStore = create<FightStore>((set, get) => ({
         const client = get().clients[id];
         if (!client) return;
 
+        triggerEventSound(event);
         commitEvents(client, [clone(event)]);
         useClientStore.getState().setClient(id, client => client);
     },
@@ -109,6 +111,7 @@ export function useClient<T = FightClient>(throwIfMissing?: boolean, selector: (
     });
 }
 
+type ErrorHandlers = Partial<Record<ErrorType, (error: FightError) => Promise<void>>>;
 export function useClientActions() {
     const id = useContext(ClientContext);
     if (!id) throw new Error('Missing client context!');
@@ -117,7 +120,7 @@ export function useClientActions() {
     const send = useCallback(<T extends 'action' | 'response'>(
         type: T,
         data: Data<T>,
-        handlers?: Partial<Record<ErrorType, (error: FightError) => Promise<void>>>,
+        handlers?: ErrorHandlers,
     ) => {
         if (useClientStore.getState().clients[id]?.pending) return;
         useClientStore.getState().setClient(id, client => ({ ...client, pending: true }));
@@ -134,7 +137,7 @@ export function useClientActions() {
         const promise = type === 'action'
             ? useGameStore.getState().sendAction(id, data as Action)
             : useGameStore.getState().sendResponse(id, data as ActionRes);
-        promise.then(() => {
+        return promise.then(() => {
             console.log(
                 '%s<%o> to %o took %oms',
                 type === 'action' ? 'Action' : 'Response',
@@ -142,6 +145,7 @@ export function useClientActions() {
                 id,
                 Date.now() - startTime
             );
+            if (type === 'action') triggerActionSound(data as Action);
         }).catch(error => {
             if (error instanceof FightError) {
                 const handler = handlers?.[error.type];
@@ -160,11 +164,11 @@ export function useClientActions() {
             useClientStore.getState().setClient(id, client => ({ ...client, pending: false }));
         });
     }, [id]);
-    const sendAction = useCallback(<T extends Action['type']>(type: T, data: Omit<Action<T>, 'type'>) => {
-        return send('action', { type, ...data } as unknown as Action);
+    const sendAction = useCallback(<T extends Action['type']>(type: T, data: Omit<Action<T>, 'type'>, handlers?: ErrorHandlers) => {
+        return send('action', { type, ...data } as unknown as Action, handlers);
     }, [send]);
-    const sendResponse = useCallback(<T extends ActionRes['type']>(type: T, data: Omit<ActionRes<T>, 'type'>) => {
-        return send('response', { type, ...data } as unknown as ActionRes);
+    const sendResponse = useCallback(<T extends ActionRes['type']>(type: T, data: Omit<ActionRes<T>, 'type'>, handlers?: ErrorHandlers) => {
+        return send('response', { type, ...data } as unknown as ActionRes, handlers);
     }, [send]);
     return { sendAction, sendResponse };
 }
@@ -265,7 +269,7 @@ export const animationDurations: Record<Event['type'], number> = {
     activate: 0.1,
     attack: 0.5,
     bones: 0.1,
-    draw: 0.25,
+    draw: 0.2,
     energy: 0.1,
     energySpend: 0.1,
     flip: 0.5,
@@ -273,14 +277,14 @@ export const animationDurations: Record<Event['type'], number> = {
     move: 0.5,
     push: 0.5,
     newSigil: 1,
-    perish: 0.5,
-    phase: 0.1,
-    play: 0.25,
+    perish: 0.2,
+    phase: 0,
+    play: 0.2,
     request: 0.1,
     response: 0.1,
     shoot: 0.5,
     transform: 1,
-    triggerAttack: 0.1,
+    triggerAttack: 0,
     stats: 0.1,
     mustPlay: 0.1,
 };

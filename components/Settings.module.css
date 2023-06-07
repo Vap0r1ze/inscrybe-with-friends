@@ -1,0 +1,27 @@
+.modalButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--ui);
+    border: 1em solid var(--flow);
+    margin: 4em;
+}
+
+.backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(0, 0, 0, .5);
+    display: flex;
+    justify-content: center;
+}
+
+.modal {
+    margin-top: 16em;
+    width: 160em;
+}
+
+.volume {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}

@@ -3,7 +3,7 @@ import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { ClientContext, animationDurations, useClientStore } from '@/hooks/useClientStore';
 import { CSSProperties, memo } from 'react';
 import { Box } from '../ui/Box';
-import { Text } from '../Text';
+import { Text } from '../ui/Text';
 import { Board } from './Board';
 import { LeftInfo } from './LeftInfo';
 import { RightInfo } from './RightInfo';

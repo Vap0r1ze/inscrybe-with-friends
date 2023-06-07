@@ -1,6 +1,6 @@
 import styles from './DevMenu.module.css';
 import { useCallback, useState } from 'react';
-import { Text } from './Text';
+import { Text } from './ui/Text';
 import { Button } from './inputs/Button';
 import { PrintList } from './ui/PrintList';
 import { useGameStore } from '@/hooks/useGameStore';

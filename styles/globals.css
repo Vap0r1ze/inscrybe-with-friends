@@ -5,15 +5,26 @@
 
 :root {
     --max-width: 1100px;
+    --font-gbc: Marksman;
+
     --ui-rgb: 215, 226, 163;
     --ui: rgb(var(--ui-rgb));
     --ui-dark: #727c5e;
     --ui-darker: #6d775a;
-    --flow-lighter: #1e1f27;
-    --flow-light: #191d17;
+    --flow-light: #051b2e;
     --flow: #020a11;
     --flow-dark: #010508;
-    --font-gbc: Marksman;
+
+    --sapphire: #3fa273;
+    --sapphire-dark: #106864;
+    --emerald: #9cbf55;
+    --emerald-dark: #619532;
+    --ruby: #f68125;
+    --ruby-dark: #be4a2a;
+    --energy: #74ffdc;
+    --energy-dark: #4cb4a0;
+    --blood: #ae3d2d;
+    --blood-dark: #8e1533;
 }
 
 @media (prefers-color-scheme: dark) {

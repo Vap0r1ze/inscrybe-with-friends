@@ -87,7 +87,7 @@ export const CardSprite = memo(function CardSprite({
                         [styles.upsideDown]: isOpposing && verticalSigils.includes(sigil),
                     })} style={{
                         marginLeft: `${(print.sigils!.length % 2) ? 0 : 1}em`,
-                    }} onContextMenu={() => openInRulebook(sigilInfos[sigil].name)}>
+                    }} onContextMenu={() => openInRulebook(`sigil:${sigil}`)}>
                         {sigil.startsWith('activated')
                             ? <SigilButton sigil={sigil} onClick={() => onActivate?.(sigil)} />
                             : <Sprite sheet={Spritesheets.sigils} name={sigil} />}
@@ -97,10 +97,10 @@ export const CardSprite = memo(function CardSprite({
                     <CostSprite cost={print.cost} />
                 </div>}
                 <div className={styles.stats}>
-                    <StatSprite className={classNames({
+                    <StatSprite className={classNames(styles.stat, {
                         [styles.dynamicStat]: power !== staticPower,
                     })} stat={power} />
-                    <StatSprite className={classNames({
+                    <StatSprite className={classNames(styles.stat, {
                         [styles.warningStat]: health < print.health,
                     })} stat={health} />
                 </div>

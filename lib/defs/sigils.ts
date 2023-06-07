@@ -56,7 +56,7 @@ const SIGIL_INFOS = {
     },
     boneDigger: {
         name: 'Bone Digger',
-        description: 'At the end of the owner\'s turn, this card generates {0} [Bone].',
+        description: 'At the end of the owner\'s turn, this card generates {0} [bones|Bone].',
         params: ['number'],
     },
     boneless: {
@@ -115,7 +115,7 @@ const SIGIL_INFOS = {
     },
     fourBones: {
         name: 'Bone King',
-        description: 'When this card dies, 4 Bones are awarded instead of 1.',
+        description: 'When this card dies, 4 [bones|Bones] are awarded instead of 1.',
     },
     frozen: {
         name: 'Frozen Away',
@@ -123,7 +123,7 @@ const SIGIL_INFOS = {
     },
     gainBattery: {
         name: 'Battery Bearer',
-        description: 'When this card is played, you gain an Energy Cell.',
+        description: 'When this card is played, you gain an [energy|Energy Cell].',
     },
     hoarder: {
         name: 'Hoarder',
@@ -131,7 +131,7 @@ const SIGIL_INFOS = {
     },
     leader: {
         name: 'Leader',
-        description: 'Creatures adjacent to this card gain 1 Power.',
+        description: 'Creatures adjacent to this card gain 1 [power|Power].',
         buffs: ['incrAdjPower'],
     },
     looter: {
@@ -160,7 +160,7 @@ const SIGIL_INFOS = {
     },
     stinky: {
         name: 'Stinky',
-        description: 'The creature opposing this card loses 1 Power.',
+        description: 'The creature opposing this card loses 1 [power|Power].',
         buffs: ['decrOppPower'],
     },
     stone: {
@@ -187,7 +187,7 @@ const SIGIL_INFOS = {
     },
     threeSacs: {
         name: 'Worthy Sacrifice',
-        description: 'This card counts as 3 Blood rather than 1 Blood when sacrificed.',
+        description: 'This card counts as 3 [blood|Blood] rather than 1 [blood|Blood] when sacrificed.',
     },
     tristrike: {
         name: 'Trifurcated Strike',
@@ -211,78 +211,78 @@ const SIGIL_INFOS = {
     },
     waterborneTentacle: {
         name: 'Kraken Waterborne',
-        description: 'Same as Waterborne, except that this card becomes a Tentacle card when it emerges.',
+        description: 'Same as [sigil:waterborne|Waterborne], except that this card becomes a [tribe:Tentacle|Tentacle] card when it emerges.',
     },
 
     // Mox
     buffGems: {
         name: 'Gem Animator',
-        description: 'Mox cards on the owner\'s side of the board gain 1 Power.',
+        description: '[tribe:mox|Mox] cards on the owner\'s side of the board gain 1 Power.',
         buffs: ['incrMoxPower'],
     },
     dropRubyOnDeath: {
         name: 'Ruby Heart',
-        description: 'When this card perishes, a Ruby Mox replaces it.',
+        description: 'When this card perishes, a [print:moxO|Ruby Mox] replaces it.',
     },
     gainGemAll: {
         name: 'Great Mox',
-        description: 'While this card is on the board, it provides all 3 Gems to its owner.',
+        description: 'While this card is on the board, it provides all 3 [mox|Gems] to its owner.',
     },
     gainGemGreen: {
         name: 'Green Mox',
-        description: 'While this card is on the board, it provides a Green Gem.',
+        description: 'While this card is on the board, it provides a Green [mox|Gem].',
     },
     gainGemOrange: {
         name: 'Orange Mox',
-        description: 'While this card is on the board, it provides an Orange Gem.',
+        description: 'While this card is on the board, it provides an Orange [mox|Gem].',
     },
     gainGemBlue: {
         name: 'Blue Mox',
-        description: 'While this card is on the board, it provides a Blue Gem.',
+        description: 'While this card is on the board, it provides a Blue [mox|Gem].',
     },
     gemsDraw: {
-        name: 'Mental Gymnastics',
-        description: 'When this card is played, you draw cards equal to the amount of your Mox cards played.',
+        name: 'Mental Gemnastics',
+        description: 'When this card is played, you draw cards equal to the amount of your [tribe:mox|Mox] cards played.',
     },
     gemDependant: {
         name: 'Gem Dependant',
-        description: 'If this card\'s owner controls no Mox cards, this card perishes.',
+        description: 'If this card\'s owner controls no [tribe:mox|Mox] cards, this card perishes.',
     },
 
     // Buttons
     activatedStatsUp: {
         name: 'Enlarge',
-        description: '[Activate]: Pay {0} [Bones] to increase the [Power] and [Health] of this card by {1}.',
+        description: '[activate|Activate]: Pay {0} [bones|Bones] to increase the [power|Power] and [health|Health] of this card by {1}.',
         params: ['number', 'number'],
     },
     activatedStatsUpEnergy: {
         name: 'Stimulate',
-        description: '[Activate]: Pay {0} [Energy] to increase the [Power] and [Health] of this card by {1}.',
+        description: '[activate|Activate]: Pay {0} [energy|Energy] to increase the [power|Power] and [health|Health] of this card by {1}.',
         params: ['number', 'number'],
     },
     activatedEnergyToBones: {
         name: 'Bonehorn',
-        description: '[Activate]: Pay {0} [Energy] to gain {1} [Bone].',
+        description: '[activate|Activate]: Pay {0} [energy|Energy] to gain {1} [bones|Bone].',
         params: ['number', 'number'],
     },
     activatedDiceRollEnergy: {
         name: 'Power Dice',
-        description: '[Activate]: Pay {0} [Energy] to set the [Power] of this card randomly between 1 and 6.',
+        description: '[activate|Activate]: Pay {0} [energy|Energy] to set the [power|Power] of this card randomly between 1 and 6.',
         params: ['number'],
     },
     activatedDrawSkeleton: {
         name: 'Disentomb',
-        description: '[Activate]: Pay {0} [Bone] to create a(n) {1} in your hand.',
+        description: '[activate|Activate]: Pay {0} [bones|Bone] to create a(n) {1} in your hand.',
         params: ['number', 'print'],
     },
     activatedSacrificeDraw: {
         name: 'True Scholar',
-        description: '[Activate]: If you have a Blue gem, destroy this card to draw 3 cards.',
+        description: '[activate|Activate]: If you have a Blue [mox|gem], destroy this card to draw 3 cards.',
         params: ['number'],
     },
     activatedDealDamage: {
         name: 'Energy Gun',
-        description: '[Activate]: Pay {0} [Energy] to deal {1} damage to the space across from this card.',
+        description: '[activate|Activate]: Pay {0} [energy|Energy] to deal {1} damage to the space across from this card.',
         params: ['number', 'number'],
     },
 
@@ -296,13 +296,13 @@ const SIGIL_INFOS = {
 const SIGIL_EFFECTS = {
     airborne: {
         runAs: 'played',
-        writers: {
+        preSettleWrite: {
             attack(event) { event.direct = true; },
         },
     },
     antSpawner: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             play(event, [print]) {
                 this.createEvent('draw', {
                     side: this.side,
@@ -313,7 +313,7 @@ const SIGIL_EFFECTS = {
     },
     beesWithin: {
         runAs: 'attackee',
-        readers: {
+        preSettleRead: {
             attack(event, [print]) {
                 this.createEvent('draw', {
                     side: this.side,
@@ -324,7 +324,7 @@ const SIGIL_EFFECTS = {
     },
     bellist: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             play(event, [print]) {
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] - 1],
@@ -339,7 +339,7 @@ const SIGIL_EFFECTS = {
     },
     bombSpewer: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             play(event, [print]) {
                 for (const [side, lanes] of entries(this.tick.fight.field)) {
                     for (let lane = 0; lane < lanes.length; lane++) {
@@ -355,7 +355,7 @@ const SIGIL_EFFECTS = {
     },
     boneDigger: {
         runAt: 'field',
-        cleanup: {
+        postSettle: {
             phase(event, [bones]) {
                 if (event.phase !== 'post-attack') return;
                 this.createEvent('bones', {
@@ -367,7 +367,7 @@ const SIGIL_EFFECTS = {
     },
     brittle: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             attack(event) {
                 this.createEvent('perish', { pos: event.from, cause: 'attack' });
             },
@@ -375,7 +375,7 @@ const SIGIL_EFFECTS = {
     },
     chaseAttack: {
         runAt: 'field',
-        writers: {
+        preSettleWrite: {
             attack(event) {
                 // TODO: centralize this logic
                 if (event.direct && !this.card.state.sigils.includes('mightyLeap')) return;
@@ -392,7 +392,7 @@ const SIGIL_EFFECTS = {
     },
     chaseOpposingPlay: {
         runAt: 'field',
-        readers: {
+        preSettleRead: {
             play(event) {
                 this.createEvent('move', {
                     from: this.fieldPos!,
@@ -404,7 +404,7 @@ const SIGIL_EFFECTS = {
     corpseEater: {
         runAt: 'hand',
         runAs: 'global',
-        cleanup: {
+        postSettle: {
             perish(event) {
                 if (event.cause === 'sac' || event.cause === 'hammer') return;
                 if (!this.tryMark('corpseEater')) return;
@@ -420,7 +420,7 @@ const SIGIL_EFFECTS = {
     },
     damBuilder: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             play(event, [print]) {
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] - 1],
@@ -435,7 +435,7 @@ const SIGIL_EFFECTS = {
     },
     deathTouch: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             attack(event) {
                 if (event.direct) return;
                 const target = this.getCard(event.to);
@@ -450,7 +450,7 @@ const SIGIL_EFFECTS = {
     },
     detonator: {
         runAs: 'played',
-        writers: {
+        preSettleWrite: {
             perish(event, [damage]) {
                 if (event.cause === 'sac') return;
                 if (!this.tryMark('detonator')) return;
@@ -476,7 +476,7 @@ const SIGIL_EFFECTS = {
     },
     doubleAttack: {
         runAs: 'played',
-        writers: {
+        preSettleWrite: {
             triggerAttack(event) {
                 this.cancelDefault();
                 this.createEvent('attack', {
@@ -492,7 +492,7 @@ const SIGIL_EFFECTS = {
     },
     drawCopy: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             play() {
                 const card = this.initCard(this.card.print);
                 card.state.sigils = lists.subtract(this.card.state.sigils, ['drawCopy']);
@@ -505,7 +505,7 @@ const SIGIL_EFFECTS = {
     },
     drawRabbit: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             play() {
                 this.createEvent('draw', {
                     side: this.side,
@@ -516,7 +516,7 @@ const SIGIL_EFFECTS = {
     },
     evolve: {
         runAt: 'field',
-        cleanup: {
+        postSettle: {
             phase(event) {
                 if (event.phase !== 'pre-turn') return;
                 const [side] = this.fieldPos!;
@@ -538,7 +538,7 @@ const SIGIL_EFFECTS = {
     },
     fourBones: {
         runAs: 'played',
-        writers: {
+        preSettleWrite: {
             perish() {
                 this.cancelDefault();
                 this.createEvent('bones', {
@@ -550,7 +550,7 @@ const SIGIL_EFFECTS = {
     },
     frozen: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             perish(event) {
                 if (event.cause === 'sac') return;
                 const { evolution = 'opossum' } = this.cardPrint;
@@ -564,10 +564,11 @@ const SIGIL_EFFECTS = {
     },
     gainBattery: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             play() {
                 this.createEvent('energy', {
                     side: this.side,
+                    total: 1,
                     amount: 1,
                 });
             },
@@ -600,7 +601,7 @@ const SIGIL_EFFECTS = {
     },
     looter: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             attack(event) {
                 if (!event.direct) return;
                 for (let i = 0; i < event.damage!; i++) {
@@ -614,7 +615,7 @@ const SIGIL_EFFECTS = {
     },
     manyLives: {
         runAs: 'played',
-        writers: {
+        preSettleWrite: {
             perish(event) {
                 if (event.cause === 'sac') this.cancel();
             },
@@ -623,7 +624,7 @@ const SIGIL_EFFECTS = {
     mightyLeap: {
         runAfter: ['airborne'],
         runAs: 'attackee',
-        writers: {
+        preSettleWrite: {
             attack(event) {
                 const attacker = this.getCard(event.from)!;
                 if (!attacker.state.sigils.includes('airborne')) return;
@@ -634,7 +635,7 @@ const SIGIL_EFFECTS = {
     },
     sentry: {
         runAs: 'opposing',
-        cleanup: {
+        postSettle: {
             play(event) {
                 if (event.transient) return;
 
@@ -655,7 +656,7 @@ const SIGIL_EFFECTS = {
     },
     sharp: {
         runAs: 'attackee',
-        readers: {
+        preSettleRead: {
             attack(event) {
                 this.createEvent('attack', {
                     from: this.fieldPos!,
@@ -667,7 +668,7 @@ const SIGIL_EFFECTS = {
     },
     sniper: {
         runAs: 'played',
-        writers: {
+        preSettleWrite: {
             triggerAttack(event) {
                 this.cancelDefault();
             },
@@ -688,10 +689,10 @@ const SIGIL_EFFECTS = {
     },
     skeletonStrafe: {
         runAt: 'field',
-        cleanup: {
+        postSettle: {
             phase(event, [print]) {
                 if (event.phase !== 'post-attack') return;
-                SIGIL_EFFECTS.strafe.cleanup.phase.call(this, event);
+                SIGIL_EFFECTS.strafe.postSettle.phase.call(this, event);
                 this.createEvent('play', {
                     pos: this.fieldPos!,
                     card: this.initCard(print),
@@ -701,10 +702,10 @@ const SIGIL_EFFECTS = {
     },
     squirrelStrafe: {
         runAt: 'field',
-        cleanup: {
+        postSettle: {
             phase(event, [print]) {
                 if (event.phase !== 'post-attack') return;
-                SIGIL_EFFECTS.strafe.cleanup.phase.call(this, event);
+                SIGIL_EFFECTS.strafe.postSettle.phase.call(this, event);
                 this.createEvent('play', {
                     pos: this.fieldPos!,
                     card: this.initCard(print),
@@ -714,7 +715,7 @@ const SIGIL_EFFECTS = {
     },
     strafe: {
         runAt: 'field',
-        cleanup: {
+        postSettle: {
             phase(event) {
                 if (event.phase !== 'post-attack') return;
                 const [side, lane] = this.fieldPos!;
@@ -735,7 +736,7 @@ const SIGIL_EFFECTS = {
     },
     strafePush: {
         runAt: 'field',
-        cleanup: {
+        postSettle: {
             phase(event) {
                 if (event.phase !== 'post-attack') return;
                 const [side, lane] = this.fieldPos!;
@@ -753,7 +754,7 @@ const SIGIL_EFFECTS = {
     },
     tristrike: {
         runAs: 'played',
-        writers: {
+        preSettleWrite: {
             triggerAttack(event) {
                 this.cancelDefault();
                 const [side, lane] = positions.opposing(event.pos);
@@ -765,7 +766,7 @@ const SIGIL_EFFECTS = {
     },
     unkillable: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             perish() {
                 const card = this.initCard(this.card.print);
                 card.state.sigils = this.card.state.sigils;
@@ -783,13 +784,13 @@ const SIGIL_EFFECTS = {
     },
     voidDamage: {
         runAs: 'attackee',
-        writers: {
+        preSettleWrite: {
             attack() { this.cancel(); },
         },
     },
     waterborne: {
         runAt: 'field',
-        cleanup: {
+        postSettle: {
             phase(event) {
                 if (event.phase !== 'pre-turn') return;
                 const isRowTurn = this.tick.fight.turn.side === this.side;
@@ -800,7 +801,7 @@ const SIGIL_EFFECTS = {
     },
     waterborneTentacle: {
         runAt: 'field',
-        cleanup: {
+        postSettle: {
             phase(event) {
                 if (event.phase !== 'pre-turn') return;
 
@@ -809,7 +810,7 @@ const SIGIL_EFFECTS = {
 
                 const willEmerge = this.card.state.flipped && shouldFlip;
                 transform: if (willEmerge) {
-                    const tentacleCards = Object.entries(this.prints).filter(([id, card]) => card.traits?.includes('tentacle'));
+                    const tentacleCards = Object.entries(this.prints).filter(([id, card]) => card.tribes?.includes('tentacle'));
                     const otherTentacleCards = tentacleCards.filter(([id]) => id !== this.card.print);
                     if (!otherTentacleCards.length) break transform;
 
@@ -828,7 +829,7 @@ const SIGIL_EFFECTS = {
     },
     doubleDeath: {
         runAt: 'field',
-        readers: {
+        preSettleRead: {
             // TODO: fix
             perish(event) {
                 if (event.cause === 'transient') return;
@@ -850,7 +851,7 @@ const SIGIL_EFFECTS = {
     },
     dropRubyOnDeath: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             perish() {
                 this.createEvent('play', {
                     pos: this.fieldPos!,
@@ -861,11 +862,11 @@ const SIGIL_EFFECTS = {
     },
     gemsDraw: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             play() {
                 const [side] = this.fieldPos!;
                 const moxCount = this.tick.fight.field[side].filter((pos) => {
-                    return pos?.print && this.prints[pos.print].traits?.includes('mox');
+                    return pos?.print && this.prints[pos.print].tribes?.includes('mox');
                 }).length;
                 for (let i = 0; i < moxCount; i++) {
                     this.createEvent('draw', {
@@ -878,11 +879,11 @@ const SIGIL_EFFECTS = {
     },
     gemDependant: {
         runAt: 'field',
-        cleanup: {
+        postSettle: {
             play() {
                 const [side] = this.fieldPos!;
                 const moxCount = this.tick.fight.field[side].filter((pos) => {
-                    return pos?.print && this.prints[pos.print].traits?.includes('mox');
+                    return pos?.print && this.prints[pos.print].tribes?.includes('mox');
                 }).length;
                 if (moxCount > 0) return;
                 this.createEvent('perish', {
@@ -892,13 +893,13 @@ const SIGIL_EFFECTS = {
             },
             phase() {
                 if (this.tick.fight.turn.phase !== 'pre-turn' && this.tick.fight.turn.phase !== 'post-attack') return;
-                SIGIL_EFFECTS.gemDependant.cleanup.play.call(this);
+                SIGIL_EFFECTS.gemDependant.postSettle.play.call(this);
             },
         },
     },
     activatedStatsUp: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             activate(event, [cost, incr]) {
                 const [side] = event.pos;
                 if (this.tick.fight.players[side].bones < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough bones.');
@@ -916,7 +917,7 @@ const SIGIL_EFFECTS = {
     },
     activatedStatsUpEnergy: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             activate(event, [cost, incr]) {
                 const [side] = event.pos;
                 if (this.tick.fight.players[side].energy[0] < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
@@ -934,7 +935,7 @@ const SIGIL_EFFECTS = {
     },
     activatedEnergyToBones: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             activate(event, [cost, bones]) {
                 const [side] = event.pos;
                 if (this.tick.fight.players[side].energy[0] < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
@@ -951,7 +952,7 @@ const SIGIL_EFFECTS = {
     },
     activatedDiceRollEnergy: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             activate(event, [cost]) {
                 const [side] = event.pos;
                 if (this.tick.fight.players[side].energy[0] < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
@@ -969,7 +970,7 @@ const SIGIL_EFFECTS = {
     },
     activatedDrawSkeleton: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             activate(event, [cost, print]) {
                 const [side] = event.pos;
                 if (this.tick.fight.players[side].bones < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough bones.');
@@ -986,7 +987,7 @@ const SIGIL_EFFECTS = {
     },
     activatedSacrificeDraw: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             activate(event, [amount]) {
                 const [side] = event.pos;
                 if (!(getMoxes(this.tick.fight.field[side]) & MoxType.Blue))
@@ -1007,7 +1008,7 @@ const SIGIL_EFFECTS = {
     },
     activatedDealDamage: {
         runAs: 'played',
-        readers: {
+        preSettleRead: {
             activate(event, [cost, damage]) {
                 const [side] = event.pos;
                 if (this.tick.fight.players[side].energy[0] < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
@@ -1029,7 +1030,7 @@ const SIGIL_EFFECTS = {
 
     vampiric: {
         runAs: 'played',
-        cleanup: {
+        postSettle: {
             attack(event) {
                 if (event.direct) return;
 

@@ -229,7 +229,7 @@ async function settleEvents(tick: FightTick) {
 
         const targets = getTargets(tick.fight, event);
 
-        const preSettleSigils = getActiveSigils(tick, event, targets, ['writers', 'readers']);
+        const preSettleSigils = getActiveSigils(tick, event, targets, ['preSettleWrite', 'preSettleRead']);
 
         const signals: EffectSignals = { event: false, default: false, prepend: [] };
 
@@ -239,16 +239,17 @@ async function settleEvents(tick: FightTick) {
 
         const originalEvent = clone(event);
 
-        for (const sigilPos of preSettleSigils.writers) {
+        for (const sigilPos of preSettleSigils.preSettleWrite) {
             cardCtx.pos = sigilPos[0];
-            sigils[sigilPos[1]].writers![event.type]!.call(cardCtx, event as never, ruleset.sigilParams[sigilPos[1] as never]);
+            // @ts-ignore
+            sigils[sigilPos[1]].preSettleWrite![event.type]!.call(cardCtx, event, ruleset.sigilParams[sigilPos[1]]);
         }
         if (signals.event) {
             tick.logger?.debug('Event was cancelled!');
             continue;
         }
         if (isEventInvalid(tick, event)) {
-            tick.logger?.error(`A write effect made the event invalid! One of these is broken: ${JSON.stringify(preSettleSigils.writers)}`);
+            tick.logger?.error(`A write effect made the event invalid! One of these is broken: ${JSON.stringify(preSettleSigils.preSettleWrite)}`);
             throw FightError.create(ErrorType.InvalidEvent);
         }
         if (signals.prepend.length) {
@@ -262,9 +263,10 @@ async function settleEvents(tick: FightTick) {
         if (signals.default) tick.logger?.debug('Default effect was cancelled!');
         else defaultEffects.preSettle[event.type]?.call(tick, clone(event as never));
 
-        for (const sigilPos of preSettleSigils.readers) {
+        for (const sigilPos of preSettleSigils.preSettleRead) {
             cardCtx.pos = sigilPos[0];
-            sigils[sigilPos[1]].readers![event.type]!.call(cardCtx, clone(event as never), ruleset.sigilParams[sigilPos[1] as never]);
+            // @ts-ignore
+            sigils[sigilPos[1]].preSettleRead![event.type]!.call(cardCtx, clone(event), ruleset.sigilParams[sigilPos[1]]);
         }
 
         await fillEvent(tick, event);
@@ -276,11 +278,12 @@ async function settleEvents(tick: FightTick) {
 
         if (!signals.default) defaultEffects.postSettle[event.type]?.call(tick, clone(event as never));
 
-        const postSettleSigils = getActiveSigils(tick, event, targets, ['cleanup', 'requests']);
+        const postSettleSigils = getActiveSigils(tick, event, targets, ['postSettle', 'requests']);
 
-        for (const sigilPos of postSettleSigils.cleanup) {
+        for (const sigilPos of postSettleSigils.postSettle) {
             cardCtx.pos = sigilPos[0];
-            sigils[sigilPos[1]].cleanup![event.type]!.call(cardCtx, clone(event as never), ruleset.sigilParams[sigilPos[1] as never]);
+            // @ts-ignore
+            sigils[sigilPos[1]].postSettle![event.type]!.call(cardCtx, clone(event), ruleset.sigilParams[sigilPos[1]]);
         }
 
         let waitingFor: FightHost['waitingFor'] | null = null;

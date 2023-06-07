@@ -9,6 +9,7 @@ import { namespacedIndexes } from '@/lib/utils';
 import { rulesets } from '@/lib/defs/prints';
 import { isClient } from '@/utils/next';
 import { useFight } from '@/hooks/useClientStore';
+import { triggerSound } from '@/hooks/useAudio';
 
 export interface CardSelectionProps {
     cards: CardOrPrint[];
@@ -38,6 +39,13 @@ export const CardSelection = memo(function CardSelection({
         if (cardEl) observerRef.current?.observe(cardEl);
         else observerRef.current?.disconnect();
     };
+    const onCardClick = (i: number) => {
+        if (disabled) return;
+        if (onSelect) {
+            onSelect(i);
+            triggerSound('blip');
+        }
+    };
 
     return <div ref={cardsElRef} className={classNames(styles.cards, {
         [styles.disabled]: disabled,
@@ -60,11 +68,12 @@ export const CardSelection = memo(function CardSelection({
                     style={{
                         '--dxm': `${dxMid}`,
                     } as CSSProperties}
+                    data-hover-blip={!disabled || null}
                     data-hover-target
-                    onClick={() => onSelect?.(i)}
+                    onClick={() => onCardClick(i)}
                 >
                     <CardSprite className={styles.cardSprite} print={prints[card.print]} state={card.state} />
-                    {!disabled && onSelect && value != i && <HoverBorder color="#d7e2a3" />}
+                    {!disabled && onSelect && value != i && <HoverBorder color="--ui" />}
                 </motion.div>;
             })}
         </AnimatePresence>

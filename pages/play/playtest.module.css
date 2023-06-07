@@ -1,3 +1,8 @@
+.gameRoot .controlsBox {
+    margin-right: 48em;
+    margin-left: 48em;
+}
+
 .controls {
     display: flex;
     flex-direction: row;

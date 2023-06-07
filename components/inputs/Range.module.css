@@ -1,0 +1,47 @@
+.slider {
+    display: flex;
+    align-items: center;
+}
+
+.button {
+    flex: 1;
+}
+
+.buttonInner {
+    margin-top: 1em;
+}
+
+.button:first-child .buttonInner {
+    margin-right: auto;
+}
+
+.button:last-child .buttonInner {
+    margin-left: auto;
+}
+
+.steps {
+    display: flex;
+    margin: 0 4em;
+}
+
+.step {
+    display: grid;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-in-out;
+}
+
+.step.off {
+    transform: rotateY(180deg);
+}
+
+.offStep,
+.onStep {
+    grid-row: 1;
+    grid-column: 1;
+    backface-visibility: hidden;
+}
+
+.offStep {
+    transform: rotateY(180deg);
+}
