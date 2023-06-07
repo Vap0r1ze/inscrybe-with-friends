@@ -26,7 +26,6 @@
 
 .step {
     display: grid;
-    backface-visibility: hidden;
     transform-style: preserve-3d;
     transition: transform 0.1s ease-in-out;
 }

@@ -11,7 +11,7 @@ interface SettingsStore {
 export const useSettingsStore = create(
     persist<SettingsStore>(
         (set, get) => ({
-            volume: { all: 0.5, sfx: 1, music: 1 },
+            volume: { all: 0.5, sfx: 1, music: 0.7 },
             setVolume: (type, value) => set(state => ({
                 ...state, volume: {
                     ...state.volume,

@@ -6,6 +6,12 @@ import * as Tone from 'tone';
 import { Action } from '@/lib/engine/Actions';
 import { Event } from '@/lib/engine/Events';
 
+// Music
+
+// TODO
+
+// SFX
+
 declare global {
     interface Window {
         SfxSampler: Tone.Sampler;

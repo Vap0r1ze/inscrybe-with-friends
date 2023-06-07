@@ -50,7 +50,7 @@ export function Range({ className, type, min, max, steps, value, onChange }: Ran
             {Array.from({ length: steps }, (v, i) => (
                 <div key={i} className={classNames(styles.step, {
                     [styles.off]: step < (i + 1),
-                })}>
+                })} onClick={() => changeStep(i + 1)}>
                     <Sprite className={styles.onStep} sheet={sheet} name={onSprite} />
                     <Sprite className={styles.offStep} sheet={sheet} name={offSprite} />
                 </div>

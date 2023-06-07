@@ -44,6 +44,6 @@ function VolumeSetting({ type }: { type: VolumeType }) {
 
     return <div className={styles.volume}>
         <Text size={16}>{volumeLabel[type]}</Text>
-        <Range min={0} max={1} steps={6} value={volume} onChange={onChange} type="sound" />
+        <Range min={0} max={1} steps={10} value={volume} onChange={onChange} type="sound" />
     </div>;
 }
