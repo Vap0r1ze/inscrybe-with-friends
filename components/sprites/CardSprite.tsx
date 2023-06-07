@@ -69,7 +69,7 @@ export const CardSprite = memo(function CardSprite({
                 <div className={styles.face}>
                     <Sprite sheet={Spritesheets.cards} name={face} />
                 </div>
-                <div className={styles.portrait}>
+                <div className={styles.portrait} onContextMenu={() => openInRulebook(`print:${portrait}`)}>
                     <Sprite sheet={Spritesheets.portraits} name={portrait} />
                 </div>
                 {print.frame && <div className={styles.face}>

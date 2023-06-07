@@ -51,12 +51,13 @@ const sampler = isClient ? new Tone.Sampler({
 const volumes: Partial<Record<Sound, number>> = {
     blip: 0.7,
     bellRing: 1,
+    hammer: 0.8,
     attack: 0.9,
     death: 0.9,
     sac: 0.9,
     select: 1.2,
-    rulebookOpen: 1.1,
-    rulebookFlip: 1.1,
+    rulebookOpen: 0.9,
+    rulebookFlip: 0.9,
 };
 
 function getNote(sound: Sound) {
