@@ -4,7 +4,7 @@ import { Event, eventSettlers, isEventInvalid } from './Events';
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { rulesets } from '../defs/prints';
 import { Sigil, sigils } from '../defs/sigils';
-import { getActiveSigils, createEffectContext, createSigilContext, defaultEffects, getTargets, EffectSignals } from './Effects';
+import { getActiveSigils, createEffectContext, createCardContext, defaultEffects, getTargets, EffectSignals } from './Effects';
 import { ErrorType, FightError } from './Errors';
 import { clone } from '../utils';
 import { FightAdapter, FightHost } from './Host';
@@ -214,6 +214,7 @@ async function settleEvents(tick: FightTick) {
     const backlog = tick.host.backlog.splice(0, tick.host.backlog.length);
     if (backlog) tick.queue.push(...backlog);
 
+    const ruleset = rulesets[tick.fight.opts.ruleset];
     let iterations = 0;
 
     for (let event = tick.queue.shift(); event; event = tick.queue.shift()) {
@@ -234,13 +235,13 @@ async function settleEvents(tick: FightTick) {
 
         const stack: Event[] = [];
         const effectCtx = createEffectContext(tick, event, targets, signals, stack);
-        const sigilCtx = createSigilContext(tick, effectCtx, null as unknown as CardPos);
+        const cardCtx = createCardContext(tick, effectCtx, null as unknown as CardPos);
 
         const originalEvent = clone(event);
 
         for (const sigilPos of preSettleSigils.writers) {
-            sigilCtx.pos = sigilPos[0];
-            sigils[sigilPos[1]].writers![event.type]!.call(sigilCtx, event as never);
+            cardCtx.pos = sigilPos[0];
+            sigils[sigilPos[1]].writers![event.type]!.call(cardCtx, event as never, ruleset.sigilParams[sigilPos[1] as never]);
         }
         if (signals.event) {
             tick.logger?.debug('Event was cancelled!');
@@ -262,8 +263,8 @@ async function settleEvents(tick: FightTick) {
         else defaultEffects.preSettle[event.type]?.call(tick, clone(event as never));
 
         for (const sigilPos of preSettleSigils.readers) {
-            sigilCtx.pos = sigilPos[0];
-            sigils[sigilPos[1]].readers![event.type]!.call(sigilCtx, clone(event as never));
+            cardCtx.pos = sigilPos[0];
+            sigils[sigilPos[1]].readers![event.type]!.call(cardCtx, clone(event as never), ruleset.sigilParams[sigilPos[1] as never]);
         }
 
         await fillEvent(tick, event);
@@ -278,14 +279,14 @@ async function settleEvents(tick: FightTick) {
         const postSettleSigils = getActiveSigils(tick, event, targets, ['cleanup', 'requests']);
 
         for (const sigilPos of postSettleSigils.cleanup) {
-            sigilCtx.pos = sigilPos[0];
-            sigils[sigilPos[1]].cleanup![event.type]!.call(sigilCtx, clone(event as never));
+            cardCtx.pos = sigilPos[0];
+            sigils[sigilPos[1]].cleanup![event.type]!.call(cardCtx, clone(event as never), ruleset.sigilParams[sigilPos[1] as never]);
         }
 
         let waitingFor: FightHost['waitingFor'] | null = null;
         for (const sigilPos of postSettleSigils.requests) {
-            sigilCtx.pos = sigilPos[0];
-            const request = sigils[sigilPos[1]].requests![event.type]!.callFor.call(sigilCtx, clone(event as never));
+            cardCtx.pos = sigilPos[0];
+            const request = sigils[sigilPos[1]].requests![event.type]!.callFor.call(cardCtx, clone(event as never));
             if (!request) continue;
             waitingFor = {
                 side: request[0],

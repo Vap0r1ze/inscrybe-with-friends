@@ -1,6 +1,6 @@
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { positions } from './utils';
-import { Sigil, sigils } from '../defs/sigils';
+import { Sigil, SigilParamMap, sigilInfos } from '../defs/sigils';
 import { buffs } from '../defs/buffs';
 import { MoxType } from './constants';
 
@@ -30,6 +30,7 @@ export interface Ruleset {
     name: string;
     prints: Record<string, Readonly<CardPrint>>;
     sideDecks: Record<string, Readonly<SideDeck>>;
+    sigilParams: OmitNever<SigilParamMap>;
 }
 export interface SideDeck {
     name: string;
@@ -96,7 +97,7 @@ export function initCardFromPrint(prints: Record<string, CardPrint>, printId: st
             power: print.power,
             health: print.health,
             flipped: false,
-            sigils: print.sigils ?? [],
+            sigils: [...print.sigils ?? []],
         },
     };
 }
@@ -137,9 +138,9 @@ export function getCardPower(prints: Record<string, CardPrint>, fight: Fight<'pl
             const card = fight.field[side][lane];
             if (card == null) continue;
             for (const sigil of card.state.sigils) {
-                const sigilDef = sigils[sigil];
-                if (!sigilDef.buffs) continue;
-                for (const buff of sigilDef.buffs)
+                const sigilInfo = sigilInfos[sigil];
+                if (!sigilInfo.buffs) continue;
+                for (const buff of sigilInfo.buffs)
                     power += buffs[buff].check(fight, [side, lane], pos)?.power ?? 0;
             }
         }

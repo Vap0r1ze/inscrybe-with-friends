@@ -6,7 +6,7 @@ import StatSprite from './StatSprite';
 import classNames from 'classnames';
 import { Sprite } from './Sprite';
 import { Spritesheets } from '@/lib/spritesheets';
-import { Sigil, sigils } from '@/lib/defs/sigils';
+import { Sigil, sigilInfos } from '@/lib/defs/sigils';
 import { openInRulebook } from '@/hooks/useRulebook';
 import { memo } from 'react';
 import { SigilButton } from '../inputs/SigilButton';
@@ -87,7 +87,7 @@ export const CardSprite = memo(function CardSprite({
                         [styles.upsideDown]: isOpposing && verticalSigils.includes(sigil),
                     })} style={{
                         marginLeft: `${(print.sigils!.length % 2) ? 0 : 1}em`,
-                    }} onContextMenu={() => openInRulebook(sigils[sigil].name)}>
+                    }} onContextMenu={() => openInRulebook(sigilInfos[sigil].name)}>
                         {sigil.startsWith('activated')
                             ? <SigilButton sigil={sigil} onClick={() => onActivate?.(sigil)} />
                             : <Sprite sheet={Spritesheets.sigils} name={sigil} />}

@@ -3,7 +3,7 @@ import { Card, CardInfo, CardPos, CardPrint, CardState, FieldPos, Ruleset, getCa
 import { Event } from './Events';
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { FightTick } from './Tick';
-import { SigilPos, sigils } from '../defs/sigils';
+import { Sigil, SigilParamMap, SigilPos, sigils } from '../defs/sigils';
 import { positions } from './utils';
 import { ErrorType, FightError } from './Errors';
 import { rulesets } from '../defs/prints';
@@ -12,29 +12,29 @@ import { array as toposort } from 'toposort';
 
 export type EffectTargets = Partial<Record<Exclude<EffectTarget, 'global'>, CardPos>>;
 export type EffectTarget = 'played' | 'drawn' | 'attackee' | 'opposing' | 'global';
-export type EffectTriggers = {
+export type EffectTriggers<S extends Sigil = never> = {
     requests?: {
         [T in Event['type']]?: {
-            callFor(this: NoopSigilContext, event: Event<T>): [FightSide, ActionReq] | null;
+            callFor(this: NoopCardContext, event: Event<T>): [FightSide, ActionReq] | null;
             onResponse(this: EffectContext, event: Event<T>, res: ActionRes, req: ActionReq): Promise<void>;
         };
     };
     writers?: {
-        [T in Event['type']]?: (this: SigilContext, event: Event<T>) => void;
+        [T in Event['type']]?: (this: CardContext, event: Event<T>, params: SigilParamMap[S]) => void;
     };
     readers?: {
-        [T in Event['type']]?: (this: ReaderSigilContext, event: Readonly<Event<T>>) => void;
+        [T in Event['type']]?: (this: ReaderCardContext, event: Readonly<Event<T>>, params: SigilParamMap[S]) => void;
     };
     cleanup?: {
         // TODO: type as Readonly<SettledEvent<T>>
-        [T in Event['type']]?: (this: ReaderSigilContext, event: Readonly<Event<T>>) => void;
+        [T in Event['type']]?: (this: ReaderCardContext, event: Readonly<Event<T>>, params: SigilParamMap[S]) => void;
     };
 };
 export type ActiveSigils = Record<keyof EffectTriggers, SigilPos[]>;
 
-export type ReaderSigilContext = Omit<SigilContext, 'cancel' | 'cancelDefault'>;
-export type NoopSigilContext = Omit<ReaderSigilContext, 'createEvent'>;
-export type SigilContext = EffectContext & {
+export type ReaderCardContext = Omit<CardContext, 'cancel' | 'cancelDefault'>;
+export type NoopCardContext = Omit<ReaderCardContext, 'createEvent'>;
+export type CardContext = EffectContext & {
     pos: CardPos;
     readonly fieldPos?: FieldPos;
     readonly handPos?: [FightSide, number];
@@ -51,6 +51,7 @@ export type EffectContext = {
     prependEvent<T extends Event['type']>(type: T, event: Omit<Event<T>, 'type'>): void;
     cancel(): void;
     cancelDefault(): void;
+    tryMark(tag: string): boolean;
 
     prints: Ruleset['prints'];
     initCard(printId: string): Card;
@@ -80,6 +81,12 @@ export function createEffectContext(tick: FightTick, event: Event, targets: Effe
         cancelDefault() {
             signals.default = true;
         },
+        tryMark(tag) {
+            // @ts-ignore
+            if (event[Symbol.for(tag)]) return false;
+            // @ts-ignore
+            return event[Symbol.for(tag)] = true;
+        },
 
         get prints() {
             return rulesets[this.tick.fight.opts.ruleset].prints;
@@ -104,7 +111,7 @@ export function createEffectContext(tick: FightTick, event: Event, targets: Effe
     };
     return effectCtx;
 }
-export function createSigilContext(tick: FightTick, effectCtx: EffectContext, pos: CardPos): SigilContext {
+export function createCardContext(tick: FightTick, effectCtx: EffectContext, pos: CardPos): CardContext {
     return {
         ...effectCtx,
         pos,
@@ -233,9 +240,6 @@ export const defaultEffects: {
 } = {
     preSettle: {
         triggerAttack(event) {
-            // FIXME
-            // const power = getCardPower(this.fight, event.pos);
-            // if (!power) return;
             this.queue.unshift({ type: 'attack', from: event.pos, to: positions.opposing(event.pos) });
         },
         perish(event) {

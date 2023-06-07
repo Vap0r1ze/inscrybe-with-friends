@@ -1083,6 +1083,24 @@ const RULESETS = {
             },
             // TODO: add sigiled vessels
         },
+        sigilParams: {
+            antSpawner: ['ant'],
+            beesWithin: ['bee'],
+            bellist: ['chime'],
+            bombSpewer: ['explodeBot'],
+            boneDigger: [1],
+            damBuilder: ['dam'],
+            detonator: [5],
+            skeletonStrafe: ['skeleton'],
+            squirrelStrafe: ['squirrel'],
+            activatedDealDamage: [1, 1],
+            activatedDiceRollEnergy: [1],
+            activatedDrawSkeleton: [2, 'witheredCorpse'],
+            activatedEnergyToBones: [1, 1],
+            activatedSacrificeDraw: [3],
+            activatedStatsUpEnergy: [3, 1],
+            activatedStatsUp: [3, 1],
+        },
     },
 } satisfies Record<string, Ruleset>;
 

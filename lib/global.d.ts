@@ -13,4 +13,5 @@ declare namespace NodeJS {
     }
 }
 
-type Mutable<T> = { -readonly [P in keyof T]: T[P] };
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+type OmitNever<T> = Pick<T, { [K in keyof T]: T[K] extends never ? never : K }[keyof T]>;

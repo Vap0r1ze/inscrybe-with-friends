@@ -9,6 +9,8 @@ export interface NSliceProps {
     className?: string;
 }
 
+const cache = new Map<string, Record<string, string>>();
+
 export function NSlice({
     sheet,
     name,
@@ -19,7 +21,10 @@ export function NSlice({
     const [spriteX, spriteY, spriteW, spriteH] = sheet.sprites[name];
     const [tileW, tileH] = [spriteW / cols.length, spriteH / rows.length];
 
-    const [images, pending, error] = useAwaiter(async () => {
+    const cachedImages = cache.get(`${sheet.path}:${name}`);
+
+    const [computedImages, pending, error] = useAwaiter(async () => {
+        if (cachedImages) return null;
         const img = new Image();
         img.src = sheet.path;
         await img.decode();
@@ -44,18 +49,21 @@ export function NSlice({
         return images;
     }, []);
 
-    return images ? <div className={className} style={{
+    if (computedImages) cache.set(`${sheet.path}:${name}`, computedImages);
+    const images = computedImages ?? cachedImages;
+
+    return <div className={className} style={{
         display: 'grid',
         gridTemplateColumns: cols.map(w => w ? `${w}em` : 'auto').join(' '),
         gridTemplateRows: rows.map(h => h ? `${h}em` : 'auto').join(' '),
     }}>
         {rows.map((row, i) =>
             cols.map((col, j) => <div key={`${i}:${j}`} style={{
-                backgroundImage: `url(${images[`${i}:${j}`]})`,
+                backgroundImage: images ? `url(${images[`${i}:${j}`]})` : undefined,
                 backgroundPosition: `-${spriteX + i * tileW}em -${spriteY + j * tileH}em}`,
                 backgroundSize: `${tileW}em ${tileH}em`,
                 imageRendering: 'pixelated',
             }} />))}
-    </div> : null;
+    </div>;
 }
 

@@ -1,94 +1,352 @@
 import { ActionReq, ActionRes } from '../engine/Actions';
 import { CardPos, getMoxes } from '../engine/Card';
-import { MoxType } from '../engine/constants';
+import { MoxType, SigilParam, SigilParamType } from '../engine/constants';
 import { EffectTarget, EffectTriggers } from '../engine/Effects';
 import { ErrorType, FightError } from '../engine/Errors';
 import { cardCanPush, lists, positions } from '../engine/utils';
-import { entries } from '../utils';
+import { entries, fromEntries } from '../utils';
 import { Buff } from './buffs';
 
 export type SigilPos = [CardPos, Sigil];
-export type Sigil = keyof typeof SIGILS;
-export interface SigilDef extends EffectTriggers {
+export type Sigil = keyof typeof SIGIL_INFOS;
+export interface SigilInfo {
     name: string;
     description: string;
-
+    buffs?: readonly Buff[];
+    params?: readonly SigilParamType[];
+}
+export interface SigilEffects<S extends Sigil = never> extends EffectTriggers<S> {
     runAfter?: readonly string[];
     runAs?: EffectTarget;
     runAt?: CardPos[0];
-    buffs?: readonly Buff[];
 }
+export interface SigilDef extends SigilInfo, SigilEffects {}
 
-const SIGILS = {
+export type SigilParamMap = {
+    -readonly [K in keyof typeof SIGIL_INFOS]: typeof SIGIL_INFOS[K] extends { params: infer P extends readonly SigilParamType[] } ? {
+        -readonly [I in keyof P]: SigilParam<P[I]>
+    } : never;
+};
+
+const SIGIL_INFOS = {
     // Act I
     airborne: {
         name: 'Airborne',
         description: 'This card will ignore opposing cards and strike an opponent directly.',
+    },
+    antSpawner: {
+        name: 'Ant Spawner',
+        description: 'When this card is played, a(n) {0} enters your hand.',
+        params: ['print'],
+    },
+    beesWithin: {
+        name: 'Bees Within',
+        description: 'When this card is struck, a(n) {0} is created in your hand.',
+        params: ['print'],
+    },
+    bellist: {
+        name: 'Bellist',
+        description: 'When this card is played, a(n) {0} is created on each adjacent empty space.',
+        params: ['print'],
+    },
+    bombSpewer: {
+        name: 'Bomb Spewer',
+        description: 'When this card is played, all empty spaces are filled with a(n) {0}.',
+        params: ['print'],
+    },
+    boneDigger: {
+        name: 'Bone Digger',
+        description: 'At the end of the owner\'s turn, this card generates {0} [Bone].',
+        params: ['number'],
+    },
+    boneless: {
+        name: 'Boneless',
+        description: 'When a card bearing this sigil dies, no [bones] are awarded.',
+    },
+    brittle: {
+        name: 'Brittle',
+        description: 'After attacking, this card perishes.',
+    },
+    chaseAttack: {
+        name: 'Burrower',
+        description: 'This card will move to any empty space that is attacked by an enemy to block it.',
+    },
+    chaseOpposingPlay: {
+        name: 'Guardian',
+        description: 'When an opposing card is played opposite an empty space, this card moves to that space.',
+    },
+    corpseEater: {
+        name: 'Corpse Eater',
+        description: 'If a card that you own dies by combat, this card is played from your hand on its space.',
+    },
+    damBuilder: {
+        name: 'Dam Builder',
+        description: 'When this card is played, a(n) {0} is created on each adjacent empty space.',
+        params: ['print'],
+    },
+    deathTouch: {
+        name: 'Death Touch',
+        description: 'This card instantly kills any card it damages.',
+    },
+    detonator: {
+        name: 'Detonator',
+        description: 'When this card dies, adjacent and opposing cards are dealt {0} damage.',
+        params: ['number'],
+    },
+    doubleAttack: {
+        name: 'Double Strike',
+        description: 'A card bearing this sigil will strike the opposing space an extra time when attacking.',
+    },
+    doubleDeath: {
+        name: 'Double Death',
+        description: 'When another creature you own dies, it dies again.',
+    },
+    drawCopy: {
+        name: 'Fecundity',
+        description: 'When this card is played, a copy of it enters your hand.',
+    },
+    drawRabbit: {
+        name: 'Rabbit Hole',
+        description: 'When this card is played, a Rabbit is created in your hand.',
+    },
+    evolve: {
+        name: 'Fledgling',
+        description: 'A card bearing this sigil will grow into a more powerful form after 1 turn on the board.',
+    },
+    fourBones: {
+        name: 'Bone King',
+        description: 'When this card dies, 4 Bones are awarded instead of 1.',
+    },
+    frozen: {
+        name: 'Frozen Away',
+        description: 'When this card perishes, the creature inside takes its place.',
+    },
+    gainBattery: {
+        name: 'Battery Bearer',
+        description: 'When this card is played, you gain an Energy Cell.',
+    },
+    hoarder: {
+        name: 'Hoarder',
+        description: 'When this card is played, choose a card from your deck to be drawn immediately.',
+    },
+    leader: {
+        name: 'Leader',
+        description: 'Creatures adjacent to this card gain 1 Power.',
+        buffs: ['incrAdjPower'],
+    },
+    looter: {
+        name: 'Looter',
+        description: 'When this card deals damage directly, draw a card for each damage dealt.',
+    },
+    manyLives: {
+        name: 'Many Lives',
+        description: 'When this card is sacrificed, it does not perish.',
+    },
+    mightyLeap: {
+        name: 'Mighty Leap',
+        description: 'This card blocks opposing Airborne creatures.',
+    },
+    sentry: {
+        name: 'Sentry',
+        description: 'When a card moves into the space opposing this card, they are dealt 1 damage.',
+    },
+    sharp: {
+        name: 'Sharp Quills',
+        description: 'Once this card is struck, the striker is dealt 1 damage.',
+    },
+    sniper: {
+        name: 'Sniper',
+        description: 'You may choose which opposing spaces this card strikes.',
+    },
+    stinky: {
+        name: 'Stinky',
+        description: 'The creature opposing this card loses 1 Power.',
+        buffs: ['decrOppPower'],
+    },
+    stone: {
+        name: 'Made of Stone',
+        description: 'A card bearing this sigil is immune to the effects of Touch of Death and Stinky.',
+    },
+    skeletonStrafe: {
+        name: 'Skeleton Crew',
+        description: 'At the end of the owner\'s turn, this card moves in the sigil\'s direction and plays a(n) {0} in the space behind it.',
+        params: ['print'],
+    },
+    squirrelStrafe: {
+        name: 'Squirrel Shedder',
+        description: 'At the end of the owner\'s turn, this card moves in the sigil\'s direction and plays a(n) {0} in the space behind it.',
+        params: ['print'],
+    },
+    strafe: {
+        name: 'Strafe',
+        description: 'At the end of the owner\'s turn, this card moves in the sigil\'s direction.',
+    },
+    strafePush: {
+        name: 'Hefty',
+        description: 'At the end of the owner\'s turn, this and adjacent cards move in the sigil\'s direction.',
+    },
+    threeSacs: {
+        name: 'Worthy Sacrifice',
+        description: 'This card counts as 3 Blood rather than 1 Blood when sacrificed.',
+    },
+    tristrike: {
+        name: 'Trifurcated Strike',
+        description: 'This card will deal damage to the opposing spaces left, right, and opposite of it.',
+    },
+    bistrike: {
+        name: 'Bifurcated Strike',
+        description: 'This card will strike each opposing space to the left and right of the spaces across it.',
+    },
+    unkillable: {
+        name: 'Unkillable',
+        description: 'When this card perishes, a copy of it enters your hand.',
+    },
+    voidDamage: {
+        name: 'Repulsive',
+        description: 'If a creature would attack this card, it does not.',
+    },
+    waterborne: {
+        name: 'Waterborne',
+        description: 'On the opponent\'s turn, creatures attacking this card\'s space attack directly.',
+    },
+    waterborneTentacle: {
+        name: 'Kraken Waterborne',
+        description: 'Same as Waterborne, except that this card becomes a Tentacle card when it emerges.',
+    },
 
+    // Mox
+    buffGems: {
+        name: 'Gem Animator',
+        description: 'Mox cards on the owner\'s side of the board gain 1 Power.',
+        buffs: ['incrMoxPower'],
+    },
+    dropRubyOnDeath: {
+        name: 'Ruby Heart',
+        description: 'When this card perishes, a Ruby Mox replaces it.',
+    },
+    gainGemAll: {
+        name: 'Great Mox',
+        description: 'While this card is on the board, it provides all 3 Gems to its owner.',
+    },
+    gainGemGreen: {
+        name: 'Green Mox',
+        description: 'While this card is on the board, it provides a Green Gem.',
+    },
+    gainGemOrange: {
+        name: 'Orange Mox',
+        description: 'While this card is on the board, it provides an Orange Gem.',
+    },
+    gainGemBlue: {
+        name: 'Blue Mox',
+        description: 'While this card is on the board, it provides a Blue Gem.',
+    },
+    gemsDraw: {
+        name: 'Mental Gymnastics',
+        description: 'When this card is played, you draw cards equal to the amount of your Mox cards played.',
+    },
+    gemDependant: {
+        name: 'Gem Dependant',
+        description: 'If this card\'s owner controls no Mox cards, this card perishes.',
+    },
+
+    // Buttons
+    activatedStatsUp: {
+        name: 'Enlarge',
+        description: '[Activate]: Pay {0} [Bones] to increase the [Power] and [Health] of this card by {1}.',
+        params: ['number', 'number'],
+    },
+    activatedStatsUpEnergy: {
+        name: 'Stimulate',
+        description: '[Activate]: Pay {0} [Energy] to increase the [Power] and [Health] of this card by {1}.',
+        params: ['number', 'number'],
+    },
+    activatedEnergyToBones: {
+        name: 'Bonehorn',
+        description: '[Activate]: Pay {0} [Energy] to gain {1} [Bone].',
+        params: ['number', 'number'],
+    },
+    activatedDiceRollEnergy: {
+        name: 'Power Dice',
+        description: '[Activate]: Pay {0} [Energy] to set the [Power] of this card randomly between 1 and 6.',
+        params: ['number'],
+    },
+    activatedDrawSkeleton: {
+        name: 'Disentomb',
+        description: '[Activate]: Pay {0} [Bone] to create a(n) {1} in your hand.',
+        params: ['number', 'print'],
+    },
+    activatedSacrificeDraw: {
+        name: 'True Scholar',
+        description: '[Activate]: If you have a Blue gem, destroy this card to draw 3 cards.',
+        params: ['number'],
+    },
+    activatedDealDamage: {
+        name: 'Energy Gun',
+        description: '[Activate]: Pay {0} [Energy] to deal {1} damage to the space across from this card.',
+        params: ['number', 'number'],
+    },
+
+    // Custom
+    vampiric: {
+        name: 'Vampiric',
+        description: 'When this card attacks another, it heals for the amount of damage dealt.',
+    },
+} as const satisfies Record<string, SigilInfo>;
+
+const SIGIL_EFFECTS = {
+    airborne: {
         runAs: 'played',
         writers: {
             attack(event) { event.direct = true; },
         },
     },
     antSpawner: {
-        name: 'Ant Spawner',
-        description: 'When this card is played, an Ant enters your hand.',
-
         runAs: 'played',
         cleanup: {
-            play() {
+            play(event, [print]) {
                 this.createEvent('draw', {
                     side: this.side,
-                    card: this.initCard('workerAnt'),
+                    card: this.initCard(print),
                 });
             },
         },
     },
     beesWithin: {
-        name: 'Bees Within',
-        description: 'When this card is struck, a Bee is created in your hand.',
-
         runAs: 'attackee',
         readers: {
-            attack() {
+            attack(event, [print]) {
                 this.createEvent('draw', {
                     side: this.side,
-                    card: this.initCard('bee'),
+                    card: this.initCard(print),
                 });
             },
         },
     },
     bellist: {
-        name: 'Bellist',
-        description: 'When this card is played, Chimes are created on adjacent empty spaces.',
-
         runAs: 'played',
         cleanup: {
-            play(event) {
+            play(event, [print]) {
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] - 1],
-                    card: this.initCard('chime'),
+                    card: this.initCard(print),
                 });
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] + 1],
-                    card: this.initCard('chime'),
+                    card: this.initCard(print),
                 });
             },
         },
     },
     bombSpewer: {
-        name: 'Bomb Spewer',
-        description: 'When this card is played, fill all empty spaces with Explode Bots.',
-
         runAs: 'played',
         cleanup: {
-            play(event) {
+            play(event, [print]) {
                 for (const [side, lanes] of entries(this.tick.fight.field)) {
                     for (let lane = 0; lane < lanes.length; lane++) {
                         if (lanes[lane]) continue;
                         this.createEvent('play', {
                             pos: [side, lane],
-                            card: this.initCard('explodeBot'),
+                            card: this.initCard(print),
                         });
                     }
                 }
@@ -96,28 +354,18 @@ const SIGILS = {
         },
     },
     boneDigger: {
-        name: 'Bone Digger',
-        description: 'At the end of the owner\'s turn, this card generates 1 Bone.',
-
         runAt: 'field',
         cleanup: {
-            phase(event) {
+            phase(event, [bones]) {
                 if (event.phase !== 'post-attack') return;
                 this.createEvent('bones', {
                     side: this.side,
-                    amount: 1,
+                    amount: bones,
                 });
             },
         },
     },
-    boneless: {
-        name: 'Boneless',
-        description: 'When a card bearing this sigil dies, no bones are awarded.',
-    },
     brittle: {
-        name: 'Brittle',
-        description: 'After attacking, this card perishes.',
-
         runAs: 'played',
         readers: {
             attack(event) {
@@ -126,9 +374,6 @@ const SIGILS = {
         },
     },
     chaseAttack: {
-        name: 'Burrower',
-        description: 'This card will move to any empty space that is attacked by an enemy to block it.',
-
         runAt: 'field',
         writers: {
             attack(event) {
@@ -146,9 +391,6 @@ const SIGILS = {
         },
     },
     chaseOpposingPlay: {
-        name: 'Guardian',
-        description: 'When an opposing card is played opposite an empty space, this card moves to that space.',
-
         runAt: 'field',
         readers: {
             play(event) {
@@ -160,18 +402,12 @@ const SIGILS = {
         },
     },
     corpseEater: {
-        name: 'Corpse Eater',
-        description: 'If a card that you own dies by combat, this card is played from your hand on its space.',
-
         runAt: 'hand',
         runAs: 'global',
         cleanup: {
             perish(event) {
                 if (event.cause === 'sac' || event.cause === 'hammer') return;
-                // @ts-ignore
-                if (event[Symbol.for('corpseEater')]) return;
-                // @ts-ignore
-                event[Symbol.for('corpseEater')] = true;
+                if (!this.tryMark('corpseEater')) return;
                 const [side, idx] = this.handPos!;
                 if (side !== event.pos[0]) return;
                 this.createEvent('play', {
@@ -183,27 +419,21 @@ const SIGILS = {
         },
     },
     damBuilder: {
-        name: 'Dam Builder',
-        description: 'When this card is played, Dams are created on adjacent empty spaces.',
-
         runAs: 'played',
         cleanup: {
-            play(event) {
+            play(event, [print]) {
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] - 1],
-                    card: this.initCard('dam'),
+                    card: this.initCard(print),
                 });
                 this.createEvent('play', {
                     pos: [this.side, event.pos[1] + 1],
-                    card: this.initCard('dam'),
+                    card: this.initCard(print),
                 });
             },
         },
     },
     deathTouch: {
-        name: 'Death Touch',
-        description: 'This card instantly kills any card it damages.',
-
         runAs: 'played',
         readers: {
             attack(event) {
@@ -219,41 +449,32 @@ const SIGILS = {
         },
     },
     detonator: {
-        name: 'Detonator',
-        description: 'When this card dies, adjacent and opposing cards are dealt 10 damage.',
-
         runAs: 'played',
         writers: {
-            perish(event) {
+            perish(event, [damage]) {
                 if (event.cause === 'sac') return;
-                // @ts-ignore
-                if (event[Symbol.for('detonator')]) return;
-                // @ts-ignore
-                event[Symbol.for('detonator')] = true;
+                if (!this.tryMark('detonator')) return;
                 const opposing = positions.opposing(event.pos);
                 const [side, lane] = event.pos;
                 this.prependEvent('shoot', {
                     from: event.pos,
                     to: [side, lane - 1],
-                    damage: 5,
+                    damage,
                 });
                 this.prependEvent('shoot', {
                     from: event.pos,
                     to: opposing,
-                    damage: 5,
+                    damage,
                 });
                 this.prependEvent('shoot', {
                     from: event.pos,
                     to: [side, lane + 1],
-                    damage: 5,
+                    damage,
                 });
             },
         },
     },
     doubleAttack: {
-        name: 'Double Strike',
-        description: 'A card bearing this sigil will strike the opposing space an extra time when attacking.',
-
         runAs: 'played',
         writers: {
             triggerAttack(event) {
@@ -270,9 +491,6 @@ const SIGILS = {
         },
     },
     drawCopy: {
-        name: 'Fecundity',
-        description: 'When this card is played, a copy of it enters your hand.',
-
         runAs: 'played',
         cleanup: {
             play() {
@@ -286,9 +504,6 @@ const SIGILS = {
         },
     },
     drawRabbit: {
-        name: 'Rabbit Hole',
-        description: 'When this card is played, a Rabbit is created in your hand.',
-
         runAs: 'played',
         cleanup: {
             play() {
@@ -300,9 +515,6 @@ const SIGILS = {
         },
     },
     evolve: {
-        name: 'Fledgling',
-        description: 'When this card is played, it gains 1 Power.',
-
         runAt: 'field',
         cleanup: {
             phase(event) {
@@ -325,9 +537,6 @@ const SIGILS = {
         },
     },
     fourBones: {
-        name: 'Bone King',
-        description: 'When this card dies, 4 Bones are awarded instead of 1.',
-
         runAs: 'played',
         writers: {
             perish() {
@@ -340,9 +549,6 @@ const SIGILS = {
         },
     },
     frozen: {
-        name: 'Frozen Away',
-        description: 'When this card perishes, the creature inside takes its place.',
-
         runAs: 'played',
         readers: {
             perish(event) {
@@ -357,9 +563,6 @@ const SIGILS = {
         },
     },
     gainBattery: {
-        name: 'Battery Bearer',
-        description: 'When this card is played, you gain an Energy Cell.',
-
         runAs: 'played',
         cleanup: {
             play() {
@@ -371,9 +574,6 @@ const SIGILS = {
         },
     },
     hoarder: {
-        name: 'Hoarder',
-        description: 'When this card is played, choose a card from your deck to be drawn immediately.',
-
         runAs: 'played',
         requests: {
             play: {
@@ -398,16 +598,7 @@ const SIGILS = {
             },
         },
     },
-    leader: {
-        name: 'Leader',
-        description: 'Creatures adjacent to this card gain 1 Power.',
-
-        buffs: ['incrAdjPower'],
-    },
     looter: {
-        name: 'Looter',
-        description: 'When this card deals damage directly, draw a card for each damage dealt.',
-
         runAs: 'played',
         cleanup: {
             attack(event) {
@@ -422,9 +613,6 @@ const SIGILS = {
         },
     },
     manyLives: {
-        name: 'Many Lives',
-        description: 'When this card is sacrificed, it does not perish.',
-
         runAs: 'played',
         writers: {
             perish(event) {
@@ -433,9 +621,6 @@ const SIGILS = {
         },
     },
     mightyLeap: {
-        name: 'Mighty Leap',
-        description: 'This card blocks opposing Airborne creatures.',
-
         runAfter: ['airborne'],
         runAs: 'attackee',
         writers: {
@@ -447,10 +632,28 @@ const SIGILS = {
             },
         },
     },
-    sharp: {
-        name: 'Sharp Quills',
-        description: 'Once this card is struck, the striker is dealt 1 damage.',
+    sentry: {
+        runAs: 'opposing',
+        cleanup: {
+            play(event) {
+                if (event.transient) return;
 
+                this.createEvent('attack', {
+                    from: this.fieldPos!,
+                    to: event.pos,
+                    damage: 1,
+                });
+            },
+            move(event) {
+                this.createEvent('attack', {
+                    from: this.fieldPos!,
+                    to: event.to,
+                    damage: 1,
+                });
+            },
+        },
+    },
+    sharp: {
         runAs: 'attackee',
         readers: {
             attack(event) {
@@ -462,52 +665,54 @@ const SIGILS = {
             },
         },
     },
-    stinky: {
-        name: 'Stinky',
-        description: 'The creature opposing this card loses 1 Power.',
-
-        buffs: ['decrOppPower'],
-    },
-    stone: {
-        name: 'Made of Stone',
-        description: 'A card bearing this sigil is immune to the effects of Touch of Death and Stinky.',
+    sniper: {
+        runAs: 'played',
+        writers: {
+            triggerAttack(event) {
+                this.cancelDefault();
+            },
+        },
+        requests: {
+            triggerAttack: {
+                callFor: (event) => [event.pos[0], { type: 'snipe' }],
+                async onResponse(event, res: ActionRes<'snipe'>) {
+                    const target = positions.opposing(event.pos, res.lane);
+                    this.createEvent('attack', {
+                        from: event.pos,
+                        to: target,
+                        damage: this.getPower(event.pos)!,
+                    });
+                },
+            },
+        },
     },
     skeletonStrafe: {
-        name: 'Skeleton Crew',
-        description: 'At the end of the owner\'s turn, this card moves in the sigil\'s direction and plays a Skeleton in the space behind it.',
-
         runAt: 'field',
         cleanup: {
-            phase(event) {
+            phase(event, [print]) {
                 if (event.phase !== 'post-attack') return;
-                SIGILS.strafe.cleanup.phase.call(this, event);
+                SIGIL_EFFECTS.strafe.cleanup.phase.call(this, event);
                 this.createEvent('play', {
                     pos: this.fieldPos!,
-                    card: this.initCard('skeleton'),
+                    card: this.initCard(print),
                 });
             },
         },
     },
     squirrelStrafe: {
-        name: 'Squirrel Shedder',
-        description: 'At the end of the owner\'s turn, this card moves in the sigil\'s direction and plays a Squirrel in the space behind it.',
-
         runAt: 'field',
         cleanup: {
-            phase(event) {
+            phase(event, [print]) {
                 if (event.phase !== 'post-attack') return;
-                SIGILS.strafe.cleanup.phase.call(this, event);
+                SIGIL_EFFECTS.strafe.cleanup.phase.call(this, event);
                 this.createEvent('play', {
                     pos: this.fieldPos!,
-                    card: this.initCard('squirrel'),
+                    card: this.initCard(print),
                 });
             },
         },
     },
     strafe: {
-        name: 'Strafe',
-        description: 'At the end of the owner\'s turn, this card moves in the sigil\'s direction.',
-
         runAt: 'field',
         cleanup: {
             phase(event) {
@@ -529,9 +734,6 @@ const SIGILS = {
         },
     },
     strafePush: {
-        name: 'Hefty',
-        description: 'At the end of the owner\'s turn, this and adjacent cards move in the sigil\'s direction.',
-
         runAt: 'field',
         cleanup: {
             phase(event) {
@@ -549,14 +751,7 @@ const SIGILS = {
             },
         },
     },
-    threeSacs: {
-        name: 'Worthy Sacrifice',
-        description: 'This card counts as 3 Blood rather than 1 Blood when sacrificed.',
-    },
     tristrike: {
-        name: 'Trifurcated Strike',
-        description: 'This card will deal damage to the opposing spaces left, right, and opposite of it.',
-
         runAs: 'played',
         writers: {
             triggerAttack(event) {
@@ -568,24 +763,7 @@ const SIGILS = {
             },
         },
     },
-    bistrike: {
-        name: 'Bifurcated Strike',
-        description: 'This card will strike each opposing space to the left and right of the spaces across it.',
-
-        runAs: 'played',
-        writers: {
-            triggerAttack(event) {
-                this.cancelDefault();
-                const [side, lane] = positions.opposing(event.pos);
-                this.createEvent('attack', { from: event.pos, to: [side, lane - 1] });
-                this.createEvent('attack', { from: event.pos, to: [side, lane + 1] });
-            },
-        },
-    },
     unkillable: {
-        name: 'Unkillable',
-        description: 'When this card perishes, a copy of it enters your hand.',
-
         runAs: 'played',
         readers: {
             perish() {
@@ -604,18 +782,12 @@ const SIGILS = {
         },
     },
     voidDamage: {
-        name: 'Repulsive',
-        description: 'If a creature would attack this card, it does not.',
-
         runAs: 'attackee',
         writers: {
             attack() { this.cancel(); },
         },
     },
     waterborne: {
-        name: 'Waterborne',
-        description: 'On the opponent\'s turn, creatures attacking this card\'s space attack directly.',
-
         runAt: 'field',
         cleanup: {
             phase(event) {
@@ -627,9 +799,6 @@ const SIGILS = {
         },
     },
     waterborneTentacle: {
-        name: 'Kraken Waterborne',
-        description: 'Same as Waterborne, except that this card becomes a Tentacle card when it emerges.',
-
         runAt: 'field',
         cleanup: {
             phase(event) {
@@ -657,15 +826,10 @@ const SIGILS = {
             },
         },
     },
-
-    // GBC
     doubleDeath: {
-        name: 'Double Death',
-        description: 'When another creature you own dies, it dies again.',
-
-        // runAfter: [],
         runAt: 'field',
         readers: {
+            // TODO: fix
             perish(event) {
                 if (event.cause === 'transient') return;
 
@@ -684,68 +848,7 @@ const SIGILS = {
             },
         },
     },
-    sentry: {
-        name: 'Sentry',
-        description: 'When a card moves into the space opposing this card, they are dealt 1 damage.',
-
-        runAs: 'opposing',
-        cleanup: {
-            play(event) {
-                if (event.transient) return;
-
-                this.createEvent('attack', {
-                    from: this.fieldPos!,
-                    to: event.pos,
-                    damage: 1,
-                });
-            },
-            move(event) {
-                this.createEvent('attack', {
-                    from: this.fieldPos!,
-                    to: event.to,
-                    damage: 1,
-                });
-            },
-        },
-    },
-
-    // Act III
-    sniper: {
-        name: 'Sniper',
-        description: 'You may choose which opposing spaces this card strikes.',
-
-        runAs: 'played',
-        writers: {
-            triggerAttack(event) {
-                this.cancelDefault();
-            },
-        },
-        requests: {
-            triggerAttack: {
-                callFor: (event) => [event.pos[0], { type: 'snipe' }],
-                async onResponse(event, res: ActionRes<'snipe'>) {
-                    const target = positions.opposing(event.pos, res.lane);
-                    this.createEvent('attack', {
-                        from: event.pos,
-                        to: target,
-                        damage: this.getPower(event.pos)!,
-                    });
-                },
-            },
-        },
-    },
-
-    // Mox
-    buffGems: {
-        name: 'Gem Animator',
-        description: 'Mox cards on the owner\'s side of the board gain 1 Power.',
-
-        buffs: ['incrMoxPower'],
-    },
     dropRubyOnDeath: {
-        name: 'Ruby Heart',
-        description: 'When this card perishes, a Ruby Mox replaces it.',
-
         runAs: 'played',
         cleanup: {
             perish() {
@@ -756,26 +859,7 @@ const SIGILS = {
             },
         },
     },
-    gainGemAll: {
-        name: 'Great Mox',
-        description: 'While this card is on the board, it provides all 3 Gems to its owner.',
-    },
-    gainGemGreen: {
-        name: 'Green Mox',
-        description: 'While this card is on the board, it provides a Green Gem.',
-    },
-    gainGemOrange: {
-        name: 'Orange Mox',
-        description: 'While this card is on the board, it provides an Orange Gem.',
-    },
-    gainGemBlue: {
-        name: 'Blue Mox',
-        description: 'While this card is on the board, it provides a Blue Gem.',
-    },
     gemsDraw: {
-        name: 'Mental Gymnastics',
-        description: 'When this card is played, you draw cards equal to the amount of your Mox cards played.',
-
         runAs: 'played',
         cleanup: {
             play() {
@@ -793,9 +877,6 @@ const SIGILS = {
         },
     },
     gemDependant: {
-        name: 'Gem Dependant',
-        description: 'If this card\'s owner controls no Mox cards, this card perishes.',
-
         runAt: 'field',
         cleanup: {
             play() {
@@ -811,86 +892,72 @@ const SIGILS = {
             },
             phase() {
                 if (this.tick.fight.turn.phase !== 'pre-turn' && this.tick.fight.turn.phase !== 'post-attack') return;
-                SIGILS.gemDependant.cleanup.play.call(this);
+                SIGIL_EFFECTS.gemDependant.cleanup.play.call(this);
             },
         },
     },
-
-    // Buttons
     activatedStatsUp: {
-        name: 'Enlarge',
-        description: '[Activate]: Pay 2 [Bones] to increase the [Power] and [Health] of this card by 1.',
-
         runAs: 'played',
         readers: {
-            activate(event) {
+            activate(event, [cost, incr]) {
                 const [side] = event.pos;
-                if (this.tick.fight.players[side].bones < 2) throw FightError.create(ErrorType.InsufficientResources, 'Not enough bones.');
+                if (this.tick.fight.players[side].bones < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough bones.');
                 this.createEvent('bones', {
                     side,
-                    amount: -2,
+                    amount: -cost,
                 });
                 this.createEvent('stats', {
                     pos: event.pos,
-                    power: this.getPower(event.pos)! + 1,
-                    health: this.card.state.health + 1,
+                    power: this.getPower(event.pos)! + incr,
+                    health: this.card.state.health + incr,
                 });
             },
         },
     },
     activatedStatsUpEnergy: {
-        name: 'Stimulate',
-        description: '[Activate]: Pay 3 [Energy] to increase the [Power] and [Health] of this card by 1.',
-
         runAs: 'played',
         readers: {
-            activate(event) {
+            activate(event, [cost, incr]) {
                 const [side] = event.pos;
-                if (this.tick.fight.players[side].energy[0] < 3) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
+                if (this.tick.fight.players[side].energy[0] < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
                 this.createEvent('energySpend', {
                     side,
-                    amount: 2,
+                    amount: cost,
                 });
                 this.createEvent('stats', {
                     pos: event.pos,
-                    power: this.getPower(event.pos)! + 1,
-                    health: this.card.state.health + 1,
+                    power: this.getPower(event.pos)! + incr,
+                    health: this.card.state.health + incr,
                 });
             },
         },
     },
     activatedEnergyToBones: {
-        name: 'Bonehorn',
-        description: '[Activate]: Pay 1 [Energy] to gain 1 [Bone].',
-
         runAs: 'played',
         readers: {
-            activate(event) {
+            activate(event, [cost, bones]) {
                 const [side] = event.pos;
-                if (this.tick.fight.players[side].energy[0] < 1) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
+                if (this.tick.fight.players[side].energy[0] < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
                 this.createEvent('energySpend', {
                     side,
-                    amount: 1,
+                    amount: cost,
                 });
                 this.createEvent('bones', {
                     side,
-                    amount: 1,
+                    amount: bones,
                 });
             },
         },
     },
     activatedDiceRollEnergy: {
-        name: 'Power Dice',
-        description: '[Activate]: Pay 1 [Energy] to set the [Power] of this card randomly between 1 and 6.',
-
         runAs: 'played',
         readers: {
-            activate(event) {
+            activate(event, [cost]) {
                 const [side] = event.pos;
-                if (this.tick.fight.players[side].energy[0] < 1) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
+                if (this.tick.fight.players[side].energy[0] < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
                 this.createEvent('energySpend', {
                     side,
-                    amount: 1,
+                    amount: cost,
                 });
                 const power = Math.floor(Math.random() * 6) + 1;
                 this.createEvent('stats', {
@@ -901,32 +968,26 @@ const SIGILS = {
         },
     },
     activatedDrawSkeleton: {
-        name: 'Disentomb',
-        description: '[Activate]: Pay 1 [Bone] to create a [Skeleton] in your hand.',
-
         runAs: 'played',
         readers: {
-            activate(event) {
+            activate(event, [cost, print]) {
                 const [side] = event.pos;
-                if (this.tick.fight.players[side].bones < 1) throw FightError.create(ErrorType.InsufficientResources, 'Not enough bones.');
+                if (this.tick.fight.players[side].bones < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough bones.');
                 this.createEvent('bones', {
                     side,
-                    amount: -1,
+                    amount: -cost,
                 });
                 this.createEvent('draw', {
                     side,
-                    card: this.initCard('witheredCorpse'),
+                    card: this.initCard(print),
                 });
             },
         },
     },
     activatedSacrificeDraw: {
-        name: 'True Scholar',
-        description: '[Activate]: If you have a Blue gem, destroy this card to draw 3 cards.',
-
         runAs: 'played',
         readers: {
-            activate(event) {
+            activate(event, [amount]) {
                 const [side] = event.pos;
                 if (!(getMoxes(this.tick.fight.field[side]) & MoxType.Blue))
                     throw FightError.create(ErrorType.InsufficientResources, 'Requires a blue gem.');
@@ -935,7 +996,7 @@ const SIGILS = {
                     pos: event.pos,
                     cause: 'attack',
                 });
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < amount; i++) {
                     this.createEvent('draw', {
                         side,
                         source: 'main',
@@ -945,36 +1006,28 @@ const SIGILS = {
         },
     },
     activatedDealDamage: {
-        name: 'Energy Gun',
-        description: '[Activate]: Pay 1 [Energy] to deal 1 damage to the space across from this card.',
-
         runAs: 'played',
         readers: {
-            activate(event) {
+            activate(event, [cost, damage]) {
                 const [side] = event.pos;
-                if (this.tick.fight.players[side].energy[0] < 1) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
+                if (this.tick.fight.players[side].energy[0] < cost) throw FightError.create(ErrorType.InsufficientResources, 'Not enough energy.');
                 const targetPos = positions.opposing(event.pos);
                 const target = this.getCard(targetPos);
                 if (!target) throw FightError.create(ErrorType.InvalidPositionAccess, 'Energy Gun must attack a card.');
                 this.createEvent('energySpend', {
                     side,
-                    amount: 1,
+                    amount: cost,
                 });
                 this.createEvent('shoot', {
                     from: event.pos,
                     to: targetPos,
-                    damage: 1,
+                    damage,
                 });
             },
         },
     },
 
-
-    // Custom
     vampiric: {
-        name: 'Vampiric',
-        description: 'When this card attacks another, it heals for the amount of damage dealt.',
-
         runAs: 'played',
         cleanup: {
             attack(event) {
@@ -991,5 +1044,9 @@ const SIGILS = {
             },
         },
     },
-} satisfies Record<string, SigilDef>;
-export const sigils: Record<string, SigilDef> = SIGILS;
+} satisfies {
+    [S in Sigil]?: SigilEffects<S>;
+};
+
+export const sigilInfos: Record<string, SigilInfo> = SIGIL_INFOS;
+export const sigils: Record<string, SigilDef> = fromEntries(entries(SIGIL_INFOS).map<[Sigil, SigilDef]>(([id, info]) => [id, { ...info, ...(SIGIL_EFFECTS as Record<string, SigilEffects>)[id] }]));

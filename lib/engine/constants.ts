@@ -8,3 +8,10 @@ export const MOX_TYPES: Record<string, MoxType> = {
     Orange: MoxType.Orange,
     Blue: MoxType.Blue,
 };
+
+export type SigilParamType = 'print' | 'number';
+
+export type SigilParam<T extends SigilParamType> =
+    T extends 'print' ? string :
+        T extends 'number' ? number :
+            never;
