@@ -1,7 +1,6 @@
 .root {
     --client-bg: var(--flow);
     --client-muted: #3a2d2d;
-    height: 100%;
 }
 
 .client {

@@ -1,6 +1,7 @@
 .gameRoot {
     width: 500em;
-    height: 260em
+    display: flex;
+    flex-direction: column;
 }
 
 .gameRoot .controlsBox {
@@ -19,4 +20,16 @@
 .borkStack {
     margin-top: 1em;
     opacity: 0.5;
+}
+
+.startOptions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8em;
+    gap: 8em;
+}
+
+.client {
+    flex: 1;
 }

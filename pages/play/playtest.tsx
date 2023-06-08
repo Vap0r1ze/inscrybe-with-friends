@@ -139,7 +139,7 @@ function PlayTestPage() {
     return <div style={{
         color: 'var(--ui)',
     }}>
-        {!game ? <div>
+        {!game ? <div className={styles.startOptions}>
             <Select
                 options={entries(rulesets).map(([id, ruleset]) => [id, ruleset.name])}
                 placeholder="Select Ruleset"
@@ -159,7 +159,7 @@ function PlayTestPage() {
             <Button
                 disabled={Object.values(selectedDecks).some(deck => !deck)}
                 onClick={onFightStart}
-            ><Text>Start Fight</Text></Button>
+            ><Text size={14}>Start Fight</Text></Button>
         </div> : <div className={styles.gameRoot} style={{ position: 'relative' }}>
             <Box className={styles.controlsBox}>
                 <div className={styles.controls}>
@@ -171,7 +171,7 @@ function PlayTestPage() {
                     <Text>Playing as <span style={{ textTransform: 'uppercase' }}>{currentSide}</span></Text>
                 </div>
             </Box>
-            <Client key={currentSide} id="playtest" debug />
+            <Client className={styles.client} key={currentSide} id="playtest" debug />
             {devMode && <DevMenu id="playtest" onClose={() => setDevMode(false)} />}
         </div>}
     </div>;

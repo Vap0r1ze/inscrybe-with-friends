@@ -12,12 +12,14 @@ import { DebugEvents, DebugInfo } from './Debug';
 import { NSlice } from '../ui/NSlice';
 import { useBattleSheet } from '@/hooks/useBattleTheme';
 import { GameEnd } from './GameEnd';
+import classNames from 'classnames';
 
 export interface ClientProps {
     id: string
+    className?: string
     debug?: boolean
 }
-export const Client = memo(function Client({ id, debug }: ClientProps) {
+export const Client = memo(function Client({ id, className, debug }: ClientProps) {
     const battleTheme = useBattleSheet();
     const client = useClientStore(state => state.clients[id]);
 
@@ -30,7 +32,7 @@ export const Client = memo(function Client({ id, debug }: ClientProps) {
         animationVars[`--event-${key}-duration`] = `${value}s`;
     }
 
-    return <div className={styles.root}>
+    return <div className={classNames(styles.root, className)}>
         <ErrorBoundary fallbackRender={ClientError}>
             {client ? <div className={styles.client} style={{
                 '--lane-count': client.fight.opts.lanes,
