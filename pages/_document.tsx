@@ -8,6 +8,7 @@ export default function Document() {
     return (
         <Html lang="en">
             <Head>
+                <link rel="icon" href="/icon.png" sizes="any" />
                 <link rel="preload" href="/fonts/Marksman.woff" as="font" type="font/woff" crossOrigin="anonymous"/>
             </Head>
             <body>

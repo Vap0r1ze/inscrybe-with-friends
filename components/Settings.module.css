@@ -16,6 +16,7 @@
 .backdrop .modal {
     margin: 16em auto;
     width: 240em;
+    color: var(--flow);
 }
 
 .volume {

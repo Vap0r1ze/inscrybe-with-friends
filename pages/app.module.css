@@ -28,3 +28,18 @@
         font-size: 0.1em;
     }
 } */
+
+.notFound {
+    color: var(--ui);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.notFoundDiv {
+    width: 1em;
+    background: var(--ui-dark);
+    height: 14em;
+    margin: 0 4em 0 2em;
+}

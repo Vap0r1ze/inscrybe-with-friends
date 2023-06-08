@@ -1,6 +1,6 @@
 import { Action, ActionRes, isActionInvalid } from './Actions';
 import { CardPos, getBloods, getCardPower, getMoxes, initCardFromPrint } from './Card';
-import { Event, eventSettlers, isEventInvalid, isEventType } from './Events';
+import { Event, eventSettlers, isEventInvalid } from './Events';
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { rulesets } from '../defs/prints';
 import { Sigil, sigils } from '../defs/sigils';
@@ -314,7 +314,7 @@ async function settleEvents(tick: FightTick) {
         }
 
         // FIXME: KILL EVENTS TIED TO DEAD CARDS
-        if (!isEventType(['perish', 'lifeLoss'], event)) {
+        if (event.type !== 'perish') {
             for (const side of FIGHT_SIDES) {
                 for (const [lane, card] of tick.fight.field[side].entries()) {
                     if (card?.state.health === 0) {
@@ -329,9 +329,7 @@ async function settleEvents(tick: FightTick) {
         if (tick.queue.length === 0) {
             const sides = FIGHT_SIDES.slice().sort((a, b) => tick.fight.points[b] - tick.fight.points[a]);
             if (tick.fight.points[sides[0]] - tick.fight.points[sides[1]] >= 5) {
-                for (const side of sides.slice(1)) {
-                    tick.queue.unshift({ type: 'lifeLoss', side });
-                }
+                for (const side of sides.slice(1)) tick.queue.unshift({ type: 'lifeLoss', side });
             }
         }
     }
