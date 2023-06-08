@@ -185,7 +185,7 @@ function PlayTestPage() {
                 </div>
             </Box>
             <Client className={styles.client} key={currentSide} id="playtest" debug={!fullscreen} />
-            {!fullscreen && devMode && <DevMenu id="playtest" onClose={() => setDevMode(false)} />}
+            {devMode && <DevMenu id="playtest" onClose={() => setDevMode(false)} />}
         </div>}
     </div>;
 }
