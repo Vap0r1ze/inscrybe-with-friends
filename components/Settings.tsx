@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styles from './Settings.module.css';
-import Asset from './sprites/Asset';
+import { Asset } from './sprites/Asset';
 import { HoverBorder } from './ui/HoverBorder';
 import { Box } from './ui/Box';
 import { VolumeType, useSettingsStore } from '@/hooks/useSettings';
@@ -17,13 +17,11 @@ export function Settings() {
             <HoverBorder color="--ui-dark" inset={-2} />
         </div>
         {open && <div className={styles.backdrop} onClick={() => setOpen(false)}>
-            <div onClick={event => event.stopPropagation()}>
-                <Box className={styles.modal}>
-                    <VolumeSetting type="all" />
-                    <VolumeSetting type="music" />
-                    <VolumeSetting type="sfx" />
-                </Box>
-            </div>
+            <Box className={styles.modal} onClick={event => event.stopPropagation()}>
+                <VolumeSetting type="all" />
+                <VolumeSetting type="music" />
+                <VolumeSetting type="sfx" />
+            </Box>
         </div>}
     </>;
 }

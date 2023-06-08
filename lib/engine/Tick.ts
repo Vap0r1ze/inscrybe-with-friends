@@ -1,6 +1,6 @@
 import { Action, ActionRes, isActionInvalid } from './Actions';
 import { CardPos, getBloods, getCardPower, getMoxes, initCardFromPrint } from './Card';
-import { Event, eventSettlers, isEventInvalid } from './Events';
+import { Event, eventSettlers, isEventInvalid, isEventType } from './Events';
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { rulesets } from '../defs/prints';
 import { Sigil, sigils } from '../defs/sigils';
@@ -156,6 +156,9 @@ export async function handleAction(tick: FightTick, side: FightSide, action: Act
             break;
         }
         case 'hammer': {
+            const { hammersPerTurn } = tick.fight.opts;
+            if (hammersPerTurn !== -1 && tick.fight.players[side].turnHammers >= hammersPerTurn)
+                throw FightError.create(ErrorType.InvalidAction, `You cannot hammer more than ${hammersPerTurn} time(s) per turn`);
             if (tick.fight.mustPlay[side] != null) throw FightError.create(ErrorType.InvalidAction, 'You must play your card');
             const card = tick.fight.field[side][action.lane];
             if (card == null) throw FightError.create(ErrorType.InvalidAction, 'You cannot hammer a lane that is empty');
@@ -311,7 +314,7 @@ async function settleEvents(tick: FightTick) {
         }
 
         // FIXME: KILL EVENTS TIED TO DEAD CARDS
-        if (event.type !== 'perish') {
+        if (!isEventType(['perish', 'lifeLoss'], event)) {
             for (const side of FIGHT_SIDES) {
                 for (const [lane, card] of tick.fight.field[side].entries()) {
                     if (card?.state.health === 0) {
@@ -319,6 +322,15 @@ async function settleEvents(tick: FightTick) {
                         tick.queue.unshift({ type: 'perish', pos: [side, lane], cause: 'attack' });
                         tick.logger?.debug(`Triggered death at [${side}, ${lane}]`);
                     }
+                }
+            }
+        }
+
+        if (tick.queue.length === 0) {
+            for (const side of FIGHT_SIDES) {
+                const otherSides = FIGHT_SIDES.filter(s => s !== side);
+                if (tick.fight.points[side] >= 5) for (const otherSide of otherSides) {
+                    tick.queue.unshift({ type: 'lifeLoss', side: otherSide });
                 }
             }
         }

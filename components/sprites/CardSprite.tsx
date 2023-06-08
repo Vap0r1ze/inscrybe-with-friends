@@ -1,14 +1,14 @@
 import styles from './Card.module.css';
-import { CardPrint, CardState, FieldPos, getCardPower } from '@/lib/engine/Card';
-import CostSprite from './CostSprite';
-import Asset from './Asset';
-import StatSprite from './StatSprite';
 import classNames from 'classnames';
+import { memo } from 'react';
+import { CardPrint, CardState, FieldPos, getCardPower } from '@/lib/engine/Card';
+import { CostSprite } from './CostSprite';
+import { Asset } from './Asset';
+import { StatSprite } from './StatSprite';
 import { Sprite } from './Sprite';
 import { Spritesheets } from '@/lib/spritesheets';
-import { Sigil, sigilInfos } from '@/lib/defs/sigils';
+import { Sigil } from '@/lib/defs/sigils';
 import { openInRulebook } from '@/hooks/useRulebook';
-import { memo } from 'react';
 import { SigilButton } from '../inputs/SigilButton';
 import { useClient } from '@/hooks/useClientStore';
 import { rulesets } from '@/lib/defs/prints';
@@ -52,13 +52,19 @@ export const CardSprite = memo(function CardSprite({
     const isOpposing = fieldPos?.[0] === 'opposing';
     const health = state?.health ?? print.health;
     let power = state?.power ?? print.power;
-    let staticPower = power;
+    const staticPower = power;
+    const isDynamicPower = typeof staticPower !== 'number';
 
     if (fieldPos && client) {
         const { prints } = rulesets[client.fight.opts.ruleset];
         const calcPower = getCardPower(prints, client.fight, fieldPos);
         if (calcPower != null) power = calcPower;
     }
+
+    const onPowerContextMenu = () => {
+        console.log('aa');
+        if (isDynamicPower) openInRulebook(`stat:${staticPower}`);
+    };
 
     return <div className={classNames(styles.card, className)} onContextMenu={e => e.preventDefault()}>
         <div className={classNames({
@@ -99,7 +105,8 @@ export const CardSprite = memo(function CardSprite({
                 <div className={styles.stats}>
                     <StatSprite className={classNames(styles.stat, {
                         [styles.dynamicStat]: power !== staticPower,
-                    })} stat={power} />
+                        [styles.isDynamicStat]: isDynamicPower,
+                    })} stat={power} onContextMenu={onPowerContextMenu} />
                     <StatSprite className={classNames(styles.stat, {
                         [styles.warningStat]: health < print.health,
                     })} stat={health} />

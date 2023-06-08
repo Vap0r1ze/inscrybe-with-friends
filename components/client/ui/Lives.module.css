@@ -1,0 +1,25 @@
+.lives {
+    position: relative;
+    padding-top: 15em;
+    margin-right: auto;
+    margin-left: -2em;
+}
+
+.candle {
+    position: absolute;
+}
+
+.candle:nth-child(2) {
+    bottom: 14em;
+    left: 8em;
+}
+
+.candle:nth-child(3) {
+    bottom: 12em;
+    left: 17em;
+}
+
+.candle:nth-child(4) {
+    bottom: 24em;
+    left: 9em;
+}

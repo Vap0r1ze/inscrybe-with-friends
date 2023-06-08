@@ -5,7 +5,7 @@ import { ActionReq, ActionRes } from './Actions';
 import { Card, CardPos, FieldPos, getCardPower } from './Card';
 import { FightTick } from './Tick';
 import { DeckType } from './Deck';
-import { Fight, FightSide, Phase } from './Fight';
+import { FIGHT_SIDES, Fight, FightSide, Phase } from './Fight';
 import { oppositeSide } from './utils';
 
 export type Event<T extends keyof EventMap = keyof EventMap> = T extends keyof EventMap ? (EventMap[T] & { type: T }) : never;
@@ -34,6 +34,8 @@ type EventMap = {
     flip: { pos: FieldPos };
     request: { side: FightSide; req: ActionReq; };
     response: { side: FightSide; req: ActionReq; res: ActionRes; };
+    lifeLoss: { side: FightSide };
+    points: { side: FightSide; amount: number };
 };
 
 // NOTE: assume the `fight` object is always dirty, clone any objects inside it before making state from it
@@ -42,7 +44,10 @@ export const eventSettlers: {
 } = {
     phase(fight, event) {
         fight.turn.phase = event.phase;
-        if (event.side) fight.turn.side = event.side;
+        if (event.side) {
+            fight.turn.side = event.side;
+            fight.players[event.side].turnHammers = 0;
+        }
     },
     energy(fight, event) {
         const { energy } = fight.players[event.side];
@@ -62,6 +67,7 @@ export const eventSettlers: {
     },
     perish(fight, event) {
         const [side, lane] = event.pos;
+        if (event.cause === 'hammer') fight.players[event.pos[0]].turnHammers++;
         fight.field[side][lane] = null;
     },
     triggerAttack(fight, event) {},
@@ -153,6 +159,13 @@ export const eventSettlers: {
     },
     response(fight, event) {
         fight.waitingFor = null;
+    },
+    lifeLoss(fight, event) {
+        fight.players[event.side].deaths++;
+        for (const side of FIGHT_SIDES) fight.points[side] = 0;
+    },
+    points(fight, event) {
+        fight.points[event.side] += event.amount;
     },
 };
 
@@ -250,7 +263,11 @@ export function translateEvent(event: Event, side: FightSide, forClient: boolean
 
     // flip FightSides
     if (shouldFlip &&
-        isEventType(['phase', 'energy', 'energySpend', 'bones', 'draw', 'request', 'response', 'mustPlay'], event)
+        isEventType([
+            'phase', 'energy', 'energySpend', 'bones',
+            'draw', 'request', 'response', 'mustPlay',
+            'lifeLoss', 'points',
+        ], event)
     && event.side) {
         event.side = oppositeSide(event.side);
     } else if (shouldFlip && event.type === 'play') {

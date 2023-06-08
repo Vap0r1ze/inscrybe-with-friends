@@ -27,5 +27,4 @@ export const Spritesheets = {
     chars: CharSprites,
     borderChars: BorderCharSprites,
     stats: StatSprites,
-    battle: BattleSprites,
 };

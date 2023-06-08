@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { createContext, useCallback, useContext, useEffect, useRef } from 'react';
-import { Fight } from '@/lib/engine/Fight';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { FIGHT_SIDES, Fight } from '@/lib/engine/Fight';
 import { FightPacket } from '@/lib/engine/Tick';
 import { Event, eventSettlers } from '@/lib/engine/Events';
 import { useGameStore } from './useGameStore';
@@ -111,7 +111,7 @@ export function useClient<T = FightClient>(throwIfMissing?: boolean, selector: (
     });
 }
 
-type ErrorHandlers = Partial<Record<ErrorType, (error: FightError) => Promise<void>>>;
+type ErrorHandlers = Partial<Record<ErrorType, (error: FightError) => Promise<void> | void>>;
 export function useClientActions() {
     const id = useContext(ClientContext);
     if (!id) throw new Error('Missing client context!');
@@ -190,7 +190,12 @@ export function useFightGetter() {
 
 export function useClientProp<T extends keyof FightClient>(prop: T) {
     const client = useClient(true);
-    const setProp = useCallback((value: FightClient[T]) => useClientStore.getState().setClient(client.id, client => ({ ...client, [prop]: value })), [client.id, prop]);
+    const setProp = useCallback((value: FightClient[T]) => {
+        useClientStore.getState().setClient(client.id, client => ({
+            ...client,
+            [prop]: value,
+        }));
+    }, [client.id, prop]);
     return [client[prop], setProp] as const;
 }
 
@@ -203,6 +208,19 @@ export function useHolding() {
     });
     const mustPlay = useFight(fight => fight.mustPlay.player);
     return [holdingMidplay ? null : (mustPlay ?? holdingIdx), setHolding] as const;
+}
+
+export function useWinner() {
+    const fightLives = useFight(fight => fight.opts.lives);
+    const players = useFight(fight => fight.players);
+    const winner = useMemo(() => {
+        for (const side of FIGHT_SIDES) {
+            if (players[side].deaths >= fightLives) return FIGHT_SIDES.filter(s => s !== side)[0];
+        }
+        return null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [players.opposing.deaths, players.player.deaths]);
+    return winner;
 }
 
 function commitEvents(client: FightClient, events: Event[]) {
@@ -287,4 +305,6 @@ export const animationDurations: Record<Event['type'], number> = {
     triggerAttack: 0,
     stats: 0.1,
     mustPlay: 0.1,
+    lifeLoss: 0.2,
+    points: 0.2,
 };

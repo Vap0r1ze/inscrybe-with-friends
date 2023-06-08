@@ -1,5 +1,5 @@
 import styles from './AssetButton.module.css';
-import Asset from '../sprites/Asset';
+import { Asset } from '../sprites/Asset';
 
 interface AssetButtonProps {
     path: string;

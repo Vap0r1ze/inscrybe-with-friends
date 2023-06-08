@@ -4,11 +4,11 @@ import { Status } from './ui/Status';
 import { useClientActions, useClientProp, useFight } from '@/hooks/useClientStore';
 import { memo } from 'react';
 import { Sprite } from '../sprites/Sprite';
-import { useBattleTheme } from '@/hooks/useBattleTheme';
+import { useBattleSheet } from '@/hooks/useBattleTheme';
 import { triggerSound } from '@/hooks/useAudio';
 
 export const LeftInfo = memo(function LeftInfo() {
-    const battleTheme = useBattleTheme();
+    const battleTheme = useBattleSheet();
     const isPlayTurn = useFight(fight => fight.turn.side === 'player' && fight.turn.phase === 'play');
     const [hammering, setHammering] = useClientProp('hammering');
     const { sendAction } = useClientActions();

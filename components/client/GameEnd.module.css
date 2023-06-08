@@ -1,0 +1,9 @@
+.winScreen {
+    position: absolute;
+    inset: 0;
+    background: rgb(0, 0, 0, .5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--flow);
+}

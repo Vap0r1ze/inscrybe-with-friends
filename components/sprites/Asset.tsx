@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 export interface AssetProps {
     path: string;
 }
-export default function Asset({ path }: AssetProps) {
+export function Asset({ path }: AssetProps) {
     const [size, setSize] = useState<{ width: number, height: number }>();
 
     useEffect(() => {

@@ -1,7 +1,7 @@
 import { Spritesheet } from '.';
 
-export const BattleSprites: Spritesheet = {
-    path: '/assets/gbc/fight/nature.png',
+export const BattleSprites = (id: string): Spritesheet => ({
+    path: `/assets/gbc/fight/${id}.png`,
     size: [573, 252],
     sprites: {
         slot: [0, 0, 44, 58],
@@ -24,7 +24,7 @@ export const BattleSprites: Spritesheet = {
 
         scaleBase: [0, 103, 24, 63],
         scaleBowl: [102, 60, 26, 40],
-        scaleMarker: [116, 44, 9, 7],
+        scaleMarker: [90, 77, 9, 7],
         scaleBeam: [129, 170, 51, 5],
         scale: [0, 93, 95, 8],
 
@@ -44,5 +44,15 @@ export const BattleSprites: Spritesheet = {
         boardRight: [441, 0, 132, 152],
         boardBorder: [129, 153, 12, 16],
         middle: [142, 153, 44, 4],
+
+        candleHolder1: [129, 176, 24, 14],
+        candleHolder2: [129, 191, 24, 14],
+        candleHolder3: [154, 176, 24, 14],
+        candle1: [129, 226, 7, 16],
+        candle2: [137, 226, 7, 16],
+        candle3: [145, 226, 7, 16],
+        candleOut1: [153, 226, 7, 16],
+        candleOut2: [161, 226, 7, 16],
+        candleOut3: [169, 226, 7, 16],
     },
-};
+});

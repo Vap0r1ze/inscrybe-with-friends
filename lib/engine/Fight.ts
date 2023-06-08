@@ -43,19 +43,21 @@ export interface Fight<InclSide extends FightSide = never> {
 }
 
 export interface PlayerState {
-    lives: number;
+    deaths: number;
     bones: number;
     energy: [number, number];
     deckSizes: Record<DeckType, number>;
     handSize: number;
+    turnHammers: number;
 }
 
-const initPlayerState = (lives: number): PlayerState => ({
-    lives,
+const initPlayerState = (): PlayerState => ({
+    deaths: 0,
     bones: 0,
     energy: [0, 0],
     deckSizes: fromEntries(DECK_TYPES.map(type => [type, 0])),
     handSize: 0,
+    turnHammers: 0,
 });
 
 export function createFight<Side extends FightSide = never>(opts: FightOptions, sides: readonly Side[], decks: Record<Side, DeckCards>): Fight<Side> {
@@ -71,8 +73,8 @@ export function createFight<Side extends FightSide = never>(opts: FightOptions, 
             opposing: Array(opts.lanes).fill(null),
         },
         players: {
-            player: initPlayerState(opts.lives),
-            opposing: initPlayerState(opts.lives),
+            player: initPlayerState(),
+            opposing: initPlayerState(),
         },
         hands,
         mustPlay,

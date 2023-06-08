@@ -1,7 +1,7 @@
 import { Number } from '@/components/sprites/Number';
 import styles from './Scale.module.css';
 import { Sprite } from '@/components/sprites/Sprite';
-import { useBattleTheme } from '@/hooks/useBattleTheme';
+import { useBattleSheet } from '@/hooks/useBattleTheme';
 import { CSSProperties } from 'react';
 
 export interface ScaleProps {
@@ -9,7 +9,7 @@ export interface ScaleProps {
     right: number;
 }
 export function Scale({ left, right }: ScaleProps) {
-    const battleTheme = useBattleTheme();
+    const battleTheme = useBattleSheet();
     const points = Math.min(5, Math.max(-5, right - left));
 
     return (

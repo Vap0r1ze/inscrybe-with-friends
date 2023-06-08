@@ -1,5 +1,17 @@
-import { Spritesheet, Spritesheets } from '@/lib/spritesheets';
+import { Spritesheet } from '@/lib/spritesheets';
+import { BattleSprites } from '@/lib/spritesheets/battle';
+import { useMemo } from 'react';
+import { create } from 'zustand';
 
-export function useBattleTheme(): Spritesheet {
-    return Spritesheets.battle;
+interface BattleThemeStore {
+    theme: string;
+}
+export const useBattleThemeStore = create<BattleThemeStore>((set, get) => ({
+    theme: 'nature',
+}));
+
+export function useBattleSheet(): Spritesheet {
+    const theme = useBattleThemeStore(state => state.theme);
+    const sheet = useMemo(() => BattleSprites(theme), [theme]);
+    return sheet;
 }

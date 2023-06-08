@@ -14,11 +14,12 @@ import { AnimatePresence } from 'framer-motion';
 import { FIGHT_SIDES } from '@/lib/engine/Fight';
 import { fromEntries } from '@/lib/utils';
 import { NSlice } from '../ui/NSlice';
-import { useBattleTheme } from '@/hooks/useBattleTheme';
+import { useBattleSheet } from '@/hooks/useBattleTheme';
 import { Projectiles } from './animations/Projectiles';
+import { triggerSound } from '@/hooks/useAudio';
 
 export const Board = memo(function Board() {
-    const battleTheme = useBattleTheme();
+    const battleTheme = useBattleSheet();
     const prints = useFight(fight => rulesets[fight.opts.ruleset].prints);
     const field = useFight(fight => fight.field);
     const hand = useFight(fight => fight.hands.player);
@@ -79,7 +80,9 @@ export const Board = memo(function Board() {
     };
     const onActivate = useCallback((lane: number, sigil: string) => {
         if (pending) return;
-        sendAction('activate', { lane, sigil });
+        sendAction('activate', { lane, sigil }, {
+            InsufficientResources: () => triggerSound('error'),
+        });
         setHolding(null);
         setHammering(false);
     }, [pending, sendAction, setHolding, setHammering]);

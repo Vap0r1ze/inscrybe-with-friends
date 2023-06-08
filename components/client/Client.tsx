@@ -10,14 +10,15 @@ import { RightInfo } from './RightInfo';
 import { Hand } from './Hand';
 import { DebugEvents, DebugInfo } from './Debug';
 import { NSlice } from '../ui/NSlice';
-import { useBattleTheme } from '@/hooks/useBattleTheme';
+import { useBattleSheet } from '@/hooks/useBattleTheme';
+import { GameEnd } from './GameEnd';
 
 export interface ClientProps {
     id: string
     debug?: boolean
 }
 export const Client = memo(function Client({ id, debug }: ClientProps) {
-    const battleTheme = useBattleTheme();
+    const battleTheme = useBattleSheet();
     const client = useClientStore(state => state.clients[id]);
 
     const onDismissError = () => {
@@ -55,6 +56,7 @@ export const Client = memo(function Client({ id, debug }: ClientProps) {
                             </Box>
                         </div>
                     </div>}
+                    <GameEnd />
                 </ClientContext.Provider>
             </div> : <Box className={styles.missing}>
                 <Text size={20}>CLIENT MISSING</Text>

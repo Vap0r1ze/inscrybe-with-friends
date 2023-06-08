@@ -21,7 +21,7 @@ declare global {
 type Sound = keyof typeof notes;
 
 const notes = {
-    blip: 'D2',
+    blip: 'D3',
     rulebookOpen: 'C1',
     rulebookFlip: ['C#1', 'D1', 'D#1'],
     bellRing: 'E1',
@@ -30,20 +30,28 @@ const notes = {
     sac: 'G1',
     select: 'G#1',
     hammer: 'A1',
+    spend: 'A#1',
+    error: 'B1',
+    points: 'C2',
+    loseLife: 'C#2',
 };
 const sampler = isClient ? new Tone.Sampler({
     urls: {
         [notes.blip]: 'crunch_blip.wav',
         [notes.select]: 'beep.wav',
+        [notes.spend]: 'spend.mp3',
+        [notes.error]: 'toneless_negate.wav',
         [notes.rulebookOpen]: 'rulebook_open.mp3',
         [notes.rulebookFlip[0]]: 'rulebook_flip_1.mp3',
         [notes.rulebookFlip[1]]: 'rulebook_flip_2.mp3',
         [notes.rulebookFlip[2]]: 'rulebook_flip_3.mp3',
         [notes.bellRing]: 'toneless_ring.mp3',
-        [notes.attack]: 'pixel_card_attack_nature.wav',
-        [notes.death]: 'pixel_card_death.wav',
-        [notes.sac]: 'pixel_card_sacrifice.wav',
-        [notes.hammer]: 'hammer.wav',
+        [notes.attack]: 'attack_nature.wav',
+        [notes.death]: 'death.wav',
+        [notes.sac]: 'sacrifice.wav',
+        [notes.hammer]: 'crunch_blip_2.wav',
+        [notes.points]: 'crunch_blip_2.wav',
+        [notes.loseLife]: 'lose_life.mp3',
     },
     baseUrl: '/audio/',
 }).toDestination() : null as never;
@@ -58,6 +66,8 @@ const volumes: Partial<Record<Sound, number>> = {
     select: 1.2,
     rulebookOpen: 0.9,
     rulebookFlip: 0.9,
+    error: 0.9,
+    points: 0.6,
 };
 
 function getNote(sound: Sound) {
@@ -87,6 +97,7 @@ export function triggerSound(sound: Sound) {
 export function triggerActionSound(action: Action) {
     if (action.type === 'bellRing') triggerSound('bellRing');
     if (action.type === 'hammer') triggerSound('hammer');
+    if (action.type === 'activate') triggerSound('select');
 }
 export function triggerEventSound(event: Event) {
     if (event.type === 'attack') {
@@ -95,6 +106,10 @@ export function triggerEventSound(event: Event) {
         if (event.cause === 'sac') triggerSound('sac');
         else triggerSound('death');
     } else if (event.type === 'draw') {
+        playSound('blip');
+    } else if (event.type === 'lifeLoss') {
+        playSound('loseLife');
+    } else if (event.type === 'play' || event.type === 'move') {
         playSound('blip');
     }
 }

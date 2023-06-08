@@ -11,12 +11,10 @@
     position: absolute;
     inset: 0;
     background: rgb(0, 0, 0, .5);
-    display: flex;
-    justify-content: center;
 }
 
-.modal {
-    margin-top: 16em;
+.backdrop .modal {
+    margin: 16em auto;
     width: 240em;
 }
 

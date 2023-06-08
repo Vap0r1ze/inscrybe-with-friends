@@ -7,10 +7,10 @@ import { FightSide } from '@/lib/engine/Fight';
 import { Sprite } from '../../sprites/Sprite';
 import { Number } from '../../sprites/Number';
 import { memo } from 'react';
-import { useBattleTheme } from '@/hooks/useBattleTheme';
+import { useBattleSheet } from '@/hooks/useBattleTheme';
 
 export const Status = memo(function Status({ side }: { side: FightSide }) {
-    const battleTheme = useBattleTheme();
+    const battleTheme = useBattleSheet();
     const player = useFight(fight => fight.players[side]);
     const lanes = useFight(fight => fight.field[side]);
     const prints = useFight(fight => rulesets[fight.opts.ruleset].prints);

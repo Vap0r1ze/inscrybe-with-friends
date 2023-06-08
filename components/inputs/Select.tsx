@@ -1,6 +1,6 @@
 import { MouseEventHandler, useEffect, useRef, useState } from 'react';
 import styles from './Select.module.css';
-import Asset from '../sprites/Asset';
+import { Asset } from '../sprites/Asset';
 import classNames from 'classnames';
 
 export interface SelectProps {

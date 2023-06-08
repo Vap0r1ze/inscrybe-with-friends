@@ -104,3 +104,8 @@
 .warningStat {
     filter: url(#warningValue);
 }
+
+.isDynamicStat {
+    pointer-events: auto;
+    cursor: help;
+}
