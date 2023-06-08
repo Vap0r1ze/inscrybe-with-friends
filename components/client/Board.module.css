@@ -30,8 +30,15 @@
     pointer-events: auto;
 }
 
+.card,
 .cardSlot {
     position: relative;
+}
+
+.circuit {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
 }
 
 .cardSlotHover {

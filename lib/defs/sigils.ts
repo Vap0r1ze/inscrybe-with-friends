@@ -1063,11 +1063,18 @@ const SIGIL_EFFECTS = {
     conduitSpawner: {
         runAt: 'field',
         preSettleRead: {
-            phase(event) {
+            phase(event, [print]) {
                 const [side] = this.fieldPos!;
-                const { turn } = this.tick.fight;
+                const { turn, field, opts } = this.tick.fight;
                 if (event.phase !== 'post-attack' || turn.side !== side) return;
-                // TODO: impl
+                const circuit = getCircuit(this.prints, field[side]);
+                for (let lane = 0; lane < opts.lanes; lane++) {
+                    if (circuit[lane] !== 'circuit') continue;
+                    this.createEvent('play', {
+                        card: this.initCard(print),
+                        pos: [side, lane],
+                    });
+                }
             },
         },
     },

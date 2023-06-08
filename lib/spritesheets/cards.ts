@@ -2,7 +2,7 @@ import { Spritesheet } from '.';
 
 export const CardSprites: Spritesheet = {
     path: '/assets/gbc/cards.png',
-    size: [220, 232],
+    size: [220, 290],
     tiled: {
         tileSize: [44, 58],
         borderWidth: { in: 0, out: 0 },
@@ -18,7 +18,6 @@ export const CardSprites: Spritesheet = {
 
         stitches: [0, 3],
         noSac: [1, 3],
-        conduit_frame: [0, 0],
         nature_frame: [4, 0],
         tech_frame: [4, 1],
         undead_frame: [4, 2],
@@ -26,6 +25,11 @@ export const CardSprites: Spritesheet = {
 
         common_back: [2, 2],
         submerged_back: [1, 2],
+
+        circuit: [0, 0],
+        conduit: [0, 4],
+        conduitLeft: [1, 4],
+        conduitRight: [2, 4],
 
         sac: [0, 2],
         target: [1, 3],

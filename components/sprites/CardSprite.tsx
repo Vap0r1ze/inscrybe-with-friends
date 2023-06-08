@@ -1,7 +1,7 @@
 import styles from './Card.module.css';
 import classNames from 'classnames';
 import { memo } from 'react';
-import { CardPrint, CardState, FieldPos, getCardPower } from '@/lib/engine/Card';
+import { CardPrint, CardState, CircuitSlot, FieldPos, getCardPower, getCircuit } from '@/lib/engine/Card';
 import { CostSprite } from './CostSprite';
 import { Asset } from './Asset';
 import { StatSprite } from './StatSprite';
@@ -55,14 +55,17 @@ export const CardSprite = memo(function CardSprite({
     const staticPower = power;
     const isDynamicPower = typeof staticPower !== 'number';
 
+    let circuitSlot: CircuitSlot = null;
     if (fieldPos && client) {
         const { prints } = rulesets[client.fight.opts.ruleset];
         const calcPower = getCardPower(prints, client.fight, fieldPos);
         if (calcPower != null) power = calcPower;
+
+        const circuit = getCircuit(prints, client.fight.field[fieldPos[0]]);
+        circuitSlot = circuit[fieldPos[1]];
     }
 
     const onPowerContextMenu = () => {
-        console.log('aa');
         if (isDynamicPower) openInRulebook(`stat:${staticPower}`);
     };
 
@@ -83,6 +86,15 @@ export const CardSprite = memo(function CardSprite({
                 </div>}
                 {print.fused && <div className={styles.face}>
                     <Sprite sheet={Spritesheets.cards} name="stitches" />
+                </div>}
+                {print.conduit && <div className={styles.face}>
+                    <Sprite sheet={Spritesheets.cards} name="conduit" />
+                </div>}
+                {print.conduit && (circuitSlot === 'right' || circuitSlot === 'circuit') && <div className={styles.face}>
+                    <Sprite sheet={Spritesheets.cards} name="conduitLeft" />
+                </div>}
+                {print.conduit && (circuitSlot === 'left' || circuitSlot === 'circuit') && <div className={styles.face}>
+                    <Sprite sheet={Spritesheets.cards} name="conduitRight" />
                 </div>}
                 {print.noSac && <div className={styles.noSac}>
                     <Asset path="/assets/no-sac.png" />

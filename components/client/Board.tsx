@@ -8,11 +8,11 @@ import { HoverBorder } from '../ui/HoverBorder';
 import { CardSprite } from '../sprites/CardSprite';
 import { rulesets } from '@/lib/defs/prints';
 import { useSet } from '@/hooks/useSet';
-import { FieldPos, getBloods, getRoomOnSac } from '@/lib/engine/Card';
+import { FieldPos, getBloods, getCircuit, getRoomOnSac } from '@/lib/engine/Card';
 import { PlayedCard } from './animations/PlayedCard';
 import { AnimatePresence } from 'framer-motion';
 import { FIGHT_SIDES } from '@/lib/engine/Fight';
-import { fromEntries } from '@/lib/utils';
+import { entries, fromEntries } from '@/lib/utils';
 import { NSlice } from '../ui/NSlice';
 import { useBattleSheet } from '@/hooks/useBattleTheme';
 import { Projectiles } from './animations/Projectiles';
@@ -108,6 +108,10 @@ export const Board = memo(function Board() {
         return fromEntries(FIGHT_SIDES.map(side => [side, field[side].map((card, i) => [side, i] as FieldPos)]));
     }, [field.player.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const circuits = useMemo(() => {
+        return fromEntries(entries(field).map(([side, cards]) => [side, getCircuit(prints, cards)]));
+    }, [prints, field]);
+
     return <div className={styles.board}>
         <Sprite className={styles.boardBg} sheet={battleTheme} name="board" />
         <NSlice
@@ -130,6 +134,9 @@ export const Board = memo(function Board() {
                     <div key={i} data-z-plane data-hover-target className={classNames(styles.card, {
                         [styles.empty]: !card,
                     })} onClick={() => hammering && onHammer(i)}>
+                        {circuits.player[i] === 'circuit' && (
+                            <Sprite className={styles.circuit} sheet={Spritesheets.cards} name="circuit" />
+                        )}
                         <AnimatePresence initial={false}>
                             {card && (
                                 <PlayedCard lane={i} key="player">
@@ -141,7 +148,7 @@ export const Board = memo(function Board() {
                                 </PlayedCard>
                             )}
                         </AnimatePresence>
-                        {card && hammering && <HoverBorder color="--ui" />}
+                        {card && hammering && <HoverBorder color={circuits.player[i] === 'circuit' ? '--flow' : '--ui'} />}
                     </div>
                 ))}
             </div>
@@ -185,6 +192,9 @@ export const Board = memo(function Board() {
                                 </PlayedCard>
                             )}
                         </AnimatePresence>
+                        {circuits.opposing[i] === 'circuit' && (
+                            <Sprite className={styles.circuit} sheet={Spritesheets.cards} name="circuit" />
+                        )}
                     </div>
                 ))}
             </div>
