@@ -327,10 +327,10 @@ async function settleEvents(tick: FightTick) {
         }
 
         if (tick.queue.length === 0) {
-            for (const side of FIGHT_SIDES) {
-                const otherSides = FIGHT_SIDES.filter(s => s !== side);
-                if (tick.fight.points[side] >= 5) for (const otherSide of otherSides) {
-                    tick.queue.unshift({ type: 'lifeLoss', side: otherSide });
+            const sides = FIGHT_SIDES.slice().sort((a, b) => tick.fight.points[b] - tick.fight.points[a]);
+            if (tick.fight.points[sides[0]] - tick.fight.points[sides[1]] >= 5) {
+                for (const side of sides.slice(1)) {
+                    tick.queue.unshift({ type: 'lifeLoss', side });
                 }
             }
         }

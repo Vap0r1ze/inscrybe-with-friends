@@ -1,7 +1,7 @@
 import { Event } from '@/lib/engine/Events';
 import styles from './Debug.module.css';
 import { forwardRef, memo } from 'react';
-import { animationDurations, useClient, useFight } from '@/hooks/useClientStore';
+import { animationDurations, useClient } from '@/hooks/useClientStore';
 import { Text } from '../ui/Text';
 import { Box } from '../ui/Box';
 import { stringify } from 'yaml';

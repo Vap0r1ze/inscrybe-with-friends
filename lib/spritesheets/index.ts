@@ -6,7 +6,6 @@ import { CostSprites } from './costs';
 import { CharSprites } from './text';
 import { BorderCharSprites } from './textBorder';
 import { StatSprites } from './stats';
-import { BattleSprites } from './battle';
 
 export interface Spritesheet {
     path: string;

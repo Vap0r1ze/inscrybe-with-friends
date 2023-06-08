@@ -1,10 +1,10 @@
 import { create } from 'zustand';
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef } from 'react';
 import { FIGHT_SIDES, Fight } from '@/lib/engine/Fight';
 import { FightPacket } from '@/lib/engine/Tick';
 import { Event, eventSettlers } from '@/lib/engine/Events';
 import { useGameStore } from './useGameStore';
-import { Action, ActionRes } from '@/lib/engine/Actions';
+import { Action, ActionRes, PlayerMessage } from '@/lib/engine/Actions';
 import { clone } from '@/lib/utils';
 import { ErrorType, FightError } from '@/lib/engine/Errors';
 import { triggerActionSound, triggerEventSound } from './useAudio';
@@ -116,10 +116,8 @@ export function useClientActions() {
     const id = useContext(ClientContext);
     if (!id) throw new Error('Missing client context!');
     const ratelimitRef = useRef<number[]>([]);
-    type Data<T extends 'action' | 'response'> = T extends 'action' ? Action : ActionRes;
-    const send = useCallback(<T extends 'action' | 'response'>(
-        type: T,
-        data: Data<T>,
+    const send = useCallback((
+        msg: PlayerMessage,
         handlers?: ErrorHandlers,
     ) => {
         if (useClientStore.getState().clients[id]?.pending) return;
@@ -130,22 +128,23 @@ export function useClientActions() {
         if (ratelimitRef.current.length >= 10) {
             const first = ratelimitRef.current[0];
             const last = ratelimitRef.current.at(-1)!;
-            if (last - first < 3000) throw new Error(`Caught client in an action loop! Please report this! [${type}:${data.type}]`);
+            // TODO: better detection, maybe force the callers to report their mouse events and detect duplicates?
+            // if (last - first < 3000) throw new Error(`Caught client in an action loop! Please report this! [${type}:${data.type}]`);
             ratelimitRef.current.shift();
         }
 
-        const promise = type === 'action'
-            ? useGameStore.getState().sendAction(id, data as Action)
-            : useGameStore.getState().sendResponse(id, data as ActionRes);
+        const promise = msg.type === 'action'
+            ? useGameStore.getState().sendAction(id, msg.action)
+            : useGameStore.getState().sendResponse(id, msg.res);
         return promise.then(() => {
             console.log(
                 '%s<%o> to %o took %oms',
-                type === 'action' ? 'Action' : 'Response',
-                data.type,
+                msg.type === 'action' ? 'Action' : 'Response',
+                msg.type === 'action' ? msg.action.type : msg.res.type,
                 id,
                 Date.now() - startTime
             );
-            if (type === 'action') triggerActionSound(data as Action);
+            if (msg.type === 'action') triggerActionSound(msg.action);
         }).catch(error => {
             if (error instanceof FightError) {
                 const handler = handlers?.[error.type];
@@ -165,10 +164,12 @@ export function useClientActions() {
         });
     }, [id]);
     const sendAction = useCallback(<T extends Action['type']>(type: T, data: Omit<Action<T>, 'type'>, handlers?: ErrorHandlers) => {
-        return send('action', { type, ...data } as unknown as Action, handlers);
+        const msg: PlayerMessage = { type: 'action', action: { type, ...data } as never as Action };
+        return send(msg, handlers);
     }, [send]);
     const sendResponse = useCallback(<T extends ActionRes['type']>(type: T, data: Omit<ActionRes<T>, 'type'>, handlers?: ErrorHandlers) => {
-        return send('response', { type, ...data } as unknown as ActionRes, handlers);
+        const msg: PlayerMessage = { type: 'response', res: { type, ...data } as never as ActionRes };
+        return send(msg, handlers);
     }, [send]);
     return { sendAction, sendResponse };
 }

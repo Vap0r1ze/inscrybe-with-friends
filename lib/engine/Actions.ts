@@ -1,11 +1,17 @@
-import { FieldPos } from './Card';
-import { FightSide } from './Fight';
 import { FightTick } from './Tick';
 import { DeckType } from './Deck';
 
 export type Action<T extends keyof ActionMap = keyof ActionMap> = T extends keyof ActionMap ? (ActionMap[T] & { type: T }) : never;
 export type ActionRes<T extends keyof ResponseMap = keyof ResponseMap> = T extends keyof ResponseMap ? (ResponseMap[T] & { type: T }) : never;
 export type ActionReq<T extends keyof ResponseMap = keyof ResponseMap> = T extends keyof ResponseMap ? (RequestMap[T] & { type: T }) : never;
+
+export type PlayerMessage = {
+    type: 'response',
+    res: ActionRes;
+} | {
+    type: 'action',
+    action: Action;
+};
 
 type ActionMap = {
     draw: { deck: DeckType };

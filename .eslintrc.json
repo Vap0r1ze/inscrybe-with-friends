@@ -2,7 +2,8 @@
     "extends": "next/core-web-vitals",
     "parser": "@typescript-eslint/parser",
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "unused-imports"
     ],
     "rules": {
         "@typescript-eslint/semi": "error",
@@ -33,6 +34,7 @@
         "jsx-quotes": [
             "error",
             "prefer-double"
-        ]
+        ],
+        "unused-imports/no-unused-imports": "error"
     }
 }
