@@ -174,7 +174,7 @@ function PlayTestPage() {
         </div> : <div className={classNames(styles.gameRoot, {
             [styles.fullscreen]: fullscreen,
         })} style={{ position: 'relative' }}>
-            {!fullscreen && <Box className={styles.controlsBox}>
+            <Box className={styles.controlsBox}>
                 <div className={styles.controls}>
                     <Button onClick={onKillGame}><Text>Kill Game</Text></Button>
                     <Button onClick={onSwitchSide}><Text>Switch Side</Text></Button>
@@ -183,7 +183,7 @@ function PlayTestPage() {
                     <Button onClick={() => setDevMode(true)}><Text>Dev Menu</Text></Button>
                     <Text>Playing as <span style={{ textTransform: 'uppercase' }}>{currentSide}</span></Text>
                 </div>
-            </Box>}
+            </Box>
             <Client className={styles.client} key={currentSide} id="playtest" debug={!fullscreen} />
             {!fullscreen && devMode && <DevMenu id="playtest" onClose={() => setDevMode(false)} />}
         </div>}
