@@ -16,6 +16,7 @@ import { clone, entries, fromEntries } from '@/lib/utils';
 import { useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { rulesets } from '@/lib/defs/prints';
+import classNames from 'classnames';
 
 export default function PlayTest() {
     return <ErrorBoundary fallbackRender={TheError}>
@@ -55,6 +56,7 @@ function PlayTestPage() {
     const [autoSwitch, setAutoSwitch] = useState(false);
     const [skipDraw, setSkipDraw] = useState(false);
     const [devMode, setDevMode] = useState(false);
+    const [fullscreen, setFullscreen] = useState(false);
 
     const decks = useMemo(() => {
         if (!deckStore || !ruleset) return [];
@@ -136,6 +138,15 @@ function PlayTestPage() {
         setSkipDraw(skip => !skip);
     };
 
+    useEffect(() => {
+        const listener = () => {
+            setFullscreen(Math.abs(window.innerHeight - screen.height) < 30);
+        };
+        window.addEventListener('resize', listener);
+        listener();
+        return () => window.removeEventListener('resize', listener);
+    }, []);
+
     return <div style={{
         color: 'var(--ui)',
     }}>
@@ -160,8 +171,10 @@ function PlayTestPage() {
                 disabled={Object.values(selectedDecks).some(deck => !deck)}
                 onClick={onFightStart}
             ><Text size={14}>Start Fight</Text></Button>
-        </div> : <div className={styles.gameRoot} style={{ position: 'relative' }}>
-            <Box className={styles.controlsBox}>
+        </div> : <div className={classNames(styles.gameRoot, {
+            [styles.fullscreen]: fullscreen,
+        })} style={{ position: 'relative' }}>
+            {!fullscreen && <Box className={styles.controlsBox}>
                 <div className={styles.controls}>
                     <Button onClick={onKillGame}><Text>Kill Game</Text></Button>
                     <Button onClick={onSwitchSide}><Text>Switch Side</Text></Button>
@@ -170,9 +183,9 @@ function PlayTestPage() {
                     <Button onClick={() => setDevMode(true)}><Text>Dev Menu</Text></Button>
                     <Text>Playing as <span style={{ textTransform: 'uppercase' }}>{currentSide}</span></Text>
                 </div>
-            </Box>
-            <Client className={styles.client} key={currentSide} id="playtest" debug />
-            {devMode && <DevMenu id="playtest" onClose={() => setDevMode(false)} />}
+            </Box>}
+            <Client className={styles.client} key={currentSide} id="playtest" debug={!fullscreen} />
+            {!fullscreen && devMode && <DevMenu id="playtest" onClose={() => setDevMode(false)} />}
         </div>}
     </div>;
 }

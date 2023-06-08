@@ -20,10 +20,6 @@
     cursor: pointer;
 }
 
-.prints.editable .print:hover {
-    filter: blur(0.2em) brightness(1.2) url(#wobble);
-}
-
 .printName {
     display: flex;
     align-items: center;

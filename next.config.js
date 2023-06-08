@@ -4,7 +4,6 @@ const nextConfig = {
         domains: ['cdn.discordapp.com'],
     },
     reactStrictMode: true,
-    productionBrowserSourceMaps: true,
 };
 
 module.exports = nextConfig;

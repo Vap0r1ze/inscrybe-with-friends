@@ -1,5 +1,5 @@
 import { ActionReq, ActionRes } from '../engine/Actions';
-import { CardPos, getMoxes } from '../engine/Card';
+import { CardPos, getCircuit, getMoxes } from '../engine/Card';
 import { MoxType, SigilParam, SigilParamType } from '../engine/constants';
 import { EffectTarget, EffectTriggers } from '../engine/Effects';
 import { ErrorType, FightError } from '../engine/Errors';
@@ -284,6 +284,22 @@ const SIGIL_INFOS = {
         name: 'Energy Gun',
         description: '[activate|Activate]: Pay {0} [energy|Energy] to deal {1} damage to the space across from this card.',
         params: ['number', 'number'],
+    },
+
+    conduitGainEnergy: {
+        name: 'Energy Conduit',
+        description: 'If this card completes a [circuit] when it\'s owner ends their turn, their max [energy|Energy] is increased by {0}.',
+        params: ['number'],
+    },
+    conduitGainPower: {
+        name: 'Attack Conduit',
+        description: 'Other creatures within a [circuit] completed by this card gain 1 [power|Power].',
+        buffs: ['incrCircuitPower'],
+    },
+    conduitSpawner: {
+        name: 'Spawn Conduit',
+        description: 'If this card creates a [circuit], a(n) {0} is played in each empty space inside this card\'s circuit at the end of the owner\'s turn.',
+        params: ['print'],
     },
 
     // Custom
@@ -1024,6 +1040,34 @@ const SIGIL_EFFECTS = {
                     to: targetPos,
                     damage,
                 });
+            },
+        },
+    },
+
+    conduitGainEnergy: {
+        runAt: 'field',
+        postSettle: {
+            phase(event) {
+                const [side] = this.fieldPos!;
+                const { turn } = this.tick.fight;
+                if (turn.phase !== 'pre-turn' || turn.side !== side) return;
+                // TODO: check circuit
+                this.createEvent('energy', {
+                    side,
+                    amount: 0,
+                    total: 3,
+                });
+            },
+        },
+    },
+    conduitSpawner: {
+        runAt: 'field',
+        preSettleRead: {
+            phase(event) {
+                const [side] = this.fieldPos!;
+                const { turn } = this.tick.fight;
+                if (event.phase !== 'post-attack' || turn.side !== side) return;
+                // TODO: impl
             },
         },
     },

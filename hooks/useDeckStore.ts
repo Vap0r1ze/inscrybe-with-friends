@@ -18,7 +18,7 @@ export const useDeckStore = create(
                 ...state.rulesets,
                 [ruleset]: Object.fromEntries(Object.entries(state.rulesets[ruleset]).filter(([key]) => key !== name)),
             } })),
-            saveDeck: (name, ruleset, deck) => set(state => ({ rulesets: {
+            saveDeck: (ruleset, name, deck) => set(state => ({ rulesets: {
                 ...state.rulesets,
                 [ruleset]: {
                     ...state.rulesets[ruleset],

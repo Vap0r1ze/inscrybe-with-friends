@@ -6,6 +6,7 @@ import { Text } from './Text';
 import classNames from 'classnames';
 import { openInRulebook } from '@/hooks/useRulebook';
 import { memo, useMemo } from 'react';
+import { HoverBorder } from './HoverBorder';
 
 export interface PrintListProps {
     ruleset: string;
@@ -30,9 +31,15 @@ export const PrintList = memo(function PrintList({ onSelect, editable, stacked, 
             [styles.editable]: editable,
         })}>
             {printEntries.map(([id, print], index) => (
-                <div className={classNames(styles.print, {
-                    [styles.stacked]: stacked && printEntries[index + 1]?.[0] === id,
-                })} key={index} onClick={() => onSelect?.(id, index)}>
+                <div
+                    key={index}
+                    className={classNames(styles.print, {
+                        [styles.stacked]: stacked && printEntries[index + 1]?.[0] === id,
+                    })}
+                    data-hover-target
+                    data-hover-blip
+                    onClick={() => onSelect?.(id, index)}
+                >
                     {showNames && <div className={styles.printName} onContextMenu={e => {
                         e.preventDefault();
                         openInRulebook(`print:${id}`);
@@ -40,6 +47,7 @@ export const PrintList = memo(function PrintList({ onSelect, editable, stacked, 
                         <Text fit>{print.name}</Text>
                     </div>}
                     <CardSprite print={print} />
+                    <HoverBorder color="--ui" top={showNames ? -1 : 0}/>
                 </div>
             ))}
         </div>

@@ -4,6 +4,11 @@
     flex-direction: column;
 }
 
+.gameRoot.fullscreen {
+    width: 100vw;
+    height: 100vh;
+}
+
 .gameRoot .controlsBox {
     margin-right: 48em;
     margin-left: 48em;

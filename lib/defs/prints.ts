@@ -584,6 +584,20 @@ const RULESETS = {
                 cost: { type: 'energy', amount: 3 },
                 sigils: ['airborne'],
             },
+            leapingBot: {
+                name: 'L33pB0t',
+                power: 1,
+                health: 2,
+                cost: { type: 'energy', amount: 3 },
+                sigils: ['mightyLeap'],
+            },
+            minecart: {
+                name: '49er',
+                power: 1,
+                health: 1,
+                cost: { type: 'energy', amount: 2 },
+                sigils: ['strafe'],
+            },
             plasmaJimmy: {
                 name: 'Plasma Jimmy',
                 rare: true,
@@ -732,6 +746,7 @@ const RULESETS = {
                 power: 2,
                 health: 2,
                 cost: { type: 'bone', amount: 5 },
+                conduit: true,
             },
             pharoahsPets: {
                 name: 'Pharoah\'s Pets',
@@ -1056,6 +1071,41 @@ const RULESETS = {
                 cost: { type: 'energy', amount: 1 },
                 noSac: true,
             },
+
+            nullConduit: {
+                name: 'Null Conduit',
+                power: 0,
+                health: 1,
+                cost: { type: 'energy', amount: 1 },
+                conduit: true,
+            },
+            conduitEnergy: {
+                name: 'Energy Conduit',
+                desc: 'Note: Effect was changed to prevent infinitely buffing stim mage.',
+                rare: true,
+                power: 1,
+                health: 2,
+                cost: { type: 'energy', amount: 3 },
+                conduit: true,
+                sigils: ['conduitGainEnergy'],
+            },
+            conduitPower: {
+                name: 'Buff Conduit',
+                power: 0,
+                health: 2,
+                cost: { type: 'energy', amount: 2 },
+                conduit: true,
+                sigils: ['conduitGainPower'],
+            },
+            conduitFactory: {
+                name: 'Factory Conduit',
+                power: 0,
+                health: 2,
+                cost: { type: 'energy', amount: 3 },
+                conduit: true,
+                sigils: ['conduitSpawner'],
+            },
+
         },
         sideDecks: {
             squirrels: {
@@ -1101,6 +1151,8 @@ const RULESETS = {
             activatedSacrificeDraw: [3],
             activatedStatsUpEnergy: [3, 1],
             activatedStatsUp: [3, 1],
+            conduitGainEnergy: [3],
+            conduitSpawner: ['leapingBot'],
         },
     },
 } satisfies Record<string, Ruleset<true>>;

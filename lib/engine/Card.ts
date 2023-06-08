@@ -59,6 +59,7 @@ export interface CardPrint {
     health: number;
     power: Stat;
     cost?: Cost;
+    conduit?: boolean;
     noSac?: boolean;
     tribes?: Tribe[];
 
@@ -187,4 +188,13 @@ export function getRoomOnSac(field: (Card | null)[], sacs: (Card | null)[]) {
         room += 1;
     }
     return room;
+}
+
+export type CircuitSlot = 'left' | 'circuit' | 'right' | null;
+export function getCircuit(prints: Record<string, CardPrint>, field: (Card | null)[]): CircuitSlot[] {
+    const circuit = new Array<CircuitSlot>(field.length).fill(null);
+    const left = field.findIndex(card => card != null && prints[card.print].conduit);
+    const right = field.findLastIndex(card => card != null && prints[card.print].conduit);
+    if (left === -1 || right === -1) return circuit;
+    return circuit.map((_, i) => i > left && i < right ? 'circuit' : i === left ? 'left' : i === right ? 'right' : null);
 }

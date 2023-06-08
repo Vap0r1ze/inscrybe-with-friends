@@ -1,4 +1,4 @@
-import { FieldPos } from '../engine/Card';
+import { FieldPos, getCircuit } from '../engine/Card';
 import { Fight } from '../engine/Fight';
 import { positions } from '../engine/utils';
 import { rulesets } from './prints';
@@ -38,6 +38,16 @@ const BUFFS = {
             const targetPrint = targetCard ? prints[targetCard.print] : null;
             if (targetPrint?.tribes?.includes('mox')) return { power: 1 };
             return null;
+        },
+    },
+    incrCircuitPower: {
+        check(fight, source, target) {
+            const [side, lane] = source;
+            if (target[0] !== side) return null;
+            const circuit = getCircuit(rulesets[fight.opts.ruleset].prints, fight.field[side]);
+            if (!circuit[lane - 1] && !circuit[lane + 1]) return null;
+            if (circuit[target[1]] !== 'circuit') return null;
+            return { power: 1 };
         },
     },
 } satisfies Record<string, BuffDef>;
