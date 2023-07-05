@@ -26,7 +26,7 @@ export default function PlayTest() {
 
 function TheError({ error }: FallbackProps) {
     const onTryFix = () => {
-        useGameStore.getState().deleteGame('playtest');
+        useGameStore.getState().deleteLocalGame('playtest');
         window.location.reload();
     };
 
@@ -43,9 +43,9 @@ function TheError({ error }: FallbackProps) {
 
 function PlayTestPage() {
     const deckStore = useStore(useDeckStore, state => state.rulesets);
-    const game = useStore(useGameStore, state => state.games.playtest);
-    const currentTurn = useStore(useGameStore, state => state.games.playtest?.host.fight.turn.side);
-    const currentPhase = useStore(useGameStore, state => state.games.playtest?.host.fight.turn.phase);
+    const game = useStore(useGameStore, state => state.localGames.playtest);
+    const currentTurn = useStore(useGameStore, state => state.localGames.playtest?.host.fight.turn.side);
+    const currentPhase = useStore(useGameStore, state => state.localGames.playtest?.host.fight.turn.phase);
 
     const [ruleset, setRuleset] = useState<string>();
     const [selectedDecks, setSelectedDecks] = useState<Record<FightSide, string | null>>({
@@ -91,7 +91,7 @@ function PlayTestPage() {
         if (!game) return;
 
         if (game.forceTranslate !== currentSide) {
-            useGameStore.getState().setGame('playtest', game => ({ ...game, forceTranslate: currentSide }));
+            useGameStore.getState().setLocalGame('playtest', game => ({ ...game, forceTranslate: currentSide }));
             const fight = translateFight(clone(game.host.fight), currentSide);
             useClientStore.getState().newClient('playtest', fight);
         } else if (!useClientStore.getState().clients.playtest) {
@@ -115,15 +115,15 @@ function PlayTestPage() {
         }, FIGHT_SIDES, decks);
         const host = createFightHost(fight);
 
-        useGameStore.getState().newGame('playtest', host);
-        useGameStore.getState().setGame('playtest', (game) => ({ ...game, forceTranslate: currentSide }));
+        useGameStore.getState().newLocalGame('playtest', host);
+        useGameStore.getState().setLocalGame('playtest', (game) => ({ ...game, forceTranslate: currentSide }));
         useClientStore.getState().newClient('playtest', translateFight(clone(fight), currentSide));
         useGameStore.getState().startHost('playtest');
     };
     const onKillGame = () => {
         if (!game) return;
 
-        useGameStore.getState().deleteGame('playtest');
+        useGameStore.getState().deleteLocalGame('playtest');
         useClientStore.getState().deleteClient('playtest');
     };
     const onSwitchSide = () => {
@@ -147,9 +147,7 @@ function PlayTestPage() {
         return () => window.removeEventListener('resize', listener);
     }, []);
 
-    return <div style={{
-        color: 'var(--ui)',
-    }}>
+    return <div className={styles.playtest}>
         {!game ? <div className={styles.startOptions}>
             <Select
                 options={entries(rulesets).map(([id, ruleset]) => [id, ruleset.name])}

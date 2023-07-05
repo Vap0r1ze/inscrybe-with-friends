@@ -7,7 +7,7 @@ import { CardSprite } from '@/components/sprites/CardSprite';
 import { HoverBorder } from '@/components/ui/HoverBorder';
 import { namespacedIndexes } from '@/lib/utils';
 import { rulesets } from '@/lib/defs/prints';
-import { isClient } from '@/utils/next';
+import { isClient } from '@/lib/utils';
 import { useFight } from '@/hooks/useClientStore';
 import { triggerSound } from '@/hooks/useAudio';
 

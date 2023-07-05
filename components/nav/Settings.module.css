@@ -1,10 +1,6 @@
 .modalButton {
-    position: absolute;
-    top: 0;
-    right: 0;
     background: var(--ui);
     border: 1em solid var(--flow);
-    margin: 4em;
 }
 
 .backdrop {
@@ -19,7 +15,7 @@
     color: var(--flow);
 }
 
-.volume {
+.group {
     display: flex;
     flex-direction: column;
     width: 100%;

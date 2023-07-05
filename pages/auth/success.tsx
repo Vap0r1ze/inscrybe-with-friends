@@ -1,8 +1,12 @@
-import { isClient } from '@/utils/next';
-import { useState } from 'react';
+import { isClient } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 export default function AuthError() {
     const [showSuccess, setShowSuccess] = useState(false);
+
+    useEffect(() => {
+        setShowSuccess(true);
+    }, []);
 
     if (!isClient) return;
 
@@ -11,9 +15,10 @@ export default function AuthError() {
         return window.close();
     }
 
-    setShowSuccess(true);
-
-    const success = <div>
+    const success = <div style={{
+        fontSize: '2rem',
+        padding: '1rem',
+    }}>
         <p>Successfully signed in</p>
         <p>You can now close this window.</p>
     </div>;

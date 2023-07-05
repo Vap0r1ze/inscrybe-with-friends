@@ -25,12 +25,12 @@ function Fit({ children, size }: FitProps) {
 }
 
 interface TextProps {
-    children: ReactNode;
+    children?: ReactNode;
     className?: string;
     fit?: boolean;
     size?: number;
 }
-export function Text({ className, children, fit, size = 9 }: TextProps) {
+export function Text({ className, children = null, fit, size = 9 }: TextProps) {
     const innerSize = fit ? 1 : size;
     const wrapper = (content: JSX.Element) => {
         if (fit) return <Fit size={size}>{content}</Fit>;

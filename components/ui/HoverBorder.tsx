@@ -1,4 +1,4 @@
-import { isClient } from '@/utils/next';
+import { isClient } from '@/lib/utils';
 import styles from './HoverBorder.module.css';
 import { memo, useCallback, useEffect, useRef } from 'react';
 import { triggerSound } from '@/hooks/useAudio';

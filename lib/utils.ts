@@ -10,7 +10,7 @@ export function fromEntries<K extends string | number | symbol, V>(entries: Iter
     return Object.fromEntries(entries) as Record<K, V>;
 }
 
-export function entries<K extends string | number | symbol, V>(obj: Record<K, V>) {
+export function entries<K extends string | number | symbol, V>(obj: { [key in K]?: V }) {
     return Object.entries(obj) as [K, V][];
 }
 
@@ -24,6 +24,10 @@ export function clone<T>(obj: T) {
 
 export function intersperse<T, S>(list: T[], separator: S): (T | S)[] {
     return list.flatMap((item, i) => i > 0 ? [separator, item] : [item]);
+}
+
+export function intersperseFn<T, S>(list: T[], separator: (i: number) => S): (T | S)[] {
+    return list.flatMap((item, i) => i > 0 ? [separator(i), item] : [item]);
 }
 
 export function join<T, J = T>(lists: T[][], joiner: J): (T | J)[] {
@@ -65,4 +69,16 @@ export function shuffle<T>(list: T[], seed?: string) {
         list[j] = temp;
     }
     return list;
+}
+
+// Next Stuff
+
+export const isClient = typeof window === 'object';
+
+export function getBaseUrl() {
+    if (isClient)
+        return '';
+    if (process.env.VERCEL_URL)
+        return `https://${process.env.VERCEL_URL}`;
+    return `http://localhost:${process.env.PORT ?? 3000}`;
 }

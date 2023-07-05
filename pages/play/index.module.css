@@ -1,0 +1,36 @@
+.fetching {
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.playMenu .lobbies {
+    background: var(--ui);
+    width: 100em;
+}
+
+.lobby {
+    display: flex;
+    flex-direction: column;
+}
+
+.lobbyBtn {
+    height: 8em;
+}
+
+.lobbiesInner {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.playMenu .newLobby {
+    background: transparent;
+    color: var(--flow);
+    border-color: var(--flow);
+}
+
+.error {
+    padding-top: 2em;
+    text-align: center;
+    color: var(--blood);
+}

@@ -1,0 +1,19 @@
+.crumbs {
+    display: flex;
+    gap: 4em;
+    padding: 0 4em;
+}
+
+.crumb,
+.sep {
+    color: var(--ui-dark);
+}
+
+.crumb:not(.current) {
+    cursor: pointer;
+}
+
+.crumb.current,
+.crumb:hover {
+    color: var(--ui);
+}

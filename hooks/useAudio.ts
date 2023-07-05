@@ -1,7 +1,7 @@
 import { random } from '@/lib/utils';
 import { throttle } from 'lodash';
 import { useSettingsStore } from './useSettings';
-import { isClient } from '@/utils/next';
+import { isClient } from '@/lib/utils';
 import * as Tone from 'tone';
 import { Action } from '@/lib/engine/Actions';
 import { Event } from '@/lib/engine/Events';
@@ -90,7 +90,7 @@ export function triggerSound(sound: Sound) {
         if (soundPlayers[sound]) soundPlayers[sound]!();
         else playSound(sound);
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 }
 

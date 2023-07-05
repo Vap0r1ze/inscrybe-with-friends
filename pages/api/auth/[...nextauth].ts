@@ -1,7 +1,7 @@
-import NextAuth, { AuthOptions } from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import { provider, adapter } from '@/server/auth';
 
-const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
     providers: [
         provider({
             clientId: process.env.DISCORD_CLIENT_ID,
@@ -13,6 +13,12 @@ const authOptions: AuthOptions = {
         signIn({ profile }) {
             // @ts-ignore
             return profile?.['verified'] || '/auth/error?error=not_verified';
+        },
+        session({ session, user }: any) {
+            if (session.user) {
+                session.user.id = user.id;
+            }
+            return session;
         },
     },
     pages: {

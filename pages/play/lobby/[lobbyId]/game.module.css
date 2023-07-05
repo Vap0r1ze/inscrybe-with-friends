@@ -1,0 +1,25 @@
+.game {
+    height: 100%;
+}
+
+.clientRoot {
+    height: 100%;
+    position: relative;
+}
+
+.client {
+    height: 100%;
+}
+
+.gameEndBackdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.gameEnd {
+    width: 200em;
+}

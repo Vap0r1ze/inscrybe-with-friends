@@ -30,6 +30,7 @@
     display: flex;
     flex-direction: column-reverse;
     overflow-y: scroll;
+    color: var(--ui);
 }
 
 .event {
@@ -46,6 +47,14 @@
 .eventType {
     color: var(--ui);
     text-transform: uppercase;
+}
+
+.eventDetails {
+    color: var(--ui-dark);
+    font-family: var(--font-gbc);
+    font-size: 8em;
+    line-height: .6em;
+    overflow: hidden;
 }
 
 .info {

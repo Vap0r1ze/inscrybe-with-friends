@@ -8,8 +8,9 @@ export interface ButtonProps {
     children?: ReactNode;
     onClick?: () => void;
     disabled?: boolean;
+    border?: string
 }
-export function Button({ className, children, onClick, disabled }: ButtonProps) {
+export function Button({ className, children, onClick, disabled, border }: ButtonProps) {
     return <button
         className={classNames(styles.button, className, {
             [styles.disabled]: disabled,
@@ -19,6 +20,6 @@ export function Button({ className, children, onClick, disabled }: ButtonProps) 
         onClick={onClick}
     >
         {children}
-        <HoverBorder inset={-2} bottom={-3} />
+        <HoverBorder inset={-2} bottom={-3} color={border} />
     </button>;
 }

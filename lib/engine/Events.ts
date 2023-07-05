@@ -237,7 +237,7 @@ export function isEventType<const T>(types: T[], event: Event): event is Extract
 }
 
 export function translateEvent(event: Event, side: FightSide, forClient: false): Event;
-export function translateEvent(event: Event, side: FightSide): Event | null;
+export function translateEvent(event: Event, side: FightSide, forClient?: boolean): Event | null;
 export function translateEvent(event: Event, side: FightSide, forClient: boolean = true): Event | null {
     const shouldFlip = side === 'opposing';
     // confidential events

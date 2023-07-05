@@ -1,7 +1,7 @@
 import styles from './Client.module.css';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { ClientContext, animationDurations, useClientStore } from '@/hooks/useClientStore';
-import { CSSProperties, memo } from 'react';
+import { CSSProperties, memo, useEffect } from 'react';
 import { Box } from '../ui/Box';
 import { Text } from '../ui/Text';
 import { Board } from './Board';
@@ -11,7 +11,6 @@ import { Hand } from './Hand';
 import { DebugEvents, DebugInfo } from './Debug';
 import { NSlice } from '../ui/NSlice';
 import { useBattleSheet } from '@/hooks/useBattleTheme';
-import { GameEnd } from './GameEnd';
 import classNames from 'classnames';
 
 export interface ClientProps {
@@ -31,6 +30,10 @@ export const Client = memo(function Client({ id, className, debug }: ClientProps
     for (const [key, value] of Object.entries(animationDurations)) {
         animationVars[`--event-${key}-duration`] = `${value}s`;
     }
+
+    useEffect(() => {
+        return useClientStore.getState().onUIOpen(id);
+    }, [id]);
 
     return <div className={classNames(styles.root, className)}>
         <ErrorBoundary fallbackRender={ClientError}>
@@ -58,7 +61,6 @@ export const Client = memo(function Client({ id, className, debug }: ClientProps
                             </Box>
                         </div>
                     </div>}
-                    <GameEnd />
                 </ClientContext.Provider>
             </div> : <Box className={styles.missing}>
                 <Text size={20}>CLIENT MISSING</Text>

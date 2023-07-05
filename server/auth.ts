@@ -1,9 +1,9 @@
 import { Adapter, AdapterUser } from 'next-auth/adapters';
 import { OAuthConfig, OAuthUserConfig } from 'next-auth/providers';
-import { Selectable } from 'kysely';
-import kv from '@vercel/kv';
-import { User, db } from './db';
-import { pick } from 'lodash';
+// import kv from '@vercel/kv';
+import { redis } from './kv';
+import { prisma } from './db';
+import { User } from '@prisma/client';
 
 export interface DiscordProfile {
     id: string
@@ -27,7 +27,7 @@ export function provider<P extends DiscordProfile>(
         id: 'discord',
         name: 'Discord',
         type: 'oauth',
-        authorization: 'https://discord.com/api/oauth2/authorize?scope=identify',
+        authorization: 'https://discord.com/api/oauth2/authorize?scope=identify+email',
         token: 'https://discord.com/api/oauth2/token',
         userinfo: 'https://discord.com/api/users/@me',
         profile(profile) {
@@ -41,8 +41,8 @@ export function provider<P extends DiscordProfile>(
     };
 }
 
-const toAdapterUser = (user: Pick<Selectable<User>, 'id' | 'name' | 'image'>): AdapterUser => ({
-    id: user.id.toString(),
+const toAdapterUser = (user: Pick<User, 'id' | 'name' | 'image'>): AdapterUser => ({
+    id: user.id,
     name: user.name,
     image: user.image,
     email: '',
@@ -51,18 +51,12 @@ const toAdapterUser = (user: Pick<Selectable<User>, 'id' | 'name' | 'image'>): A
 export const adapter: Adapter = {
     async createUser(userInfo) {
         const user = { name: userInfo.name!, image: userInfo.image! };
-        const { id } = await db.insertInto('users')
-            .values(user)
-            .returning('id')
-            .executeTakeFirstOrThrow();
+        const { id } = await prisma.user.create({ data: user });
 
         return toAdapterUser({ id, ...user });
     },
     async getUser(id) {
-        const user = await db.selectFrom('users')
-            .selectAll()
-            .where('id', '=', parseInt(id))
-            .executeTakeFirst();
+        const user = await prisma.user.findFirst({ where: { id } });
 
         return user ? toAdapterUser(user) : null;
     },
@@ -70,30 +64,22 @@ export const adapter: Adapter = {
         return null;
     },
     async getUserByAccount({ providerAccountId, provider }) {
-        const connection = await db.selectFrom('connections')
-            .selectAll()
-            .where('connection_id', '=', providerAccountId)
-            .where('provider', '=', provider)
-            .executeTakeFirst();
+        const connection = await prisma.connection.findFirst({ where: { connectionId: providerAccountId, provider } });
+
         if (!connection) return null;
 
-        const user = await db.selectFrom('users')
-            .selectAll()
-            .where('id', '=', connection.user_id)
-            .executeTakeFirst();
+        const user = await prisma.user.findFirst({ where: { id: connection.userId } });
         if (!user) return null;
 
         return toAdapterUser(user);
     },
     async updateUser({ id, ...user }) {
-        await db.updateTable('users')
-            .set(pick(user, ['name', 'image']) as any)
-            .where('id', '=', parseInt(id))
-            .executeTakeFirstOrThrow();
-        const newUser = await db.selectFrom('users')
-            .selectAll()
-            .where('id', '=', parseInt(id))
-            .executeTakeFirstOrThrow();
+        if (id == null) throw new Error('Missing user ID');
+
+        const newUser = await prisma.user.update({ where: { id }, data: {
+            name: user.name ?? undefined,
+            image: user.image ?? undefined,
+        } });
 
         return toAdapterUser(newUser);
     },
@@ -103,56 +89,54 @@ export const adapter: Adapter = {
     },
     async linkAccount(account) {
         const pks = {
-            user_id: parseInt(account.userId),
+            userId: account.userId,
             provider: account.provider,
         };
         const meta = {
-            connection_id: account.providerAccountId,
+            connectionId: account.providerAccountId,
             token: account.refresh_token!,
         };
-        await db.insertInto('connections')
-            .values({ ...pks, ...meta })
-            .onConflict((oc) => oc.columns(['user_id', 'provider']).doUpdateSet(meta))
-            .executeTakeFirstOrThrow();
+        await prisma.connection.upsert({
+            where: { userId_provider: pks },
+            update: meta,
+            create: { ...pks, ...meta },
+        });
     },
     async unlinkAccount({ providerAccountId, provider }) {
         // TODO
         return;
     },
     async createSession({ sessionToken, userId, expires }) {
-        await kv.set(`session:${sessionToken}`, userId, { pxat: expires.getTime() });
+        await redis.set(`session:${sessionToken}`, userId, { PXAT: expires.getTime() });
         return { sessionToken, userId, expires };
     },
     async getSessionAndUser(sessionToken) {
-        const userId = await kv.get<string>(`session:${sessionToken}`);
+        const userId = await redis.get(`session:${sessionToken}`);
         if (!userId) return null;
 
-        const expiresIn = await kv.pttl(`session:${sessionToken}`);
+        const expiresIn = await redis.pTTL(`session:${sessionToken}`);
         if (expiresIn === -2) return null;
 
         const session = { sessionToken, userId, expires: new Date(Date.now() + expiresIn) };
 
-        const user = await db.selectFrom('users')
-            .selectAll()
-            .where('id', '=', parseInt(userId))
-            .executeTakeFirst();
+        const user = await prisma.user.findFirst({ where: { id: userId } });
 
         return user ? { session, user: toAdapterUser(user) } : null;
     },
     async updateSession({ sessionToken, ...session }) {
-        const setOptions = session.expires ? { pxat: session.expires.getTime() } : {};
-        const oldId = await kv.get<string>(`session:${sessionToken}`);
+        const setOptions = session.expires ? { PXAT: session.expires.getTime() } : {};
+        const oldId = await redis.get(`session:${sessionToken}`);
 
         if (!oldId && !session.userId) return;
         const userId = (session.userId ?? oldId) as string;
 
-        await kv.set(`session:${sessionToken}`, userId, setOptions);
+        await redis.set(`session:${sessionToken}`, userId, setOptions);
 
-        let expiresIn = await kv.pttl(`session:${sessionToken}`);
+        let expiresIn = await redis.pTTL(`session:${sessionToken}`);
         return { sessionToken, userId, expires: new Date(Date.now() + expiresIn) };
     },
     async deleteSession(sessionToken) {
-        await kv.del(`session:${sessionToken}`);
+        await redis.del(`session:${sessionToken}`);
         return;
     },
 };

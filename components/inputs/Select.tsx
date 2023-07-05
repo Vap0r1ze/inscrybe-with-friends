@@ -10,6 +10,8 @@ export interface SelectProps {
     placeholder?: string;
     disabled?: boolean;
     editable?: boolean;
+    readonly?: boolean;
+    className?: string;
     onSelect?: (value: string) => void;
     onEdit?: (value: string) => void;
 }
@@ -21,6 +23,8 @@ export function Select({
     placeholder,
     disabled,
     editable,
+    readonly,
+    className,
     onSelect,
     onEdit,
 }: SelectProps) {
@@ -32,12 +36,12 @@ export function Select({
     const valueLabel = content ?? options.find(([v]) => v === value)?.[1] ?? '';
 
     const onSelectClick: MouseEventHandler<HTMLElement> = (e) => {
-        if (disabled || editable) return;
+        if (disabled || editable || readonly) return;
         if (optionsRef.current?.contains(e.target as Node)) return;
         setOpen(o => !o);
     };
     const onDropdownClick = () => {
-        if (disabled || !editable) return;
+        if (disabled || !editable || readonly) return;
         setOpen(o => !o);
     };
 
@@ -52,24 +56,25 @@ export function Select({
     // TODO: keyboard accessibility
 
     return (
-        <div tabIndex={0} className={classNames(styles.select, {
+        <div tabIndex={0} className={classNames(styles.select, className, {
             [styles.open]: open,
             [styles.disabled]: disabled,
-            [styles.readonly]: !editable,
+            [styles.editable]: editable,
+            [styles.readonly]: readonly,
         })} onClick={onSelectClick} onBlur={() => setOpen(false)}>
             <input
                 type="text"
                 className={styles.value}
-                readOnly={!editable}
+                readOnly={!editable || readonly}
                 placeholder={placeholder}
                 value={valueLabel}
                 onChange={e => onEdit?.(e.target.value)}
             />
-            <div className={styles.button} style={{
+            {!readonly && <div className={styles.button} style={{
                 transform: `rotate(${open ? 0 : 180}deg)`,
             }} onClick={onDropdownClick}>
                 <Asset path="/assets/caret.png" />
-            </div>
+            </div>}
             <div ref={optionsRef} className={classNames(styles.options, {
                 // [styles.overflows]: overflows,
             })}>

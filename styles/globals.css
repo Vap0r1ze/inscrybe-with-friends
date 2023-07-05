@@ -25,6 +25,9 @@
     --energy-dark: #4cb4a0;
     --blood: #ae3d2d;
     --blood-dark: #8e1533;
+    --discord: #5865f2;
+    --discord-dark: #4752c4;
+    --discord-darker: #3c45a5;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,7 +49,7 @@ body {
     overflow-x: hidden;
     user-select: none;
     background-color: #000;
-    color: var(--flow);
+    color: var(--ui);
 }
 
 a {

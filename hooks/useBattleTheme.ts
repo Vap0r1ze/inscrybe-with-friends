@@ -6,7 +6,7 @@ import { create } from 'zustand';
 interface BattleThemeStore {
     theme: string;
 }
-export const useBattleThemeStore = create<BattleThemeStore>((set, get) => ({
+export const useBattleThemeStore = create<BattleThemeStore>(() => ({
     theme: 'nature',
 }));
 

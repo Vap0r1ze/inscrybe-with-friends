@@ -1,12 +1,18 @@
+.playtest {
+    color: var(--ui);
+    height: 100%;
+}
+
 .gameRoot {
     width: 500em;
     display: flex;
     flex-direction: column;
+    margin: 0 auto;
 }
 
 .gameRoot.fullscreen {
     width: 100vw;
-    height: 100vh;
+    height: 100%;
 }
 
 .gameRoot .controlsBox {

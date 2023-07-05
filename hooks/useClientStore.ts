@@ -21,6 +21,13 @@ interface FightClient {
     animating?: { event: Event, timeout: number } | null;
     hammering?: boolean;
     errors: string[];
+    opponent?: {
+        discord?: boolean;
+        name: string;
+        image?: string;
+    };
+    uiOpen?: number;
+    queueConsumer?: symbol | null;
 }
 
 interface FightStore {
@@ -29,7 +36,8 @@ interface FightStore {
     deleteClient: (id: string) => void;
     setClient: (id: string, mutator: (client: FightClient) => FightClient) => void;
     addPacket: (id: string, packet: FightPacket) => void;
-    maybeConsume: (id: string) => void;
+    onUIOpen: (id: string) => () => void;
+    maybeConsume: (id: string, consumer?: symbol) => void;
     commitEvent: (id: string, event: Event) => void;
 }
 
@@ -46,6 +54,7 @@ export const useClientStore = create<FightStore>((set, get) => ({
                     settled: [],
                     queue: [],
                     errors: [],
+                    uiOpen: 0,
                 },
             },
         }));
@@ -73,17 +82,35 @@ export const useClientStore = create<FightStore>((set, get) => ({
         this.setClient(id, client => ({ ...client, queue: [...client.queue, ...packet.settled] }));
         setTimeout(() => this.maybeConsume(id), 0);
     },
-    maybeConsume(id) {
+    onUIOpen(id) {
+        this.setClient(id, client => ({ ...client, uiOpen: (client.uiOpen ?? 0) + 1 }));
+        setTimeout(() => this.maybeConsume(id), 0);
+        return () => {
+            this.setClient(id, client => ({ ...client, uiOpen: Math.max(0, (client.uiOpen ?? 0) - 1) }));
+        };
+    },
+    maybeConsume(id, consumer = Symbol()) {
         const client = get().clients[id];
         if (!client) return;
+
+        let queueConsumer: symbol | null = client.queueConsumer ?? consumer;
+        if (queueConsumer !== consumer) return;
+
         const [event] = client.queue;
-        if (!event) return;
+        const isFinished = !event || !client.uiOpen;
+        if (isFinished) queueConsumer = null;
+
+        if (queueConsumer !== client.queueConsumer) this.setClient(id, client => ({ ...client, queueConsumer }));
+        if (isFinished) return;
+
         this.commitEvent(id, event);
+
         const timeout = window.setTimeout(() => {
             if (get().clients[id]?.animating?.timeout !== timeout) return;
             this.setClient(id, client => ({ ...client, animating: null, settled: [...client.settled, event] }));
-            this.maybeConsume(id);
+            this.maybeConsume(id, consumer);
         }, animationDurations[event.type] * 1000);
+
         this.setClient(id, client => ({ ...client, queue: client.queue.slice(1), animating: { event, timeout } }));
     },
     commitEvent(id, event) {
@@ -133,9 +160,7 @@ export function useClientActions() {
             ratelimitRef.current.shift();
         }
 
-        const promise = msg.type === 'action'
-            ? useGameStore.getState().sendAction(id, msg.action)
-            : useGameStore.getState().sendResponse(id, msg.res);
+        const promise = useGameStore.getState().sendPlayerMessage(id, msg);
         return promise.then(() => {
             console.log(
                 '%s<%o> to %o took %oms',

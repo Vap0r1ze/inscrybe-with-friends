@@ -1,4 +1,4 @@
-import { isClient } from '@/utils/next';
+import { isClient } from '@/lib/utils';
 import { useRouter } from 'next/router';
 
 export default function AuthError() {

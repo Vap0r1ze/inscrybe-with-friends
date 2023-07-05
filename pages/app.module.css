@@ -1,12 +1,20 @@
-.app {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
+.play {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 26em calc(100vh - 26em);
+    grid-template-areas: "nav" "main";
+    height: 100vh;
 
     filter: url(#abberation) url(#bloom);
-    /* filter: url(#grain) url(#wobble); */
     font-size: 0.1875em;
+}
+
+.main {
+    grid-area: main;
+}
+
+.nav {
+    grid-area: nav;
 }
 
 .version {
@@ -16,18 +24,6 @@
     color: var(--ui-dark);
     text-shadow: 0 0 1em var(--flow), 0 0 1em var(--flow), 0 0 1em var(--flow), 0 0 1em var(--flow), 0 0 1em var(--flow), 0 0 1em var(--flow), 0 0 1em var(--flow), 0 0 1em var(--flow), 0 0 1em var(--flow);
 }
-
-/* @media screen and (max-width: 1200px) {
-    .app {
-        font-size: 0.15em;
-    }
-}
-
-@media screen and (max-width: 900px) {
-    .app {
-        font-size: 0.1em;
-    }
-} */
 
 .notFound {
     color: var(--ui);

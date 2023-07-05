@@ -1,0 +1,106 @@
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
+}
+
+model User {
+    id        String   @id @default(uuid())
+    name      String
+    image     String
+    createdAt DateTime @default(now())
+
+    ownedLobbies    Lobby[]
+    playerships     Playership[]
+    gamePlayerships GamePlayer[]
+
+    friends  User[] @relation("Friendship")
+    friendOf User[] @relation("Friendship")
+    decks    Deck[]
+}
+
+model Connection {
+    userId       String
+    provider     String
+    connectionId String
+    token        String
+
+    @@id([userId, provider])
+}
+
+model Lobby {
+    id        String   @id
+    createdAt DateTime @default(now())
+
+    ownerId     String
+    owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    playerships Playership[]
+
+    name    String?
+    version Int
+    options Json
+
+    @@index([ownerId])
+}
+
+model Playership {
+    lobbyId String
+    userId  String
+    lobby   Lobby  @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
+    user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    joinedAt    DateTime @default(now())
+    permissions Int
+
+    @@id([lobbyId, userId])
+}
+
+model Deck {
+    name      String
+    createdAt DateTime @default(now())
+
+    owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId String
+
+    ruleset String
+    cards   Json
+
+    @@id([ownerId, name])
+}
+
+model Game {
+    id      String  @id @default(uuid())
+    lobbyId String?
+
+    createdAt DateTime  @default(now())
+    endedAt   DateTime?
+
+    packets GamePacket[]
+    players GamePlayer[]
+}
+
+model GamePlayer {
+    gameId String
+    userId String
+    game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    side String
+
+    @@id([gameId, userId])
+}
+
+model GamePacket {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+
+    gameId String
+    game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+    packet Json
+}

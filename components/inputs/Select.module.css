@@ -3,9 +3,15 @@
     position: relative;
 
     width: 100em;
+    height: 14em;
     background: var(--ui);
     border: solid var(--flow);
     border-width: 1em 1em 2em;
+}
+
+.select.readonly {
+    border-bottom-width: 1em;
+    padding-bottom: 1em;
 }
 
 .select.disabled {
@@ -13,7 +19,7 @@
     opacity: 0.5;
 }
 
-.select.readonly {
+.select:not(.editable):not(.readonly) {
     cursor: pointer;
 }
 
@@ -26,7 +32,7 @@
     color: var(--flow);
 }
 
-.select.readonly:hover .value::placeholder {
+.select:not(.editable):hover .value::placeholder {
     opacity: 1;
 }
 
@@ -54,7 +60,7 @@
 }
 
 .select.open .button,
-.select.readonly:hover .button,
+.select:not(.editable):hover .button,
 .button:hover {
     filter: url(#abberation) url(#abberation) url(#abberation) url(#abberation);
     opacity: 1;

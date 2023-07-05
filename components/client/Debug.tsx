@@ -59,11 +59,6 @@ const Event = forwardRef<HTMLDivElement, EventProps>(function Event({ event, i }
             <Text className={styles.eventType}>{type}</Text>
             <Text>{i}</Text>
         </div>
-        <pre style={{
-            fontFamily: 'var(--font-gbc)',
-            fontSize: '8em',
-            lineHeight: '.6em',
-            overflow: 'hidden',
-        }}>{stringify(data, {}).trim()}</pre>
+        <pre className={styles.eventDetails}>{stringify(data, {}).trim()}</pre>
     </Box>;
 });

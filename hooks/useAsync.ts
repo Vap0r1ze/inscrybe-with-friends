@@ -1,6 +1,6 @@
 import { DependencyList, useEffect, useState } from 'react';
 
-export function useAwaiter<T>(factory: () => Promise<T>, deps: DependencyList[]) {
+export function useAwaiter<T>(factory: () => Promise<T>, deps: DependencyList) {
     const [state, setState] = useState<{
         value: T | null;
         error: unknown;
@@ -12,11 +12,14 @@ export function useAwaiter<T>(factory: () => Promise<T>, deps: DependencyList[])
     });
 
     useEffect(() => {
+        let abort = false;
         if (!state.pending) setState({ ...state, pending: true });
 
         factory()
-            .then(value => setState({ value, error: null, pending: false }))
-            .catch(error => setState({ value: null, error, pending: false }));
+            .then(value => !abort && setState({ value, error: null, pending: false }))
+            .catch(error => !abort && setState({ value: null, error, pending: false }));
+
+        return () => void (abort = true);
     }, deps); // eslint-disable-line react-hooks/exhaustive-deps
 
     return [state.value, state.pending, state.error] as const;

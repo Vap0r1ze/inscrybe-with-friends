@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 
 export default function AuthError() {
     const router = useRouter();
-    console.log(router);
     const [message, setMessage] = useState<string | null>(null);
 
     useEffect(() => {

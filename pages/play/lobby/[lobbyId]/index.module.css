@@ -1,0 +1,45 @@
+.player {
+    height: 14em;
+    border: 1em solid var(--flow);
+    display: flex;
+    align-items: center;
+    gap: 2em;
+    padding-right: 2em;
+}
+
+.profilePicture {
+    height: 10em;
+    width: 10em;
+    margin: 1em;
+}
+
+.panels {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.playerRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2em;
+}
+
+.player {
+    flex: 1;
+}
+
+.playerRow .selectDeck {
+    width: 70em;
+}
+
+.panels .playerPanel {
+    width: 200em;
+}

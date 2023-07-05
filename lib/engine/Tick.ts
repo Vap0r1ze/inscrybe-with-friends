@@ -1,6 +1,6 @@
 import { Action, ActionRes, isActionInvalid } from './Actions';
 import { CardPos, getBloods, getCardPower, getMoxes, initCardFromPrint } from './Card';
-import { Event, eventSettlers, isEventInvalid } from './Events';
+import { Event, eventSettlers, isEventInvalid, translateEvent } from './Events';
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { rulesets } from '../defs/prints';
 import { Sigil, sigils } from '../defs/sigils';
@@ -23,7 +23,6 @@ export interface FightTick {
 }
 
 export interface TickLogger {
-    log: (message: string) => void;
     error: (message: string) => void;
     warn: (message: string) => void;
     info: (message: string) => void;
@@ -33,6 +32,11 @@ export interface TickLogger {
 export type FightPacket = {
     settled: Event[];
 };
+
+export function translatePacket(packet: FightPacket, side: FightSide, forClient = true) {
+    const events = clone(packet.settled).map(e => translateEvent(e, side, forClient)).filter(e => e != null) as Event[];
+    return { settled: events };
+}
 
 export async function startGame(tick: FightTick): Promise<FightPacket> {
     tick.queue.push({ type: 'phase', phase: 'pre-turn', side: 'player' });
@@ -224,7 +228,7 @@ async function settleEvents(tick: FightTick) {
         if (iterations++ >= MAX_STACK_SIZE)
             throw FightError.create(ErrorType.MaxStackSize);
 
-        tick.logger?.debug(`[Processing] ${JSON.stringify(event)}`);
+        tick.logger?.debug(`Processing event: ${JSON.stringify(event)}`);
         if (isEventInvalid(tick, event)) {
             tick.logger?.debug('Event was invalid!');
             continue;

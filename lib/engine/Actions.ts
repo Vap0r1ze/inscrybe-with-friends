@@ -24,7 +24,7 @@ type ActionMap = {
 
 type ResponseMap = {
     snipe: { lane: number; };
-    bombLatch: { direction: 'opposing' | 'left' | 'right' };
+    // bombLatch: { direction: 'opposing' | 'left' | 'right' };
     chooseDraw: { idx: number; };
 };
 

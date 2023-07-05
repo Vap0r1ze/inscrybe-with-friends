@@ -12,6 +12,7 @@ import { Button } from '@/components/inputs/Button';
 import { getSideDeckPrintIds } from '@/lib/engine/Card';
 import { Box } from '@/components/ui/Box';
 import { DeckCards } from '@/lib/engine/Deck';
+import { trpc } from '@/lib/trpc';
 
 function useDeck(init: DeckCards) {
     const [deck, setDeck] = useState(init);
@@ -34,9 +35,31 @@ export default function EditDecks() {
     const decks = useStore(useDeckStore, state => state.rulesets)?.[selectedRuleset] ?? {};
 
     const deckName = deckNameInput.trim();
-    const noDeckSelected = !(selectedDeck && decks?.[selectedDeck]);
+    const noDeckSelected = !(selectedDeck && decks[selectedDeck]);
     const canSave = !noDeckSelected && (JSON.stringify(decks[selectedDeck]) !== JSON.stringify(deck) || deckName !== selectedDeck);
-    const canMakeNew = noDeckSelected || (!!deckName && !decks?.[deckName]);
+    const canMakeNew = noDeckSelected || (!!deckName && !decks[deckName]);
+
+    const cloudDecks = trpc.decks.getOwn.useQuery();
+    const saveToCloud = trpc.decks.save.useMutation({
+        onSuccess: () => cloudDecks.refetch(),
+    });
+    let backedUp = false;
+    checkBackup: if (selectedDeck && cloudDecks.data) {
+        const cloudDeck = cloudDecks.data.find(d => d.name === selectedDeck && d.ruleset === selectedRuleset);
+        if (!cloudDeck) break checkBackup;
+        backedUp = true;
+        if (JSON.stringify(decks[selectedDeck]) !== JSON.stringify(cloudDeck.cards)) backedUp = false;
+        if (deckName !== selectedDeck) backedUp = false;
+    }
+
+    const onBackupDeck = () => {
+        if (!selectedDeck || canSave) return;
+        saveToCloud.mutate({
+            name: selectedDeck,
+            ruleset: selectedRuleset,
+            cards: deck,
+        });
+    };
 
     const selectDeck = (name: string) => {
         setSelectedDeck(name);
@@ -53,10 +76,26 @@ export default function EditDecks() {
 
         setDeckName(name);
 
-        if (tryRename && selectedDeck && name !== selectedDeck)
-            useDeckStore.getState().deleteDeck(selectedRuleset, selectedDeck);
+        const willRename = tryRename && selectedDeck && name !== selectedDeck;
+        if (willRename) useDeckStore.getState().deleteDeck(selectedRuleset, selectedDeck);
+
         useDeckStore.getState().saveDeck(selectedRuleset, name, deck);
         setSelectedDeck(name);
+
+        if (willRename) {
+            saveToCloud.mutate({
+                name: selectedDeck,
+                ruleset: selectedRuleset,
+                cards: deck,
+                rename: name,
+            });
+        } else {
+            saveToCloud.mutate({
+                name,
+                ruleset: selectedRuleset,
+                cards: deck,
+            });
+        }
     };
     const deleteDeck = (name: string) => {
         if (name === selectedDeck) {
@@ -95,12 +134,14 @@ export default function EditDecks() {
             <Box className={styles.controls}>
                 <div className={styles.controlsRow}>
                     <Select
+                        className={styles.select}
                         options={entries(rulesets).map(([id, ruleset]) => [id, ruleset.name])}
                         value={selectedRuleset}
                         placeholder="Select Ruleset"
                         onSelect={id => onChangeRuleset(id)}
                     />
                     <Select
+                        className={styles.select}
                         options={deckEntries.map(([name]) => [name, name])}
                         disabled={!deckEntries.length}
                         value={selectedDeck}
@@ -120,6 +161,13 @@ export default function EditDecks() {
                         <AssetButton path="/assets/plus.png" title="Create New Deck" disabled={!canMakeNew} onClick={() => saveDeck()} />
                         <AssetButton path="/assets/disk.png" title="Save Deck" disabled={!canSave} onClick={() => saveDeck(true)} />
                         <AssetButton path="/assets/trash.png" title="Delete Deck" disabled={noDeckSelected} onClick={() => deleteDeck(selectedDeck!)} />
+                        <AssetButton
+                            disabled={!selectedDeck || cloudDecks.isLoading || !backedUp && saveToCloud.isLoading}
+                            path={`/assets/${
+                                (!selectedDeck || cloudDecks.isLoading) ? 'cloud' : backedUp ? 'cloudgreen' : 'cloudred'
+                            }.png`}
+                            onClick={onBackupDeck}
+                        />
                     </div>
                     <div style={{ flex:1 }} />
                     <Text size={14}>{`${deck.main.length}`} card{deck.main.length === 1 ? '' : 's'}</Text>

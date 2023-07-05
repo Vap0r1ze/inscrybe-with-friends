@@ -35,6 +35,9 @@
             "error",
             "prefer-double"
         ],
+        "react-hooks/exhaustive-deps": [ "warn", {
+                "additionalHooks": "useAwaiter"
+            } ],
         "unused-imports/no-unused-imports": "error"
     }
 }

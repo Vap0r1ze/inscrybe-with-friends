@@ -1,0 +1,23 @@
+.button {
+    display: flex;
+    align-items: center;
+    background: var(--discord);
+    border: 1em solid var(--discord-darker);
+    border-bottom-width: 2em;
+    color: #fff;
+    padding: 1em;
+
+    cursor: pointer;
+}
+
+.pending {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.avatar {
+    width: 12em;
+    height: 12em;
+    margin-right: 4em;
+    image-rendering: pixelated;
+}
