@@ -1,8 +1,10 @@
 import { isClient } from '@/lib/utils';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-export default function AuthError() {
+export default function AuthSuccess() {
     const [showSuccess, setShowSuccess] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         setShowSuccess(true);
@@ -14,6 +16,8 @@ export default function AuthError() {
         window.opener.postMessage({ type: 'signinResult', success: true }, window.location.origin);
         return window.close();
     }
+
+    router.replace('/play');
 
     const success = <div style={{
         fontSize: '2rem',
