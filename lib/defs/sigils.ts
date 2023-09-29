@@ -410,6 +410,7 @@ const SIGIL_EFFECTS = {
         runAt: 'field',
         preSettleRead: {
             play(event) {
+                if (event.pos[0] === this.side) return;
                 this.createEvent('move', {
                     from: this.fieldPos!,
                     to: positions.opposing(event.pos),
@@ -765,6 +766,17 @@ const SIGIL_EFFECTS = {
                     dx,
                     turnAround: !canPush,
                 });
+            },
+        },
+    },
+    bistrike: {
+        runAs: 'played',
+        preSettleWrite: {
+            triggerAttack(event) {
+                this.cancelDefault();
+                const [side, lane] = positions.opposing(event.pos);
+                this.createEvent('attack', { from: event.pos, to: [side, lane - 1] });
+                this.createEvent('attack', { from: event.pos, to: [side, lane + 1] });
             },
         },
     },

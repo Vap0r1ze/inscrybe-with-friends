@@ -1,1 +1,1 @@
-module.exports = 'Alpha v47 (c7e885a)'
+module.exports = 'Alpha v48 (fce1569)'

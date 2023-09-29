@@ -178,6 +178,7 @@ export function isEventInvalid({ fight, host }: FightTick, event: Event) {
             const [side, lane] = event.from;
             if (!fight.field[side][lane]) return true;
             if (event.from[1] < 0 || event.from[1] >= fight.opts.lanes) return true;
+            if (event.to[1] < 0 || event.to[1] >= fight.opts.lanes) return true;
             break;
         }
         case 'shoot': {
