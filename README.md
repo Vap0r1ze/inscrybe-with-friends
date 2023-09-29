@@ -7,8 +7,10 @@
   >
 </div>
 
-This is a multiplayer version of the game [Inscryption](https://www.inscryption.com/) made by [Daniel Mullins](https://twitter.com/dmullinsgames).
+---
 
-It's fully open-source and runs in the web browser, so you can play it with your friends without having to download anything.
+This is a multiplayer version of the 2nd act in the game [Inscryption](https://www.inscryption.com/). The orignal game made by [Daniel Mullins](https://twitter.com/dmullinsgames).
+
+It's fully open-source and runs in the web browser, so you can play it with your friends without having to download anything. Currently the only way to log in is with Discord because it was easy to do without worrying about abuse, but I want to add more options in the future.
 
 If you want to contribute to the project or are just curious what services I use, check out [CONTRIBUTING.md](./CONTRIBUTING.md).

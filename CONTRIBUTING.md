@@ -14,7 +14,13 @@
 
 # Contributing
 
-If you're looking to contribute, first: thank you very much ^^!
+If you're looking to contribute, first: thank you very much ^^! Read below to get a feel of the codebase, and look at some [issues](https://github.com/Vap0r1ze/inscrybe-with-friends/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc) for examples of things to help with.
+
+## Getting Started
+  1. Clone the repo
+  2. Install dependencies with `yarn`
+  3. Run the dev server with `yarn dev`
+  4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Technologies Used
   - **[Next.JS]** `both` &ndash; Backend framework built for react
@@ -23,7 +29,6 @@ If you're looking to contribute, first: thank you very much ^^!
   - **[Framer Motion]** `frontend` &ndash; Used for animating elements
   - **[Tone.js]** `frontend` &ndash; Audio library, eventually will be used for music
   - **[Prisma]** `backend` &ndash; ORM for the postgres database
-  -
 
 ## Services Used
 I use the free-tier of everthing listed here
