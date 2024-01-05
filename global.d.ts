@@ -7,6 +7,8 @@ declare namespace NodeJS {
         PUSHER_SECRET: string;
         NEXT_PUBLIC_PUSHER_KEY: string;
         NEXT_PUBLIC_PUSHER_CLUSTER: string;
+
+        CRON_SECRET: string;
     }
 }
 
