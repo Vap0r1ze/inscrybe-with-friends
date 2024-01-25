@@ -1,5 +1,7 @@
 # Inscrybe With Friends
 
+[Discord Server](https://discord.gg/me2Me5ztMz)
+
 <div style="text-align:center">
   <img
     alt="Preview of the game"

@@ -20,3 +20,18 @@
     flex-direction: column;
     width: 100%;
 }
+
+.discordLink {
+    display: flex;
+    flex-direction: column;
+}
+
+.discordButton.discordButton {
+    background: var(--discord);
+    border: 1em solid var(--discord-darker);
+    border-bottom-width: 2em;
+    color: #fff;
+    padding: 1em;
+
+    cursor: pointer;
+}

@@ -7,6 +7,9 @@ import { HoverBorder } from '../ui/HoverBorder';
 import { Box } from '../ui/Box';
 import { Text } from '../ui/Text';
 import { Range } from '../inputs/Range';
+import { Button } from '../inputs/Button';
+
+const DISCORD_LINK = 'https://discord.gg/me2Me5ztMz';
 
 export function Settings() {
     const [open, setOpen] = useState(false);
@@ -26,6 +29,9 @@ export function Settings() {
                 <VolumeSetting type="all" />
                 <VolumeSetting type="music" />
                 <VolumeSetting type="sfx" />
+                <a className={styles.discordLink} href={DISCORD_LINK} target="_blank">
+                    <Button className={styles.discordButton} border="--discord-dark"><Text>Join Discord</Text></Button>
+                </a>
             </Box>
         </div>}
     </>;

@@ -1,0 +1,16 @@
+.backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(0, 0, 0, .5);
+}
+
+.backdrop .modal {
+    margin: 16em auto;
+    width: 240em;
+    color: var(--flow);
+}
+
+.discordLink {
+    color: var(--discord-darker);
+    text-decoration: underline;
+}
