@@ -22,8 +22,10 @@ export const logger = {
     verbose: (message: string, ctx?: LogContext) => logger.log(message, { ctx, level: 'verbose' }),
 
     flush: async () => {
-        await superagent.post('https://in.logs.betterstack.com')
-            .set('Authorization', 'Bearer ' + process.env.LOGTAIL_TOKEN)
-            .send(logger.events);
+        try {
+            await superagent.post('https://in.logs.betterstack.com')
+                .set('Authorization', 'Bearer ' + process.env.LOGTAIL_TOKEN)
+                .send(logger.events);
+        } catch {}
     },
 };
