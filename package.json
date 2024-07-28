@@ -1,12 +1,14 @@
 {
     "name": "inscrybe-with-friends",
     "private": true,
+    "packageManager": "pnpm@8.15.9+sha256.daa27a0b541bc635323ff96c2ded995467ff9fe6d69ff67021558aa9ad9dcc36",
     "scripts": {
         "dev": "prisma generate && next dev",
         "build": "prisma generate && next build",
         "start": "next start",
         "lint": "next lint",
-        "migrate:db": "dotenv -e .env.local -- prisma migrate dev"
+        "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
+        "db:push": "dotenv -e .env.local -- prisma db push"
     },
     "dependencies": {
         "@prisma/client": "^4.15.0",
@@ -51,6 +53,7 @@
         "eslint-config-next": "13.4.1",
         "eslint-plugin-unused-imports": "^2.0.0",
         "prisma": "^4.15.0",
+        "tsx": "^4.16.2",
         "typescript": "5.1.6"
     }
 }
