@@ -2,8 +2,7 @@ import styles from './edit-decks.module.css';
 import { rulesets } from '@/lib/defs/prints';
 import { entries } from '@/lib/utils';
 import { useCallback, useState } from 'react';
-import { useDeckStore } from '@/hooks/useDeckStore';
-import { useStore } from '@/hooks/useStore';
+import { useDeckSync } from '@/hooks/useDeckStore';
 import { PrintList } from '@/components/ui/PrintList';
 import { AssetButton } from '@/components/inputs/AssetButton';
 import { Select } from '@/components/inputs/Select';
@@ -12,7 +11,6 @@ import { Button } from '@/components/inputs/Button';
 import { getSideDeckPrintIds } from '@/lib/engine/Card';
 import { Box } from '@/components/ui/Box';
 import { DeckCards } from '@/lib/engine/Deck';
-import { trpc } from '@/lib/trpc';
 
 function useDeck(init: DeckCards) {
     const [deck, setDeck] = useState(init);
@@ -32,77 +30,58 @@ export default function EditDecks() {
         main: [],
         side: getSideDeckPrintIds(defaultSideDeck),
     });
-    const decks = useStore(useDeckStore, state => state.rulesets)?.[selectedRuleset] ?? {};
+    const {
+        decks: { [selectedRuleset]: decks = {} },
+        saveDeck,
+        deleteDeck,
+        restoreDeck,
+        isLoading,
+        isSaving,
+    } = useDeckSync();
 
     const deckName = deckNameInput.trim();
     const noDeckSelected = !(selectedDeck && decks[selectedDeck]);
-    const canSave = !noDeckSelected && (JSON.stringify(decks[selectedDeck]) !== JSON.stringify(deck) || deckName !== selectedDeck);
+    const canSave = !noDeckSelected && (JSON.stringify(decks[selectedDeck].cards) !== JSON.stringify(deck) || deckName !== selectedDeck);
     const canMakeNew = noDeckSelected || (!!deckName && !decks[deckName]);
+    const cloudState = (!selectedDeck || isLoading) ? null : decks[selectedDeck]?.state ?? null;
 
-    const cloudDecks = trpc.decks.getOwn.useQuery();
-    const saveToCloud = trpc.decks.save.useMutation({
-        onSuccess: () => cloudDecks.refetch(),
-    });
-    let backedUp = false;
-    checkBackup: if (selectedDeck && cloudDecks.data) {
-        const cloudDeck = cloudDecks.data.find(d => d.name === selectedDeck && d.ruleset === selectedRuleset);
-        if (!cloudDeck) break checkBackup;
-        backedUp = true;
-        if (JSON.stringify(decks[selectedDeck]) !== JSON.stringify(cloudDeck.cards)) backedUp = false;
-        if (deckName !== selectedDeck) backedUp = false;
-    }
-
-    const onBackupDeck = () => {
-        if (!selectedDeck || canSave) return;
-        saveToCloud.mutate({
-            name: selectedDeck,
-            ruleset: selectedRuleset,
-            cards: deck,
-        });
+    const onSyncDeck = () => {
+        if (!selectedDeck || !cloudState) return;
+        if (cloudState === 'synced') return;
+        if (cloudState === 'local') saveDeck(selectedRuleset, selectedDeck, deck);
+        if (cloudState === 'conflict') {
+            const deck = restoreDeck(selectedRuleset, selectedDeck);
+            setDeck(deck);
+        }
     };
 
-    const selectDeck = (name: string) => {
+    const onSelectDeck = (name: string) => {
         setSelectedDeck(name);
         if (!name) return;
-        setDeck(useDeckStore.getState().rulesets[selectedRuleset][name]);
+        setDeck(decks[name].cards);
         setDeckName(name);
     };
     const onDeckNameChange = (name: string) => {
         setDeckName(name);
     };
-    const saveDeck = (tryRename = false) => {
+    const onSaveDeck = (tryRename = false) => {
         let name = deckName || selectedDeck;
-        for (let i = 1; !name || (i > 1 && decks?.[name]); i++) name = `New Deck (${i})`;
+        for (let i = 1; !name || (i > 1 && decks[name]); i++) name = `New Deck (${i})`;
 
         setDeckName(name);
 
         const willRename = tryRename && selectedDeck && name !== selectedDeck;
-        if (willRename) useDeckStore.getState().deleteDeck(selectedRuleset, selectedDeck);
+        if (willRename) saveDeck(selectedRuleset, selectedDeck, deck, name);
+        else saveDeck(selectedRuleset, name, deck);
 
-        useDeckStore.getState().saveDeck(selectedRuleset, name, deck);
         setSelectedDeck(name);
-
-        if (willRename) {
-            saveToCloud.mutate({
-                name: selectedDeck,
-                ruleset: selectedRuleset,
-                cards: deck,
-                rename: name,
-            });
-        } else {
-            saveToCloud.mutate({
-                name,
-                ruleset: selectedRuleset,
-                cards: deck,
-            });
-        }
     };
-    const deleteDeck = (name: string) => {
+    const onDeleteDeck = (name: string) => {
         if (name === selectedDeck) {
             setDeck({ main: [], side: getSideDeckPrintIds(defaultSideDeck) });
             setSelectedDeck('');
         }
-        useDeckStore.getState().deleteDeck(selectedRuleset, name);
+        deleteDeck(selectedRuleset, name);
     };
     const onChangeRuleset = (id: string) => {
         if (id === selectedRuleset) return;
@@ -125,7 +104,7 @@ export default function EditDecks() {
     /* eslint-enable react-hooks/exhaustive-deps */
 
     const sideEntries = entries(rulesets[selectedRuleset].sideDecks);
-    const deckEntries = entries(decks ?? {});
+    const deckEntries = entries(decks);
 
     // TODO: figure out how to prevent deck select from flickering on create/rename
 
@@ -148,7 +127,7 @@ export default function EditDecks() {
                         content={deckNameInput}
                         placeholder="Select a Deck"
                         editable
-                        onSelect={name => selectDeck(name)}
+                        onSelect={name => onSelectDeck(name)}
                         onEdit={name => onDeckNameChange(name)}
                     />
                     <div style={{ flex: 1 }} />
@@ -158,15 +137,22 @@ export default function EditDecks() {
                 </div>
                 <div className={styles.controlsRow}>
                     <div className={styles.actions}>
-                        <AssetButton path="/assets/plus.png" title="Create New Deck" disabled={!canMakeNew} onClick={() => saveDeck()} />
-                        <AssetButton path="/assets/disk.png" title="Save Deck" disabled={!canSave} onClick={() => saveDeck(true)} />
-                        <AssetButton path="/assets/trash.png" title="Delete Deck" disabled={noDeckSelected} onClick={() => deleteDeck(selectedDeck!)} />
+                        <AssetButton path="/assets/plus.png" title="Create New Deck" disabled={!canMakeNew} onClick={() => onSaveDeck()} />
+                        <AssetButton path="/assets/disk.png" title="Save Deck" disabled={!canSave} onClick={() => onSaveDeck(true)} />
+                        <AssetButton path="/assets/trash.png" title="Delete Deck" disabled={noDeckSelected} onClick={() => onDeleteDeck(selectedDeck!)} />
                         <AssetButton
-                            disabled={!selectedDeck || cloudDecks.isLoading || !backedUp && saveToCloud.isLoading}
-                            path={`/assets/${
-                                (!selectedDeck || cloudDecks.isLoading) ? 'cloud' : backedUp ? 'cloudgreen' : 'cloudred'
-                            }.png`}
-                            onClick={onBackupDeck}
+                            disabled={!cloudState || cloudState === 'synced' || cloudState !== 'local' && (canSave || isSaving)}
+                            path={`/assets/${cloudState ? ({
+                                synced: 'cloudgreen',
+                                local: 'cloudred',
+                                conflict: 'clouddownload',
+                            })[cloudState] : 'cloud'}.png`}
+                            title={cloudState ? ({
+                                synced: 'Synced',
+                                local: 'Sync deck',
+                                conflict: 'Download deck from cloud',
+                            })[cloudState] : undefined}
+                            onClick={onSyncDeck}
                         />
                     </div>
                     <div style={{ flex:1 }} />

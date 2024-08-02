@@ -6,7 +6,7 @@ export function assert(value: unknown, issue: string): asserts value {
     console.error(issue);
 }
 
-export function fromEntries<K extends string | number | symbol, V>(entries: Iterable<[K, V]>) {
+export function fromEntries<K extends string | number | symbol, V>(entries: Iterable<readonly [K, V]>) {
     return Object.fromEntries(entries) as Record<K, V>;
 }
 

@@ -7,10 +7,18 @@ import { zDeckCards } from '@/lib/online/z';
 export const deckRouter = router({
     getOwn: protectedProcedure
         .query(async ({ ctx }) => {
-            return await prisma.deck.findMany({
+            const dbDecks = await prisma.deck.findMany({
                 where: { ownerId: ctx.session.user.id },
                 orderBy: { name: 'asc' },
             });
+
+            const validDecks = dbDecks.map(deck => {
+                const cards = zDeckCards.safeParse(deck.cards);
+                if (cards.success) return { ...deck, cards: cards.data };
+                return null;
+            }).filter((maybeDeck): maybeDeck is typeof maybeDeck & {} => !!maybeDeck);
+
+            return validDecks;
         }),
     save: protectedProcedure
         .input(z.object({
@@ -57,5 +65,19 @@ export const deckRouter = router({
             });
 
             return deck;
+        }),
+    delete: protectedProcedure
+        .input(z.object({
+            name: z.string(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            await prisma.deck.delete({
+                where: {
+                    ownerId_name: {
+                        ownerId: ctx.session.user.id,
+                        name: input.name,
+                    },
+                },
+            });
         }),
 });

@@ -20,6 +20,7 @@
         "@types/superagent": "^4.1.18",
         "classnames": "^2.3.2",
         "framer-motion": "^10.12.16",
+        "immer": "^10.1.1",
         "json5": "^2.2.3",
         "lodash": "^4.17.21",
         "next": "13.4.1",
