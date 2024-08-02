@@ -6,7 +6,7 @@ import { Button } from '@/components/inputs/Button';
 import { Select } from '@/components/inputs/Select';
 import { Box } from '@/components/ui/Box';
 import { useClientStore } from '@/hooks/useClientStore';
-import { useDeckStore } from '@/hooks/useDeckStore';
+import { useDeckSync } from '@/hooks/useDeckStore';
 import { useGameStore } from '@/hooks/useGameStore';
 import { useStore } from '@/hooks/useStore';
 import { FIGHT_SIDES, FightSide, createFight, translateFight } from '@/lib/engine/Fight';
@@ -42,7 +42,7 @@ function TheError({ error }: FallbackProps) {
 }
 
 function PlayTestPage() {
-    const deckStore = useStore(useDeckStore, state => state.rulesets);
+    const { decks: deckStore } = useDeckSync();
     const game = useStore(useGameStore, state => state.localGames.playtest);
     const currentTurn = useStore(useGameStore, state => state.localGames.playtest?.host.fight.turn.side);
     const currentPhase = useStore(useGameStore, state => state.localGames.playtest?.host.fight.turn.phase);
@@ -60,7 +60,7 @@ function PlayTestPage() {
 
     const decks = useMemo(() => {
         if (!deckStore || !ruleset) return [];
-        return entries(deckStore[ruleset] ?? []).map(([name, deck]) => ({ name, deck }));
+        return entries(deckStore[ruleset] ?? {}).map(([name, { cards }]) => ({ name, deck: cards }));
     }, [deckStore, ruleset]);
 
     const noDecks = !decks.length;
@@ -103,7 +103,7 @@ function PlayTestPage() {
     const onFightStart = () => {
         if (game || !ruleset || !deckStore || Object.values(selectedDecks).some(deck => !deck)) return;
 
-        const decks = fromEntries(entries(selectedDecks).map(([side, deck]) => [side, deckStore[ruleset][deck!]]));
+        const decks = fromEntries(entries(selectedDecks).map(([side, deck]) => [side, deckStore[ruleset][deck!].cards]));
 
         const fight = createFight({
             features: [],
