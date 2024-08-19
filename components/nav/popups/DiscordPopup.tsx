@@ -24,7 +24,7 @@ export function DiscordPopup() {
         <Box className={styles.modal} onClick={event => event.stopPropagation()}>
             <Text size={24}>Hi players!</Text>
             <Text size={12}>I made a <a className={styles.discordLink} href={DISCORD_LINK} target="_blank">Discord server</a> for Inscrybe w/ Friends</Text>
-            <Text size={12}>I should have more time to work on this fangame soon, and I would love to hear your feedback on things</Text>
+            <Text size={12}>At some point I may have more time to work on this fangame, and I would love to hear your feedback on things</Text>
             <Button onClick={() => close()}><Text>Omg sick I joined</Text></Button>
             <Button onClick={() => close()}><Text>I&apos;ll join later in Settings</Text></Button>
         </Box>
