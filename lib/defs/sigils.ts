@@ -410,7 +410,7 @@ const SIGIL_EFFECTS = {
         runAt: 'field',
         preSettleRead: {
             play(event) {
-                if (event.pos[0] === this.side) return;
+                if (event.pos[0] === this.side || event.pos[1] === this.fieldPos![1]) return;
                 this.createEvent('move', {
                     from: this.fieldPos!,
                     to: positions.opposing(event.pos),
