@@ -130,8 +130,8 @@ export const gameRouter = router({
                 throw new TRPCError({ code: 'BAD_REQUEST', message: 'Both players must have a deck selected' });
 
             const [playerDeck, opposingDeck] = await prisma.$transaction([
-                prisma.deck.findFirst({ where: { name: playerDeckName } }),
-                prisma.deck.findFirst({ where: { name: opposingDeckName } }),
+                prisma.deck.findFirst({ where: { ownerId: sides.player, name: playerDeckName } }),
+                prisma.deck.findFirst({ where: { ownerId: sides.opposing, name: opposingDeckName } }),
             ]);
 
             if (!playerDeck || !opposingDeck)
