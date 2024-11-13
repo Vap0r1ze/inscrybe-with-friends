@@ -545,6 +545,8 @@ const SIGIL_EFFECTS = {
                 extraSigils = lists.subtract(extraSigils, ['evolve']);
                 const card = this.initCard(this.cardPrint.evolution);
                 card.state.sigils.push(...extraSigils);
+                const damage = this.cardPrint.health - this.card.state.health;
+                card.state.health -= damage;
 
                 this.createEvent('transform', {
                     pos: this.fieldPos!,
