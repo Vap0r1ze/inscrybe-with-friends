@@ -111,7 +111,7 @@ const SIGIL_INFOS = {
     },
     evolve: {
         name: 'Fledgling',
-        description: 'A card bearing this sigil will grow into a more powerful form after 1 turn on the board.',
+        description: 'A card bearing this sigil will grow into it\'s evolution after 1 turn on the board.',
     },
     fourBones: {
         name: 'Bone King',

@@ -135,8 +135,11 @@ export function getEntryData(entry: Entry | null, ruleset: string): EntryData | 
     } else if (entry.type === 'print') {
         const print = rulesets[ruleset].prints[entry.id];
         if (!print) return null;
+
         const segmentParts: EntrySegment[][] = [];
+
         if (print.desc) segmentParts.push([{ type: 'text', text: print.desc }]);
+
         for (const sigil of print.sigils ?? []) {
             const sigilData = getEntryData({ type: 'sigil', id: sigil }, ruleset);
             if (!sigilData) continue;
@@ -146,6 +149,14 @@ export function getEntryData(entry: Entry | null, ruleset: string): EntryData | 
                 ...sigilData.description,
             ]);
         }
+
+        if (print.evolution) {
+            segmentParts.push([
+                { type: 'text', text: 'Evolves into ' },
+                { type: 'link', tag: `print:${print.evolution}` },
+            ]);
+        }
+
         for (const sigil of print.tribes ?? []) {
             const sigilData = getEntryData({ type: 'sigil', id: sigil }, ruleset);
             if (!sigilData) continue;
@@ -155,6 +166,7 @@ export function getEntryData(entry: Entry | null, ruleset: string): EntryData | 
                 ...sigilData.description,
             ]);
         }
+
         return {
             title: print.name,
             description: join<EntrySegment>(segmentParts, { type: 'break' }),
