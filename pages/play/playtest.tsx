@@ -46,6 +46,7 @@ function PlayTestPage() {
     const game = useStore(useGameStore, state => state.localGames.playtest);
     const currentTurn = useStore(useGameStore, state => state.localGames.playtest?.host.fight.turn.side);
     const currentPhase = useStore(useGameStore, state => state.localGames.playtest?.host.fight.turn.phase);
+    const clientNonce = useStore(useClientStore, state => state.clients.playtest?.nonce);
 
     const [ruleset, setRuleset] = useState<string>();
     const [selectedDecks, setSelectedDecks] = useState<Record<FightSide, string | null>>({
@@ -182,7 +183,7 @@ function PlayTestPage() {
                     <Text>Playing as <span style={{ textTransform: 'uppercase' }}>{currentSide}</span></Text>
                 </div>
             </Box>
-            <Client className={styles.client} key={currentSide} id="playtest" debug={!fullscreen} />
+            <Client className={styles.client} key={clientNonce} id="playtest" debug={!fullscreen} />
             {devMode && <DevMenu id="playtest" onClose={() => setDevMode(false)} />}
         </div>}
     </div>;

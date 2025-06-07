@@ -8,11 +8,13 @@ import { Action, ActionRes, PlayerMessage } from '@/lib/engine/Actions';
 import { clone } from '@/lib/utils';
 import { ErrorType, FightError } from '@/lib/engine/Errors';
 import { triggerActionSound, triggerEventSound } from './useAudio';
+import { devtools } from 'zustand/middleware';
 
 export const ClientContext = createContext<string | null>(null);
 
 interface FightClient {
     id: string;
+    nonce: string;
     fight: Fight<'player'>;
     pending: boolean;
     settled: Event[];
@@ -41,7 +43,7 @@ interface FightStore {
     commitEvent: (id: string, event: Event) => void;
 }
 
-export const useClientStore = create<FightStore>((set, get) => ({
+export const useClientStore = create(devtools<FightStore>((set, get) => ({
     clients: {},
     newClient(id, fight) {
         set(state => ({
@@ -49,6 +51,7 @@ export const useClientStore = create<FightStore>((set, get) => ({
                 ...state.clients,
                 [id]: {
                     id,
+                    nonce: crypto.randomUUID(),
                     fight,
                     pending: false,
                     settled: [],
@@ -121,6 +124,8 @@ export const useClientStore = create<FightStore>((set, get) => ({
         commitEvents(client, [clone(event)]);
         useClientStore.getState().setClient(id, client => client);
     },
+}), {
+    store: 'ClientStore',
 }));
 
 export function useClient(throwIfMissing?: false): FightClient | null;
