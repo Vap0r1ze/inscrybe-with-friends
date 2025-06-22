@@ -157,10 +157,10 @@ export default function Lobby() {
                     <div key={playership.userId} className={styles.playerRow}>
                         <div className={styles.player}>
                             <Image
-                                alt="Profile picture"
+                                alt={`${playership.user.name}'s profile picture`}
                                 src={playership.user.image}
-                                width={16}
-                                height={16}
+                                width={32}
+                                height={32}
                                 className={styles.profilePicture}
                             />
                             <Text>{playership.user.name}{playership.user.id === lobby.data?.ownerId ? ' [LEADER]' : ''}</Text>

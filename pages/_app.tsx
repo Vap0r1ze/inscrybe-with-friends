@@ -5,7 +5,6 @@ import { SessionProvider, signIn } from 'next-auth/react';
 import { AppType } from 'next/app';
 import { Text } from '@/components/ui/Text';
 import { Rulebook } from '@/components/Rulebook';
-import version from '../version.js';
 import * as Tone from 'tone';
 import { trpc } from '@/lib/trpc';
 import { isClient } from '@/lib/utils';
@@ -13,6 +12,8 @@ import { Navbar } from '@/components/nav/Navbar';
 import { pusherClient } from '@/lib/pusher';
 
 const App: AppType<{ session: any }> = ({ Component, pageProps, ...appProps }) => {
+    const version = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || 'dev';
+
     if (appProps.router.pathname.startsWith('/auth/')) {
         return <SessionProvider>
             <Component {...pageProps} />
@@ -45,7 +46,7 @@ const App: AppType<{ session: any }> = ({ Component, pageProps, ...appProps }) =
             </SessionProvider>
             <Filters />
             <div className={styles.version}>
-                <Text>{version}</Text>
+                <Text>Alpha ({ version })</Text>
             </div>
         </div>;
     }

@@ -104,7 +104,7 @@ export default function EditDecks() {
     /* eslint-enable react-hooks/exhaustive-deps */
 
     const sideEntries = entries(rulesets[selectedRuleset].sideDecks);
-    const deckEntries = entries(decks);
+    const deckEntries = entries(decks).sort(([a], [b]) => a.localeCompare(b));
 
     // TODO: figure out how to prevent deck select from flickering on create/rename
 

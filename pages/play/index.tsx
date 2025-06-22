@@ -8,7 +8,9 @@ import { useRouter } from 'next/router';
 
 export default function Play() {
     const router = useRouter();
-    const playerships = trpc.lobbies.getOwnPlayerships.useQuery();
+    const playerships = trpc.lobbies.getOwnPlayerships.useQuery(void 0, {
+        refetchOnWindowFocus: false,
+    });
 
     const createLobby = trpc.lobbies.create.useMutation({
         onSuccess: () => playerships.refetch(),
@@ -30,7 +32,7 @@ export default function Play() {
                 {playerships.data?.map(playership => (
                     <div key={playership.lobbyId} className={styles.lobby}>
                         <Button className={styles.lobbyBtn} onClick={() => openLobby(playership.lobbyId)}>
-                            <Text fit>{playership.lobby.name ?? 'New Lobby'}</Text>
+                            <Text fit>{playership.lobby.name ?? `${playership.lobby.owner.name}'s Lobby`}</Text>
                         </Button>
                     </div>
                 ))}

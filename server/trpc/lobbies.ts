@@ -16,7 +16,25 @@ export const lobbiesRouter = router({
         .query(async ({ ctx }) => {
             const playerships = await prisma.playership.findMany({
                 where: { userId: ctx.session.user.id },
-                include: { lobby: true },
+                include: { lobby: {
+                    include: {
+                        owner: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                        playerships: {
+                            include: {
+                                user: {
+                                    select: {
+                                        name: true,
+                                        image: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                } },
             });
             return playerships;
         }),
