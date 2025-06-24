@@ -195,6 +195,6 @@ export function getCircuit(prints: Record<string, CardPrint>, field: (Card | nul
     const circuit = new Array<CircuitSlot>(field.length).fill(null);
     const left = field.findIndex(card => card != null && prints[card.print].conduit);
     const right = field.findLastIndex(card => card != null && prints[card.print].conduit);
-    if (left === -1 || right === -1) return circuit;
+    if (left === -1 || left === right) return circuit;
     return circuit.map((_, i) => i > left && i < right ? 'circuit' : i === left ? 'left' : i === right ? 'right' : null);
 }
