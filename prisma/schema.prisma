@@ -1,6 +1,9 @@
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["jsonProtocol"]
+    provider = "prisma-client-js"
+}
+
+generator json {
+    provider = "prisma-json-types-generator"
 }
 
 datasource db {
@@ -10,10 +13,11 @@ datasource db {
 }
 
 model User {
-    id        String   @id @default(uuid())
-    name      String
-    image     String
-    createdAt DateTime @default(now())
+    id          String   @id @default(uuid())
+    name        String
+    image       String
+    createdAt   DateTime @default(now())
+    permissions Int      @default(0)
 
     ownedLobbies    Lobby[]
     playerships     Playership[]
@@ -55,22 +59,25 @@ model Playership {
     user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     joinedAt    DateTime @default(now())
-    permissions Int
+    permissions Int      @default(0)
 
     @@id([lobbyId, userId])
 }
 
 model Deck {
+    id        String    @id @default(uuid())
     name      String
-    createdAt DateTime @default(now())
+    createdAt DateTime  @default(now())
+    updatedAt DateTime?
 
     owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
     ownerId String
 
     ruleset String
+    /// ![PrismaJson.DeckCards]
     cards   Json
 
-    @@id([ownerId, name])
+    @@unique([ownerId, name])
 }
 
 model Game {

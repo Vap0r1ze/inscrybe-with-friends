@@ -3,6 +3,8 @@ import { FightFeatures, FightOptions, FightSide } from '../engine/Fight';
 import { DeckCards, DeckType } from '../engine/Deck';
 import { Action, ActionRes, PlayerMessage } from '../engine/Actions';
 
+// TODO: make more restrictive: maximum array sizes, print id enums, string max lengths, etc.
+
 export const zFightOptions = z.object({
     lanes: z.number(),
     features: z.array(z.union([

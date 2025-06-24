@@ -22,16 +22,16 @@ export const deckRouter = router({
         }),
     save: protectedProcedure
         .input(z.object({
+            id: z.string().optional(),
             name: z.string(),
-            rename: z.string().optional(),
             ruleset: z.string(),
             cards: zDeckCards,
         }))
         .mutation(async ({ ctx, input }) => {
-            const exists = !!await prisma.deck.findFirst({
+            const exists = input.id && !!await prisma.deck.findFirst({
                 where: {
+                    id: input.id,
                     ownerId: ctx.session.user.id,
-                    name: input.name,
                 },
             });
             if (exists) {
@@ -43,40 +43,44 @@ export const deckRouter = router({
                 if (deckCount >= 20) throw new TRPCError({ code: 'FORBIDDEN', message: 'You can only have up to 20 decks' });
             }
 
-            // FIXME: check validity of deck
-
-            const deck = await prisma.deck.upsert({
-                where: {
-                    ownerId_name: {
+            if (input.id) {
+                return await prisma.deck.upsert({
+                    where: {
+                        id: input.id,
+                    },
+                    update: {
+                        name: input.name,
+                        ruleset: input.ruleset,
+                        cards: input.cards,
+                    },
+                    create: {
+                        id: input.id,
                         ownerId: ctx.session.user.id,
                         name: input.name,
+                        ruleset: input.ruleset,
+                        cards: input.cards,
                     },
-                },
-                update: {
-                    name: input.rename,
-                    cards: input.cards,
-                },
-                create: {
-                    ownerId: ctx.session.user.id,
-                    name: input.name,
-                    ruleset: input.ruleset,
-                    cards: input.cards,
-                },
-            });
-
-            return deck;
+                });
+            } else {
+                return await prisma.deck.create({
+                    data: {
+                        ownerId: ctx.session.user.id,
+                        name: input.name,
+                        ruleset: input.ruleset,
+                        cards: input.cards,
+                    },
+                });
+            }
         }),
     delete: protectedProcedure
         .input(z.object({
-            name: z.string(),
+            id: z.string(),
         }))
         .mutation(async ({ ctx, input }) => {
             await prisma.deck.delete({
                 where: {
-                    ownerId_name: {
-                        ownerId: ctx.session.user.id,
-                        name: input.name,
-                    },
+                    id: input.id,
+                    ownerId: ctx.session.user.id,
                 },
             });
         }),

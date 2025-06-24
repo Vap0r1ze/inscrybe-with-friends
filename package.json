@@ -11,13 +11,14 @@
         "db:studio": "dotenv -e .env.local -- prisma studio"
     },
     "dependencies": {
-        "@prisma/client": "^4.15.0",
+        "@prisma/client": "^6.10.1",
         "@tanstack/react-query": "^4.29.12",
         "@trpc/client": "^10.29.1",
         "@trpc/next": "^10.29.1",
         "@trpc/react-query": "^10.29.1",
         "@trpc/server": "^10.29.1",
         "@types/superagent": "^4.1.18",
+        "@uidotdev/usehooks": "^2.4.1",
         "classnames": "^2.3.2",
         "framer-motion": "^10.12.16",
         "immer": "^10.1.1",
@@ -54,7 +55,8 @@
         "eslint": "8.40.0",
         "eslint-config-next": "13.4.1",
         "eslint-plugin-unused-imports": "^2.0.0",
-        "prisma": "^4.15.0",
+        "prisma": "^6.10.1",
+        "prisma-json-types-generator": "^3.5.0",
         "tsx": "^4.16.2",
         "typescript": "5.1.6"
     }

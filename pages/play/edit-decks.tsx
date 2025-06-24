@@ -1,8 +1,8 @@
 import styles from './edit-decks.module.css';
 import { rulesets } from '@/lib/defs/prints';
 import { entries } from '@/lib/utils';
-import { useCallback, useState } from 'react';
-import { useDeckSync } from '@/hooks/useDeckStore';
+import { useCallback, useEffect, useState } from 'react';
+import { isCardsDirty, useDeckSync } from '@/hooks/useDeckStore';
 import { PrintList } from '@/components/ui/PrintList';
 import { AssetButton } from '@/components/inputs/AssetButton';
 import { Select } from '@/components/inputs/Select';
@@ -21,9 +21,10 @@ function useDeck(init: DeckCards) {
 }
 
 export default function EditDecks() {
-    const [selectedDeck, setSelectedDeck] = useState('');
+    const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
     const [deckNameInput, setDeckName] = useState('');
     const [selectedRuleset, setSelectedRuleset] = useState(Object.keys(rulesets)[0]);
+    // TODO: unpair side-decks from rulesets, (add 'custom' option for when side deck isnt part of ruleset)
     const [defaultSideDeckId, defaultSideDeck] = Object.entries(rulesets[selectedRuleset].sideDecks)[0];
     const [selectedSideDeck, setSelectedSideDeck] = useState(defaultSideDeckId);
     const [deck, { addCard, removeCard, setSide, setDeck }] = useDeck({
@@ -31,57 +32,97 @@ export default function EditDecks() {
         side: getSideDeckPrintIds(defaultSideDeck),
     });
     const {
-        decks: { [selectedRuleset]: decks = {} },
+        decks,
         saveDeck,
         deleteDeck,
-        restoreDeck,
         isLoading,
+        isDeleting,
         isSaving,
+        errorSaving,
     } = useDeckSync();
 
     const deckName = deckNameInput.trim();
-    const noDeckSelected = !(selectedDeck && decks[selectedDeck]);
-    const canSave = !noDeckSelected && (JSON.stringify(decks[selectedDeck].cards) !== JSON.stringify(deck) || deckName !== selectedDeck);
-    const canMakeNew = noDeckSelected || (!!deckName && !decks[deckName]);
-    const cloudState = (!selectedDeck || isLoading) ? null : decks[selectedDeck]?.state ?? null;
+    const hasDeckSelected = !!(selectedDeckId && decks[selectedDeckId]);
 
-    const onSyncDeck = () => {
-        if (!selectedDeck || !cloudState) return;
-        if (cloudState === 'synced') return;
-        if (cloudState === 'local') saveDeck(selectedRuleset, selectedDeck, deck);
-        if (cloudState === 'conflict') {
-            const deck = restoreDeck(selectedRuleset, selectedDeck);
-            setDeck(deck);
+    let isDirty = false;
+    if (hasDeckSelected) {
+        isDirty ||= isCardsDirty(selectedDeckId, deck);
+        isDirty ||= deckName !== decks[selectedDeckId].name;
+        isDirty ||= selectedRuleset !== decks[selectedDeckId].ruleset;
+    }
+
+    const canMakeNew = !isDirty;
+
+    useEffect(() => {
+        function onBeforeUnload(event: BeforeUnloadEvent) {
+            if (isDirty) event.preventDefault();
         }
-    };
+        window.addEventListener('beforeunload', onBeforeUnload);
+        return () => window.removeEventListener('beforeunload', onBeforeUnload);
+    }, [isDirty]);
 
-    const onSelectDeck = (name: string) => {
-        setSelectedDeck(name);
-        if (!name) return;
-        setDeck(decks[name].cards);
-        setDeckName(name);
+    /* eslint-disable react-hooks/exhaustive-deps */
+    useEffect(() => {
+        if (!hasDeckSelected) return;
+
+        decks[selectedDeckId].local = deck;
+    }, [decks, deck, selectedDeckId]);
+    /* eslint-enable react-hooks/exhaustive-deps */
+
+    const onSelectDeck = (id: string) => {
+        setSelectedDeckId(id);
+        if (!id) return;
+        setDeck(decks[id].local);
+        setDeckName(decks[id].name);
     };
     const onDeckNameChange = (name: string) => {
         setDeckName(name);
     };
-    const onSaveDeck = (tryRename = false) => {
-        let name = deckName || selectedDeck;
-        for (let i = 1; !name || (i > 1 && decks[name]); i++) name = `New Deck (${i})`;
 
-        setDeckName(name);
-
-        const willRename = tryRename && selectedDeck && name !== selectedDeck;
-        if (willRename) saveDeck(selectedRuleset, selectedDeck, deck, name);
-        else saveDeck(selectedRuleset, name, deck);
-
-        setSelectedDeck(name);
-    };
-    const onDeleteDeck = (name: string) => {
-        if (name === selectedDeck) {
-            setDeck({ main: [], side: getSideDeckPrintIds(defaultSideDeck) });
-            setSelectedDeck('');
+    const onCreateDeck = () => {
+        let deckToCreate = deck;
+        let deckNameToCreate = deckName;
+        if (hasDeckSelected) {
+            const defaultSideDeck = Object.keys(rulesets[selectedRuleset].sideDecks)[0];
+            deckToCreate = { main: [], side: getSideDeckPrintIds(rulesets[selectedRuleset].sideDecks[defaultSideDeck]) };
+            setDeck(deckToCreate);
+            setSelectedSideDeck(defaultSideDeck);
+            deckNameToCreate = '';
         }
-        deleteDeck(selectedRuleset, name);
+
+        // TODO: add (x) counter for conflicts
+        if (!deckNameToCreate) {
+            for (let i = 1; i < 100; i++) {
+                deckNameToCreate = `New Deck (${i})`;
+                if (!Object.values(decks).some(deck => deck.name === deckNameToCreate)) break;
+            }
+        };
+        setDeckName(deckNameToCreate);
+
+        saveDeck(selectedDeckId ?? undefined, {
+            name: deckNameToCreate,
+            ruleset: selectedRuleset,
+            cards: deckToCreate,
+        }).then((deck) => {
+            setSelectedDeckId(deck.id);
+            setDeckName(deck.name);
+        });
+    };
+    const onSaveDeck = () => {
+        if (!hasDeckSelected) return;
+        saveDeck(selectedDeckId, {
+            name: deckName,
+            ruleset: selectedRuleset,
+            cards: deck,
+        });
+    };
+    const onDeleteDeck = (id: string) => {
+        if (id === selectedDeckId) {
+            setDeck({ main: [], side: getSideDeckPrintIds(defaultSideDeck) });
+            setSelectedDeckId(null);
+            setDeckName('');
+        }
+        deleteDeck(id);
     };
     const onChangeRuleset = (id: string) => {
         if (id === selectedRuleset) return;
@@ -90,7 +131,7 @@ export default function EditDecks() {
         setSelectedSideDeck(defaultSideDeck);
         setDeck({ main: [], side: getSideDeckPrintIds(rulesets[id].sideDecks[defaultSideDeck]) });
         setDeckName('');
-        setSelectedDeck('');
+        setSelectedDeckId(null);
     };
 
     /* eslint-disable react-hooks/exhaustive-deps */
@@ -104,7 +145,7 @@ export default function EditDecks() {
     /* eslint-enable react-hooks/exhaustive-deps */
 
     const sideEntries = entries(rulesets[selectedRuleset].sideDecks);
-    const deckEntries = entries(decks).sort(([a], [b]) => a.localeCompare(b));
+    const deckEntries = entries(decks).sort(([, { name: a }], [, { name: b }]) => a.localeCompare(b));
 
     // TODO: figure out how to prevent deck select from flickering on create/rename
 
@@ -121,13 +162,13 @@ export default function EditDecks() {
                     />
                     <Select
                         className={styles.select}
-                        options={deckEntries.map(([name]) => [name, name])}
+                        options={deckEntries.map(([, { id, name }]) => [id, name])}
                         disabled={!deckEntries.length}
-                        value={selectedDeck}
+                        value={selectedDeckId}
                         content={deckNameInput}
                         placeholder="Select a Deck"
                         editable
-                        onSelect={name => onSelectDeck(name)}
+                        onSelect={id => onSelectDeck(id)}
                         onEdit={name => onDeckNameChange(name)}
                     />
                     <div style={{ flex: 1 }} />
@@ -137,22 +178,15 @@ export default function EditDecks() {
                 </div>
                 <div className={styles.controlsRow}>
                     <div className={styles.actions}>
-                        <AssetButton path="/assets/plus.png" title="Create New Deck" disabled={!canMakeNew} onClick={() => onSaveDeck()} />
-                        <AssetButton path="/assets/disk.png" title="Save Deck" disabled={!canSave} onClick={() => onSaveDeck(true)} />
-                        <AssetButton path="/assets/trash.png" title="Delete Deck" disabled={noDeckSelected} onClick={() => onDeleteDeck(selectedDeck!)} />
+                        <AssetButton path="/assets/plus.png" title="Create New Deck" disabled={!canMakeNew} onClick={() => onCreateDeck()} />
+                        <AssetButton path="/assets/disk.png" title="Save Deck" disabled={!isDirty || isSaving} onClick={() => onSaveDeck()} />
+                        <AssetButton path="/assets/trash.png" title="Delete Deck" disabled={!hasDeckSelected || isDeleting} onClick={() => onDeleteDeck(selectedDeckId!)} />
                         <AssetButton
-                            disabled={!cloudState || cloudState === 'synced' || cloudState !== 'local' && (canSave || isSaving)}
-                            path={`/assets/${cloudState ? ({
-                                synced: 'cloudgreen',
-                                local: 'cloudred',
-                                conflict: 'clouddownload',
-                            })[cloudState] : 'cloud'}.png`}
-                            title={cloudState ? ({
-                                synced: 'Synced',
-                                local: 'Sync deck',
-                                conflict: 'Download deck from cloud',
-                            })[cloudState] : undefined}
-                            onClick={onSyncDeck}
+                            // disabled={!isDirty || isSaving}
+                            disabled
+                            path={`/assets/${!isDirty ? 'cloudgreen' : errorSaving ? 'cloudred' : 'cloud'}.png`}
+                            title={!isDirty ? 'Synced' : errorSaving ? 'Error while saving deck' : 'Syncing'}
+                            onClick={() => onSaveDeck()}
                         />
                     </div>
                     <div style={{ flex:1 }} />
