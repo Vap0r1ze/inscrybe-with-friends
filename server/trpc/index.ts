@@ -14,7 +14,6 @@ type Session = {
 };
 export const createContext = async (opts: CreateNextContextOptions) => {
     const session = await auth(opts.req, opts.res) as Session | null;
-    console.log(session);
 
     return {
         session,
