@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import styles from './Text.module.css';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, type JSX } from 'react';
 
 interface FitProps {
     children?: ReactNode;

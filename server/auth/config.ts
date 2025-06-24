@@ -1,7 +1,8 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
-import { provider, adapter } from '@/server/auth';
+import { NextAuthConfig } from 'next-auth';
+import { adapter } from './adapter';
+import { provider } from './provider';
 
-export const authOptions: NextAuthOptions = {
+export const authConfig: NextAuthConfig = {
     providers: [
         provider({
             clientId: process.env.DISCORD_CLIENT_ID,
@@ -10,9 +11,11 @@ export const authOptions: NextAuthOptions = {
     ],
     adapter,
     callbacks: {
-        signIn({ profile }) {
-            // @ts-ignore
-            return profile?.['verified'] || '/auth/error?error=not_verified';
+        signIn: async ({ account, profile }) => {
+            if (account?.provider === 'discord' && !profile?.verified) {
+                return '/auth/error?error=not_verified';
+            }
+            return true;
         },
         session({ session, user }: any) {
             if (session.user) {
@@ -27,5 +30,3 @@ export const authOptions: NextAuthOptions = {
         signOut: '/auth/signout',
     },
 };
-
-export default NextAuth(authOptions);

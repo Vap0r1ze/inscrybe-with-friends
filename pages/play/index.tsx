@@ -39,7 +39,7 @@ export default function Play() {
                 {playerships.isFetching && !playerships.data?.length && (
                     <Text>Loading...</Text>
                 )}
-                <Button onClick={onCreateLobby} disabled={createLobby.isLoading} className={styles.newLobby}>
+                <Button onClick={onCreateLobby} disabled={createLobby.isPending} className={styles.newLobby}>
                     <Text>Create Lobby</Text>
                 </Button>
                 {createLobby.error && <div className={styles.error}>

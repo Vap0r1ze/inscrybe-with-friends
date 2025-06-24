@@ -1,6 +1,6 @@
 import styles from './CardSelection.module.css';
 import { CSSProperties, memo, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'motion/react';
 import classNames from 'classnames';
 import { CardOrPrint } from '@/lib/engine/Card';
 import { CardSprite } from '@/components/sprites/CardSprite';

@@ -1,4 +1,4 @@
-import { Event } from '@/lib/engine/Events';
+import type { Event } from '@/lib/engine/Events';
 import styles from './Debug.module.css';
 import { forwardRef, memo } from 'react';
 import { animationDurations, useClient } from '@/hooks/useClientStore';

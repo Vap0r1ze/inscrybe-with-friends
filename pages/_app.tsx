@@ -25,8 +25,8 @@ const App: AppType<{ session: any }> = ({ Component, pageProps, ...appProps }) =
             refetchOnWindowFocus: false,
         });
 
-        if (isClient && !session) {
-            signIn('discord');
+        if (!session) {
+            if (isClient) signIn('discord');
             return <div></div>;
         }
 

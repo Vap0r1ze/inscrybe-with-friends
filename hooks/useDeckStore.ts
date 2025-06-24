@@ -95,8 +95,8 @@ export function useDeckSync() {
     return {
         decks,
         isLoading: remoteDecks.isLoading,
-        isSaving: remoteSaveDeck.isLoading,
-        isDeleting: remoteDeleteDeck.isLoading,
+        isSaving: remoteSaveDeck.isPending,
+        isDeleting: remoteDeleteDeck.isPending,
         errorSaving: remoteSaveDeck.error,
         saveDeck,
         deleteDeck,

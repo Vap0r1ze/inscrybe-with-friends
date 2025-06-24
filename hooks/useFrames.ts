@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 
 export function useFrame(fps: number) {
     const [frame, setFrame] = useState(0);
-    const requestRef = useRef<number>();
-    const previousTimeRef = useRef<number>();
+    const requestRef = useRef<number>(undefined);
+    const previousTimeRef = useRef<number>(undefined);
     const [paused, setPaused] = useState(false);
 
     const animate: FrameRequestCallback = time => {

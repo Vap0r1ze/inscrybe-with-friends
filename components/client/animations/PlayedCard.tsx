@@ -1,4 +1,4 @@
-import { usePresence, useAnimate, AnimationPlaybackControls } from 'framer-motion';
+import { usePresence, useAnimate, AnimationPlaybackControls } from 'motion/react';
 import { animationDurations, useClientProp, useFightGetter } from '@/hooks/useClientStore';
 import { ReactNode, useEffect, useRef } from 'react';
 import { positions } from '@/lib/engine/utils';
@@ -22,7 +22,7 @@ export function PlayedCard({ children, opposing, lane }: PlayedCardProps) {
     const [isPresent, safeToRemove] = usePresence();
     const [scope, animate] = useAnimate<HTMLDivElement>();
     const getFight = useFightGetter();
-    const lastAnimationRef = useRef<typeof animation>();
+    const lastAnimationRef = useRef<typeof animation>(undefined);
 
     useEffect(() => {
         if (!isPresent && !animation) return safeToRemove?.();

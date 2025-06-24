@@ -2,6 +2,7 @@ import type { AppRouter } from '@/server/trpc/router';
 import { getBaseUrl, isClient } from '@/lib/utils';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import { createTRPCNext } from '@trpc/next';
+import { ssrPrepass } from '@trpc/next/ssrPrepass';
 import { inferRouterOutputs } from '@trpc/server';
 
 export const trpc = createTRPCNext<AppRouter>({
@@ -19,6 +20,7 @@ export const trpc = createTRPCNext<AppRouter>({
         };
     },
     ssr: true,
+    ssrPrepass,
 });
 
 export const trpcProxy = createTRPCProxyClient<AppRouter>({

@@ -107,7 +107,7 @@ export default function Lobby() {
                 <Text>{stringify(Object.assign(defaultFightOptions(), zFightOptions.partial().parse(lobby.data.options)))}</Text>
                 {isOwner && <>
                     <Button
-                        disabled={deleteLobby.isLoading}
+                        disabled={deleteLobby.isPending}
                         onClick={onDeleteLobby}
                     ><Text>Delete Lobby</Text></Button>
                     {deleteLobby.error && <Text>{deleteLobby.error.message}</Text>}
@@ -120,7 +120,7 @@ export default function Lobby() {
                         options={lobby.data.playerships.map(p => [p.userId, p.user.name])}
                         className={styles.select}
                         placeholder="Select Player"
-                        disabled={setPlayerSide.isLoading}
+                        disabled={setPlayerSide.isPending}
                         onSelect={id => onSetPlayerSide(id, 'player')}
                         value={player?.userId.toString() ?? ''}
                     /> : <Text size={16}>{player?.user.name ?? '...'}</Text>}
@@ -129,14 +129,14 @@ export default function Lobby() {
                         options={lobby.data.playerships.map(p => [p.userId, p.user.name])}
                         className={styles.select}
                         placeholder="Select Player"
-                        disabled={setPlayerSide.isLoading}
+                        disabled={setPlayerSide.isPending}
                         onSelect={id => onSetPlayerSide(id, 'opposing')}
                         value={opposing?.userId.toString() ?? ''}
                     /> : <Text size={16}>{opposing?.user.name ?? '...'}</Text>}
                 </div>
                 {(isOwner && !hasGame) && (
                     <Button
-                        disabled={!canStartGame || startGame.isLoading}
+                        disabled={!canStartGame || startGame.isPending}
                         onClick={onStartGame}
                     ><Text>Start Game</Text></Button>
                 )}
@@ -172,7 +172,7 @@ export default function Lobby() {
                             placeholder="Select Deck"
                             value={lobby.data?.decks[playership.userId] ?? ''}
                             onSelect={onSelectDeck}
-                            disabled={selectOwnDeck.isLoading || decks.isLoading}
+                            disabled={selectOwnDeck.isPending || decks.isLoading}
                             readonly={hasGame}
                         /> : <Select
                             className={styles.selectDeck}
@@ -188,12 +188,12 @@ export default function Lobby() {
                 ))}
                 {isInGame ? (
                     <Button
-                        disabled={hasGame || pending || isOwner || leaveLobby.isLoading}
+                        disabled={hasGame || pending || isOwner || leaveLobby.isPending}
                         onClick={onLeaveLobby}
                     ><Text>Leave Game</Text></Button>
                 ) : (
                     <Button
-                        disabled={pending || isInGame || joinLobby.isLoading}
+                        disabled={pending || isInGame || joinLobby.isPending}
                         onClick={onJoinLobby}
                     ><Text>Join Game</Text></Button>
                 )}

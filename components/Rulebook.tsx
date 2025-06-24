@@ -8,7 +8,7 @@ import { Spritesheets } from '@/lib/spritesheets';
 import { CardSprite } from './sprites/CardSprite';
 import { rulesets } from '@/lib/defs/prints';
 import { memo } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'motion/react';
 
 export function Rulebook() {
     const entry = useRulebook(state => state.entry);

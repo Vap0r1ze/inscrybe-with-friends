@@ -10,7 +10,7 @@ import { rulesets } from '@/lib/defs/prints';
 import { useSet } from '@/hooks/useSet';
 import { FieldPos, getBloods, getCircuit, getRoomOnSac } from '@/lib/engine/Card';
 import { PlayedCard } from './animations/PlayedCard';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import { FIGHT_SIDES } from '@/lib/engine/Fight';
 import { entries, fromEntries } from '@/lib/utils';
 import { NSlice } from '../ui/NSlice';

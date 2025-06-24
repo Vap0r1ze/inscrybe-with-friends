@@ -8,6 +8,7 @@ import { Box } from '../ui/Box';
 import { Text } from '../ui/Text';
 import { Range } from '../inputs/Range';
 import { Button } from '../inputs/Button';
+import { useShallow } from 'zustand/shallow';
 
 const DISCORD_LINK = 'https://discord.gg/me2Me5ztMz';
 
@@ -43,7 +44,7 @@ const volumeLabel: Record<VolumeType, string> = {
     sfx: 'SOUND EFFECT VOLUME',
 };
 function VolumeSetting({ type }: { type: VolumeType }) {
-    const [volume, setVolume] = useSettingsStore(state => [state.volume[type], state.setVolume]);
+    const [volume, setVolume] = useSettingsStore(useShallow((state) => [state.volume[type], state.setVolume]));
 
     const onChange = (vol: number) => {
         setVolume(type, vol);

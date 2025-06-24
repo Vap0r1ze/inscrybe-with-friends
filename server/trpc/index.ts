@@ -1,9 +1,8 @@
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
-import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
-import { unstable_getServerSession } from 'next-auth';
 import { redis } from '../kv';
 import decrOrDel from '../redis/decrOrDel.lua';
+import { auth } from '../auth';
 
 type Session = {
     user: {
@@ -14,14 +13,15 @@ type Session = {
     expires: string;
 };
 export const createContext = async (opts: CreateNextContextOptions) => {
-    const session = await unstable_getServerSession(opts.req, opts.res, authOptions) as Session | null;
+    const session = await auth(opts.req, opts.res) as Session | null;
+    console.log(session);
 
     return {
         session,
     };
 };
 
-export type Context = inferAsyncReturnType<typeof createContext>;
+export type Context = Awaited<ReturnType<typeof createContext>>;
 const t = initTRPC.context<Context>().create({
     errorFormatter({ shape }) {
         return shape;

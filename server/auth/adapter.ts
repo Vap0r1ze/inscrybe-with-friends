@@ -1,45 +1,7 @@
 import { Adapter, AdapterUser } from 'next-auth/adapters';
-import { OAuthConfig, OAuthUserConfig } from 'next-auth/providers';
-// import kv from '@vercel/kv';
-import { redis } from './kv';
-import { prisma } from './db';
+import { redis } from '@/server/kv';
+import { prisma } from '@/server/db';
 import { User } from '@prisma/client';
-
-export interface DiscordProfile {
-    id: string
-    username: string
-    display_name: string
-    discriminator: string
-    avatar: string
-    verified: boolean
-}
-
-export function getDiscordImage(profile: DiscordProfile) {
-    return profile.avatar
-        ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.${profile.avatar.startsWith('a_') ? 'gif' : 'png'}`
-        : `https://cdn.discordapp.com/embed/avatars/${parseInt(profile.discriminator) % 5}.png`;
-};
-
-export function provider<P extends DiscordProfile>(
-    options: OAuthUserConfig<P>
-): OAuthConfig<P> {
-    return {
-        id: 'discord',
-        name: 'Discord',
-        type: 'oauth',
-        authorization: 'https://discord.com/api/oauth2/authorize?scope=identify+email',
-        token: 'https://discord.com/api/oauth2/token',
-        userinfo: 'https://discord.com/api/users/@me',
-        profile(profile) {
-            return {
-                id: profile.id,
-                name: profile.display_name || profile.username,
-                image: getDiscordImage(profile),
-            };
-        },
-        options,
-    };
-}
 
 const toAdapterUser = (user: Pick<User, 'id' | 'name' | 'image'>): AdapterUser => ({
     id: user.id,

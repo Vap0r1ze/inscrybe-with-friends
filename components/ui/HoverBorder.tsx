@@ -16,8 +16,8 @@ export interface HoverBorderProps {
 export const HoverBorder = memo(function HoverBorder({ color = '--flow', top, left, right, bottom, inset }: HoverBorderProps) {
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
     const pausedRef = useRef(true);
-    const requestRef = useRef<number>();
-    const previousTimeRef = useRef<number>();
+    const requestRef = useRef<number>(undefined);
+    const previousTimeRef = useRef<number>(undefined);
     const frameRef = useRef(0);
     const stepRef = useRef(0);
 

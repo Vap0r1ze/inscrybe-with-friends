@@ -1,5 +1,5 @@
 import styles from './Projectiles.module.css';
-import { useAnimate } from 'framer-motion';
+import { useAnimate } from 'motion/react';
 import { animationDurations, useClientProp } from '@/hooks/useClientStore';
 import { useEffect } from 'react';
 import { FightSide } from '@/lib/engine/Fight';
