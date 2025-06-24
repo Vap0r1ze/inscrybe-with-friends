@@ -60,8 +60,8 @@ function PlayTestPage() {
     const [fullscreen, setFullscreen] = useState(false);
 
     const decks = useMemo(() => {
-        if (!deckStore || !ruleset) return [];
-        return entries(deckStore[ruleset] ?? {}).map(([name, { cards }]) => ({ name, deck: cards }));
+        if (!ruleset) return [];
+        return entries(deckStore).map(([id, { local, name }]) => ({ id, name, deck: local }));
     }, [deckStore, ruleset]);
 
     const noDecks = !decks.length;
@@ -104,7 +104,7 @@ function PlayTestPage() {
     const onFightStart = () => {
         if (game || !ruleset || !deckStore || Object.values(selectedDecks).some(deck => !deck)) return;
 
-        const decks = fromEntries(entries(selectedDecks).map(([side, deck]) => [side, deckStore[ruleset][deck!].cards]));
+        const decks = fromEntries(entries(selectedDecks).map(([side, deckId]) => [side, deckStore[deckId!].local]));
 
         const fight = createFight({
             features: [],
@@ -159,10 +159,10 @@ function PlayTestPage() {
             {FIGHT_SIDES.map(side => <div key={side}>
                 <Text>{side[0].toUpperCase() + side.slice(1)}</Text>
                 <Select
-                    options={decks.map((deck) => [deck.name, deck.name])}
+                    options={decks.map((deck) => [deck.id, deck.name])}
                     disabled={noDecks}
                     placeholder={noDecks ? 'No decks' : 'Select Deck'}
-                    onSelect={deck => setSelectedDecks({ ...selectedDecks, [side]: deck })}
+                    onSelect={deckId => setSelectedDecks({ ...selectedDecks, [side]: deckId })}
                     value={selectedDecks[side]}
                 />
             </div>)}
