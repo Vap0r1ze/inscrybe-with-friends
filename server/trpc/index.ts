@@ -13,7 +13,9 @@ type Session = {
     expires: string;
 };
 export const createContext = async (opts: CreateNextContextOptions) => {
+    console.log('pre-auth call');
     const session = await auth(opts.req, opts.res) as Session | null;
+    console.log('post-auth call');
 
     return {
         session,
