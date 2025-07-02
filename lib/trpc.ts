@@ -19,8 +19,10 @@ export const trpc = createTRPCNext<AppRouter>({
                 httpBatchLink({
                     url: `${getBaseUrl()}/api/trpc`,
                     headers: isClient ? void 0 : () => {
-                        if (!ctx?.req?.headers) return {};
-                        return { ...ctx.req.headers };
+                        return {
+                            ...ctx?.req?.headers,
+                            'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+                        };
                     },
                 }),
             ],
