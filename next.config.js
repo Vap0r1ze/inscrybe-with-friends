@@ -6,11 +6,16 @@ const nextConfig = {
     reactStrictMode: true,
 
     transpilePackages: ['next-auth'],
-    webpack: (config) => {
+    webpack: (config, { isServer }) => {
         config.module.rules.push({
             test: /\.lua$/,
             use: 'raw-loader',
         });
+
+        if (isServer) {
+            config.devtool = 'source-map';
+        }
+
         return config;
     },
     turbopack: {
