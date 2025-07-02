@@ -26,6 +26,7 @@ const App: AppType<{ session: any }> = ({ Component, pageProps, ...appProps }) =
         });
 
         if (!session) {
+            debugger;
             if (isClient) signIn('discord');
             return <div></div>;
         }
