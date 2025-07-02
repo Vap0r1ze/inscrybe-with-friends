@@ -7,7 +7,7 @@
 
 [Vercel]: https://vercel.com/
 [Upstash]: https://upstash.com/
-[PlanetScale]: https://planetscale.com/
+[Neon]: https://neon.tech/
 [Pusher]: https://pusher.com/
 
 [transient updates]: https://github.com/pmndrs/zustand#transient-updates-for-often-occurring-state-changes
@@ -18,8 +18,8 @@ If you're looking to contribute, first: thank you very much ^^! Read below to ge
 
 ## Getting Started
   1. Clone the repo
-  2. Install dependencies with `yarn`
-  3. Run the dev server with `yarn dev`
+  2. Install dependencies with `pnpm i`
+  3. Run the dev server with `pnpm dev`
   4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Technologies Used
@@ -34,7 +34,7 @@ If you're looking to contribute, first: thank you very much ^^! Read below to ge
 I use the free-tier of everthing listed here
   - **[Vercel]** &ndash; Pretty good serverless hosting with great Next.JS support
   - **[Upstash]** &ndash; Redis cache with a sufficient free-tier and low latency with Vercel
-  - **[PlanetScale]** &ndash; Really cool postgres host with an interesting git-like branch system for schemas
+  - **[Neon]** &ndash; Really cool postgres host with an interesting git-like branch system for schemas
   - **[Pusher]** &ndash; Lets you push events to your clients fast without hosting your own WebSocket server, has a builtin authentication system
 
 ## Codebase Structure
