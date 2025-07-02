@@ -21,12 +21,13 @@ const App: AppType<{ session: any }> = ({ Component, pageProps, ...appProps }) =
     }
 
     if (/^\/play(?:\/|$)/.test(appProps.router.pathname)) {
-        const { data: session } = trpc.user.getSession.useQuery(void 0, {
+        const sessionQuery = trpc.user.getSession.useQuery(void 0, {
             refetchOnWindowFocus: false,
         });
+        const session = sessionQuery.data;
 
         if (!session) {
-            debugger;
+            console.log(session, sessionQuery);
             if (isClient) signIn('discord');
             return <div></div>;
         }
