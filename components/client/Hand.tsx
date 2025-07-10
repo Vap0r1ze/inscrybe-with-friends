@@ -46,8 +46,10 @@ export const Hand = memo(function Hand() {
         sendResponse('chooseDraw', { idx: choiceIdxs[i] });
     };
 
-    return <div className={styles.hand} data-hover-target>
-        {canDraw && <HoverBorder color="rgb(var(--ui-rgb), 0.4)" alwaysPlay />}
+    return <div className={classNames(styles.hand, {
+        [styles.canDraw]: canDraw,
+    })} data-hover-target>
+        {/* {canDraw && <HoverBorder color="var(--ui)" lineWidth={2} lineDash={[6, 4]} alwaysPlay />} */}
         <div className={styles.cardsArea}>
             <CardSelection padding={20} cards={hand} disabled={!canPlay} value={selected} onSelect={onCardClick} />
         </div>

@@ -7,6 +7,10 @@
     position: relative;
 }
 
+.hand.canDraw {
+    box-shadow: 0 0 0 2em var(--ui) inset;
+}
+
 .cardsArea {
     flex: 1;
     max-width: calc(100% - 100em);

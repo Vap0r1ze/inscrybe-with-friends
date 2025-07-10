@@ -9,6 +9,8 @@ const FPS = 10;
 
 export interface HoverBorderProps {
     color?: string;
+    lineDash?: number[];
+    lineWidth?: number;
     inset?: number;
     top?: number;
     right?: number;
@@ -16,13 +18,20 @@ export interface HoverBorderProps {
     left?: number;
     alwaysPlay?: boolean;
 }
-export const HoverBorder = memo(function HoverBorder({ color = '--flow', top, left, right, bottom, inset, alwaysPlay }: HoverBorderProps) {
+export const HoverBorder = memo(function HoverBorder({
+    color = '--flow',
+    lineDash = [3, 2],
+    lineWidth = 1,
+    top, left, right, bottom, inset,
+    alwaysPlay,
+}: HoverBorderProps) {
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
     const hoveredRef = useRef(true);
     const requestRef = useRef<number>(undefined);
     const previousTimeRef = useRef<number>(undefined);
     const frameRef = useRef(0);
     const stepRef = useRef(0);
+    const animationLength = lineDash.reduce((a, b) => a + b, 0);
 
     const cssColor = color.startsWith('--') ? `var(${color})` : color;
 
@@ -62,14 +71,14 @@ export const HoverBorder = memo(function HoverBorder({ color = '--flow', top, le
         const computedColor = getComputedColor(ctx.canvas, cssColor);
 
         stepRef.current++;
-        stepRef.current %= 5;
+        stepRef.current %= animationLength;
         ctx.clearRect(0, 0, width, height);
-        ctx.setLineDash([3, 2]);
-        ctx.lineWidth = 2;
+        ctx.setLineDash(lineDash);
+        ctx.lineWidth = lineWidth * 2;
         ctx.strokeStyle = computedColor;
-        ctx.lineDashOffset = 4 - stepRef.current;
+        ctx.lineDashOffset = animationLength - stepRef.current - 1;
         ctx.strokeRect(0, 0, width, height);
-    }, [cssColor]);
+    }, [cssColor, animationLength, lineDash, lineWidth]);
 
     const animate: FrameRequestCallback = useCallback(time => {
         const newFrame = Math.floor(time / 1e3 * FPS) % FPS;
