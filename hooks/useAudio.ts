@@ -5,6 +5,7 @@ import { isClient } from '@/lib/utils';
 import * as Tone from 'tone';
 import { Action } from '@/lib/engine/Actions';
 import { Event } from '@/lib/engine/Events';
+import { FightClient } from './useClientStore';
 
 // Music
 
@@ -99,7 +100,7 @@ export function triggerActionSound(action: Action) {
     if (action.type === 'hammer') triggerSound('hammer');
     if (action.type === 'activate') triggerSound('select');
 }
-export function triggerEventSound(event: Event) {
+export function triggerEventSound(event: Event, client?: FightClient) {
     if (event.type === 'attack') {
         triggerSound('attack');
     } else if (event.type === 'perish') {
@@ -111,6 +112,9 @@ export function triggerEventSound(event: Event) {
         playSound('loseLife');
     } else if (event.type === 'play' || event.type === 'move') {
         playSound('blip');
+    } else if (event.type === 'phase') {
+        // Emulate the opponent's bell-ring action sound
+        if (event.phase === 'pre-attack' && client?.fight.turn.side !== 'player') playSound('bellRing');
     }
 }
 

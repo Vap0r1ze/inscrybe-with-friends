@@ -1,5 +1,4 @@
 :global([data-hover-target])>.hover {
-    visibility: hidden;
     position: absolute;
     inset: -2em;
     width: calc(100% + 4em);
@@ -8,10 +7,14 @@
     image-rendering: pixelated;
 }
 
-:global([data-hover-target]):hover>.hover {
+:global([data-hover-target])>.hover.hoverControls {
+    visibility: hidden;
+}
+
+:global([data-hover-target]):hover>.hover.hoverControls {
     visibility: visible;
 }
 
-:global([data-hover-target]):active>.hover {
+:global([data-hover-target]):active>.hover.hoverControls {
     visibility: hidden;
 }

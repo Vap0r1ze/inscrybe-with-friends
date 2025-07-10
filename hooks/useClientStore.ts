@@ -12,7 +12,7 @@ import { devtools } from 'zustand/middleware';
 
 export const ClientContext = createContext<string | null>(null);
 
-interface FightClient {
+export interface FightClient {
     id: string;
     nonce: string;
     fight: Fight<'player'>;
@@ -32,7 +32,7 @@ interface FightClient {
     queueConsumer?: symbol | null;
 }
 
-interface FightStore {
+export interface FightStore {
     clients: Partial<Record<string, FightClient>>;
     newClient: (id: string, fight: Fight<'player'>) => void;
     deleteClient: (id: string) => void;
@@ -120,7 +120,7 @@ export const useClientStore = create(devtools<FightStore>((set, get) => ({
         const client = get().clients[id];
         if (!client) return;
 
-        triggerEventSound(event);
+        triggerEventSound(event, client);
         commitEvents(client, [clone(event)]);
         useClientStore.getState().setClient(id, client => client);
     },

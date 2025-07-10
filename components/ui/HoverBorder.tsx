@@ -1,7 +1,8 @@
-import { isClient } from '@/lib/utils';
+import { getComputedColor, isClient } from '@/lib/utils';
 import styles from './HoverBorder.module.css';
 import { memo, useCallback, useEffect, useRef } from 'react';
 import { triggerSound } from '@/hooks/useAudio';
+import classNames from 'classnames';
 
 const FPS = 10;
 
@@ -12,19 +13,27 @@ export interface HoverBorderProps {
     right?: number;
     bottom?: number;
     left?: number;
+    alwaysPlay?: boolean;
 }
-export const HoverBorder = memo(function HoverBorder({ color = '--flow', top, left, right, bottom, inset }: HoverBorderProps) {
+export const HoverBorder = memo(function HoverBorder({ color = '--flow', top, left, right, bottom, inset, alwaysPlay }: HoverBorderProps) {
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-    const pausedRef = useRef(true);
+    const hoveredRef = useRef(true);
     const requestRef = useRef<number>(undefined);
     const previousTimeRef = useRef<number>(undefined);
     const frameRef = useRef(0);
     const stepRef = useRef(0);
 
+    const cssColor = color.startsWith('--') ? `var(${color})` : color;
+
     top ??= inset ?? 0;
     right ??= inset ?? 0;
     bottom ??= inset ?? 0;
     left ??= inset ?? 0;
+
+    const getPaused = useCallback(() => {
+        if (alwaysPlay) return false;
+        return !hoveredRef.current;
+    }, [alwaysPlay]);
 
     const observerRef = useRef(isClient ? new ResizeObserver((entries) => {
         for (const { target } of entries) {
@@ -48,9 +57,8 @@ export const HoverBorder = memo(function HoverBorder({ color = '--flow', top, le
         const ctx = ctxRef.current;
         if (!ctx) return;
         const { width, height } = ctx.canvas;
-        const computedColor = color.startsWith('--')
-            ? getComputedStyle(ctx.canvas).getPropertyValue(color)
-            : color;
+        const computedColor = getComputedColor(ctx.canvas, cssColor);
+
         stepRef.current++;
         stepRef.current %= 5;
         ctx.clearRect(0, 0, width, height);
@@ -59,17 +67,17 @@ export const HoverBorder = memo(function HoverBorder({ color = '--flow', top, le
         ctx.strokeStyle = computedColor;
         ctx.lineDashOffset = 4 - stepRef.current;
         ctx.strokeRect(0, 0, width, height);
-    }, [color]);
+    }, [cssColor]);
 
     const animate: FrameRequestCallback = useCallback(time => {
         const newFrame = Math.floor(time / 1e3 * FPS) % FPS;
         if (newFrame !== frameRef.current) {
             frameRef.current = newFrame;
-            if (!pausedRef.current) draw();
+            if (!getPaused()) draw();
         };
         requestRef.current = requestAnimationFrame(animate);
         previousTimeRef.current = time;
-    }, [draw]);
+    }, [draw, getPaused]);
 
     useEffect(() => {
         requestRef.current = requestAnimationFrame(animate);
@@ -81,11 +89,11 @@ export const HoverBorder = memo(function HoverBorder({ color = '--flow', top, le
     const onMouseEnter = useCallback(({ target }: Event) => {
         if (!(target instanceof HTMLElement)) return;
         if (target.matches('[data-hover-blip]')) triggerSound('blip');
-        pausedRef.current = false;
+        hoveredRef.current = true;
     }, []);
     const onMouseLeave = useCallback(({ target }: Event) => {
         if (!(target instanceof HTMLElement)) return;
-        pausedRef.current = true;
+        hoveredRef.current = false;
     }, []);
 
     useEffect(() => {
@@ -99,7 +107,9 @@ export const HoverBorder = memo(function HoverBorder({ color = '--flow', top, le
         };
     }, [onMouseEnter, onMouseLeave]);
 
-    return <canvas className={styles.hover} ref={canvasCallback} style={{
+    return <canvas className={classNames(styles.hover, {
+        [styles.hoverControls]: !alwaysPlay,
+    })} ref={canvasCallback} style={{
         top: `${top}em`,
         left: `${left}em`,
         width: `calc(100% - ${left + right}em)`,
