@@ -86,18 +86,7 @@ export function getBaseUrl() {
 // DOM Stuff
 
 const COLOR_COMPUTE = '--color-compute';
-let computedColorRegistered = false;
 export function getComputedColor(target: HTMLElement, cssColor: string) {
-    if (!computedColorRegistered) {
-        computedColorRegistered = true;
-        // Register the property only once
-        try {
-            CSS.registerProperty({ name: COLOR_COMPUTE, syntax: '<color>', inherits: false, initialValue: 'transparent' });
-        } catch (error) {
-            console.error('Failed to register CSS property:', error);
-        }
-    }
-
     target.style.setProperty(COLOR_COMPUTE, cssColor);
     const computedColor = getComputedStyle(target).getPropertyValue(COLOR_COMPUTE);
     target.style.removeProperty(COLOR_COMPUTE);

@@ -90,7 +90,8 @@ export type CardInfo = {
     state: CardState;
 };
 export type FieldPos = [FightSide, number];
-export type CardPos = ['field' | 'hand', [FightSide, number]];
+export type HandPos = [FightSide, number];
+export type CardPos = ['field' | 'hand', HandPos];
 
 export function initCardFromPrint(prints: Record<string, CardPrint>, printId: string): Card {
     const print = prints[printId];

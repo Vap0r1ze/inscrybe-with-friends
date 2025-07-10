@@ -197,8 +197,10 @@ function getPacket(tick: FightTick): FightPacket {
 async function fillEvent(tick: FightTick, event: Event) {
     const { prints } = rulesets[tick.fight.opts.ruleset];
     if (event.type === 'draw' && !event.card) {
-        const idx = tick.host.decks[event.side][event.source!].pop()!;
-        const printId = tick.fight.decks[event.side][event.source!][idx];
+        if (!event.source) throw FightError.create(ErrorType.InvalidEvent, 'Draw event missing source');
+        const idx = tick.host.decks[event.side][event.source].pop();
+        if (idx == null) throw FightError.create(ErrorType.InvalidEvent, 'Server tried to draw from an empty deck');
+        const printId = tick.fight.decks[event.side][event.source][idx];
         const card = initCardFromPrint(prints, printId);
         event.card = card;
     } else if (event.type === 'attack') {

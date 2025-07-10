@@ -1,8 +1,9 @@
-import { getComputedColor, isClient } from '@/lib/utils';
+import { getComputedColor } from '@/lib/utils';
 import styles from './HoverBorder.module.css';
 import { memo, useCallback, useEffect, useRef } from 'react';
 import { triggerSound } from '@/hooks/useAudio';
 import classNames from 'classnames';
+import { useElementSize } from '@mantine/hooks';
 
 const FPS = 10;
 
@@ -35,22 +36,23 @@ export const HoverBorder = memo(function HoverBorder({ color = '--flow', top, le
         return !hoveredRef.current;
     }, [alwaysPlay]);
 
-    const observerRef = useRef(isClient ? new ResizeObserver((entries) => {
-        for (const { target } of entries) {
-            if (!(target instanceof HTMLCanvasElement)) continue;
-            const scale = parseFloat(getComputedStyle(target, null).getPropertyValue('font-size')) / 2;
-            target.width = target.clientWidth / scale;
-            target.height = target.clientHeight / scale;
-        }
-    }) : null);
+    const { ref: canvasRef, width, height } = useElementSize();
 
-    const canvasCallback = (canvas: HTMLCanvasElement | null) => {
-        if (!canvas) {
-            ctxRef.current = null;
-            return observerRef.current?.disconnect();
-        }
-        observerRef.current?.observe(canvas);
+    useEffect(() => {
+        if (!canvasRef.current) return;
+        const scale = parseFloat(getComputedStyle(canvasRef.current, null).getPropertyValue('font-size')) / 2;
+        canvasRef.current.width = width / scale;
+        canvasRef.current.height = height / scale;
+    }, [width, height, canvasRef]);
+
+    const canvasCallback = (canvas: HTMLCanvasElement) => {
         ctxRef.current = canvas.getContext('2d');
+        canvasRef.current = canvas;
+
+        return () => {
+            canvasRef.current = null;
+            ctxRef.current = null;
+        };
     };
 
     const draw = useCallback(() => {

@@ -17,6 +17,9 @@ import { NSlice } from '../ui/NSlice';
 import { useBattleSheet } from '@/hooks/useBattleTheme';
 import { Projectiles } from './animations/Projectiles';
 import { triggerSound } from '@/hooks/useAudio';
+import { HiddenHand } from './ui/HiddenHand';
+import { useElementSize } from '@mantine/hooks';
+import { useEm } from '@/hooks/dom/useEm';
 
 export const Board = memo(function Board() {
     const battleTheme = useBattleSheet();
@@ -112,15 +115,19 @@ export const Board = memo(function Board() {
         return fromEntries(entries(field).map(([side, cards]) => [side, getCircuit(prints, cards)]));
     }, [prints, field]);
 
-    return <div className={styles.board}>
+    const { ref: boardRef, height: boardHeight } = useElementSize<HTMLDivElement>();
+    const em = useEm(boardRef);
+    const canOpposingHandExceedBoard = boardHeight / em >= 186;
+    const opposingHand = (
+        <div key="opposing-hand" className={classNames(styles.opposingHand, {
+            [styles.canExceedBoard]: canOpposingHandExceedBoard,
+        })}>
+            <HiddenHand side="opposing" />
+        </div>
+    );
+
+    return <div className={styles.board} ref={boardRef}>
         <Sprite className={styles.boardBg} sheet={battleTheme} name="board" />
-        <NSlice
-            className={styles.border}
-            sheet={battleTheme}
-            name="boardBorder"
-            rows={[4, 0, 4, 60]}
-            cols={[4, 0, 4]}
-        />
         <div data-z-plane className={classNames(styles.boardRow, styles.playerRow)}>
             {field.player.map((card, i) => (
                 <div key={i} data-hover-target className={styles.cardSlot} onClick={() => onTryPlay(i)}>
@@ -171,7 +178,7 @@ export const Board = memo(function Board() {
             </div>}
         </div>
         <div data-z-plane className={styles.boardRow}>
-            {field.player.map((card, i) => <div key={i} className={styles.cardSlot}>
+            {field.opposing.map((card, i) => <div key={i} className={styles.cardSlot}>
                 <Sprite className={styles.cardSlotBase} sheet={battleTheme} name="slot" />
                 <Sprite className={styles.cardSlotHover} sheet={battleTheme} name="slotHover" />
             </div>)}
@@ -207,6 +214,15 @@ export const Board = memo(function Board() {
                 ))}
             </div>}
         </div>
+        {!canOpposingHandExceedBoard && opposingHand}
+        <NSlice
+            className={styles.border}
+            sheet={battleTheme}
+            name="boardBorder"
+            rows={[4, 0, 4, 60]}
+            cols={[4, 0, 4]}
+        />
+        {canOpposingHandExceedBoard && opposingHand}
         <Projectiles />
     </div>;
 });

@@ -2,7 +2,7 @@ import { pick } from 'lodash';
 import { rulesets } from '../defs/prints';
 import { Sigil } from '../defs/sigils';
 import { ActionReq, ActionRes } from './Actions';
-import { Card, CardPos, FieldPos, getCardPower } from './Card';
+import { Card, CardPos, FieldPos, getCardPower, HandPos } from './Card';
 import { FightTick } from './Tick';
 import { DeckType } from './Deck';
 import { FIGHT_SIDES, Fight, FightSide, Phase } from './Fight';
@@ -22,7 +22,7 @@ type EventMap = {
     triggerAttack: { pos: FieldPos };
     attack: { from: FieldPos; to: FieldPos; direct?: boolean; damage?: number };
     shoot: { from: FieldPos; to: FieldPos; damage: number };
-    play: { pos: FieldPos; card: Card; fromHand?: [FightSide, number]; transient?: boolean };
+    play: { pos: FieldPos; card: Card; fromHand?: HandPos; transient?: boolean };
     mustPlay: { side: FightSide; card: number };
     transform: { pos: FieldPos; card: Card; };
     move: { from: FieldPos; to: FieldPos; turnAround?: boolean, failed?: boolean };
@@ -62,7 +62,7 @@ export const eventSettlers: {
         fight.players[event.side].bones += event.amount;
     },
     draw(fight, event) {
-        fight.hands[event.side].push(event.card!);
+        if (event.card) fight.hands[event.side].push(event.card);
         fight.players[event.side].handSize++;
     },
     perish(fight, event) {
@@ -91,7 +91,7 @@ export const eventSettlers: {
 
         if (event.fromHand) {
             const [side, idx] = event.fromHand;
-            fight.hands[side].splice(idx, 1);
+            fight.hands[side]?.splice(idx, 1);
             fight.players[side].handSize--;
             if (fight.mustPlay[side] === idx) {
                 fight.mustPlay[side] = null;
@@ -244,11 +244,14 @@ export function translateEvent(event: Event, side: FightSide, forClient: boolean
     // confidential events
     if (forClient) {
         if (event.type === 'draw' && event.side !== side) {
-            return null;
+            delete event.source;
+            delete event.card;
         } else if (event.type === 'newSigil' && event.pos[0] === 'hand' && event.pos[1][0] !== side) {
             return null;
-        } else if (event.type === 'play' && event.fromHand?.[0] !== side) {
-            delete event.fromHand;
+        } else if (event.type === 'play' && event.fromHand && event.fromHand[0] !== side) {
+            event.fromHand[1] = 0; // hide index
+        } else if (event.type === 'mustPlay' && event.side !== side) {
+            event.card = 0; // hide index
         }
         if ((event.type === 'request' || event.type === 'response') && event.side !== side) {
             if (event.req.type === 'chooseDraw') {

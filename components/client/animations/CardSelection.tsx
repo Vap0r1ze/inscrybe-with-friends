@@ -1,5 +1,5 @@
 import styles from './CardSelection.module.css';
-import { CSSProperties, memo, useRef } from 'react';
+import { CSSProperties, memo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import classNames from 'classnames';
 import { CardOrPrint } from '@/lib/engine/Card';
@@ -7,9 +7,9 @@ import { CardSprite } from '@/components/sprites/CardSprite';
 import { HoverBorder } from '@/components/ui/HoverBorder';
 import { namespacedIndexes } from '@/lib/utils';
 import { rulesets } from '@/lib/defs/prints';
-import { isClient } from '@/lib/utils';
 import { useFight } from '@/hooks/useClientStore';
 import { triggerSound } from '@/hooks/useAudio';
+import { useElementSize } from '@mantine/hooks';
 
 export interface CardSelectionProps {
     cards: CardOrPrint[];
@@ -29,16 +29,13 @@ export const CardSelection = memo(function CardSelection({
 }: CardSelectionProps) {
     const prints = useFight(fight => rulesets[fight.opts.ruleset].prints);
 
-    const observerRef = useRef(isClient ? new ResizeObserver((entries) => {
-        for (const { target } of entries) {
-            if (!(target instanceof HTMLElement)) continue;
-            target.style.setProperty('--c-sel-w', target.clientWidth + 'px');
-        }
-    }) : null);
-    const cardsElRef = (cardEl: HTMLDivElement | null) => {
-        if (cardEl) observerRef.current?.observe(cardEl);
-        else observerRef.current?.disconnect();
-    };
+    const { ref: cardsRef, width } = useElementSize<HTMLDivElement>();
+
+    useEffect(() => {
+        if (!cardsRef.current) return;
+        cardsRef.current.style.setProperty('--c-sel-w', width + 'px');
+    }, [width, cardsRef]);
+
     const onCardClick = (i: number) => {
         if (disabled) return;
         if (onSelect) {
@@ -47,7 +44,7 @@ export const CardSelection = memo(function CardSelection({
         }
     };
 
-    return <div ref={cardsElRef} className={classNames(styles.cards, {
+    return <div ref={cardsRef} className={classNames(styles.cards, {
         [styles.disabled]: disabled,
         [styles.prompt]: prompt,
     })} style={{

@@ -37,6 +37,7 @@ export interface Fight<InclSide extends FightSide = never> {
     field: Record<FightSide, (Card | null)[]>;
     players: Record<FightSide, PlayerState>;
 
+    // TODO: Move private per-player state to a single key
     mustPlay: Record<InclSide, number | null>;
     hands: Record<InclSide, Card[]>;
     decks: Record<InclSide, DeckCards>;

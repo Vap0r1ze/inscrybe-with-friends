@@ -1,5 +1,5 @@
 import { ActionReq, ActionRes } from './Actions';
-import { Card, CardInfo, CardPos, CardPrint, CardState, FieldPos, Ruleset, getCardPower, initCardFromPrint } from './Card';
+import { Card, CardInfo, CardPos, CardPrint, CardState, FieldPos, HandPos, Ruleset, getCardPower, initCardFromPrint } from './Card';
 import { Event } from './Events';
 import { FIGHT_SIDES, Fight, FightSide } from './Fight';
 import { FightTick } from './Tick';
@@ -37,7 +37,7 @@ export type NoopCardContext = Omit<ReaderCardContext, 'createEvent'>;
 export type CardContext = EffectContext & {
     pos: CardPos;
     readonly fieldPos?: FieldPos;
-    readonly handPos?: [FightSide, number];
+    readonly handPos?: HandPos;
     readonly cardPrint: Readonly<CardPrint>;
     readonly card: Readonly<Card>;
     readonly side: FightSide;

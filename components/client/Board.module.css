@@ -92,6 +92,7 @@
     left: 0;
     right: 0;
     bottom: 0;
+    pointer-events: none;
 }
 
 .boardBg {
@@ -99,4 +100,19 @@
     bottom: 2em;
     left: 4em;
     z-index: -10;
+}
+
+.opposingHand {
+    position: absolute;
+    /* board-content-height: 123em, card-height: 58em */
+    bottom: max(calc(123em + (100% - (123em + (58em / 2))) / 2), 123em);
+    left: 4em;
+    right: 4em;
+    display: flex;
+    justify-content: center;
+}
+
+.opposingHand.canExceedBoard {
+    left: -20em;
+    right: -20em;
 }
