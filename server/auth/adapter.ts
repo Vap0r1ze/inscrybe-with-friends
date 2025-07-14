@@ -54,9 +54,15 @@ export const adapter: Adapter = {
             userId: account.userId,
             provider: account.provider,
         };
+        const token: PrismaJson.ConnectionToken = {
+            refresh_token: account.refresh_token!,
+            access_token: account.access_token!,
+            expires_at: account.expires_at!,
+            scope: account.scope!,
+        };
         const meta = {
             connectionId: account.providerAccountId,
-            token: account.refresh_token!,
+            token,
         };
         await prisma.connection.upsert({
             where: { userId_provider: pks },

@@ -19,6 +19,8 @@ model User {
     createdAt   DateTime @default(now())
     permissions Int      @default(0)
 
+    connections Connection[]
+
     ownedLobbies    Lobby[]
     playerships     Playership[]
     gamePlayerships GamePlayer[]
@@ -29,10 +31,14 @@ model User {
 }
 
 model Connection {
-    userId       String
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
     provider     String
     connectionId String
-    token        String
+    /// ![PrismaJson.ConnectionToken]
+    token        Json?
+    createdAt    DateTime @default(now())
 
     @@id([userId, provider])
 }
