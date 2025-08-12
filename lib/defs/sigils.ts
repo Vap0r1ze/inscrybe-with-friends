@@ -860,13 +860,15 @@ const SIGIL_EFFECTS = {
     doubleDeath: {
         runAt: 'field',
         preSettleRead: {
-            // TODO: fix
             perish(event) {
                 if (event.cause === 'transient') return;
 
+                const card = this.getCard(event.pos);
+                if (!card) return;
+
                 this.createEvent('play', {
                     pos: event.pos,
-                    card: this.card,
+                    card,
                     transient: true,
                 });
             },
