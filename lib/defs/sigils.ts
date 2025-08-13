@@ -862,6 +862,8 @@ const SIGIL_EFFECTS = {
         preSettleRead: {
             perish(event) {
                 if (event.cause === 'transient') return;
+                if (event.pos[0] !== this.side) return;
+                if (event.pos[1] === this.fieldPos![1]) return;
 
                 const card = this.getCard(event.pos);
                 if (!card) return;
