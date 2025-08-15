@@ -17,7 +17,7 @@ type EventMap = {
     energy: { side: FightSide, amount: number; total?: number };
     energySpend: { side: FightSide, amount: number };
     bones: { side: FightSide; amount: number };
-    draw: { side: FightSide; card?: Card; source?: DeckType };
+    draw: { side: FightSide; card?: Card; source?: DeckType; idx?: number };
     perish: { pos: FieldPos; cause: PerishCause };
     triggerAttack: { pos: FieldPos };
     attack: { from: FieldPos; to: FieldPos; direct?: boolean; damage?: number };

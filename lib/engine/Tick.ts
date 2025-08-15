@@ -198,8 +198,12 @@ async function fillEvent(tick: FightTick, event: Event) {
     const { prints } = rulesets[tick.fight.opts.ruleset];
     if (event.type === 'draw' && !event.card) {
         if (!event.source) throw FightError.create(ErrorType.InvalidEvent, 'Draw event missing source');
-        const idx = tick.host.decks[event.side][event.source].pop();
+        const idx = event.idx ?? tick.host.decks[event.side][event.source].at(-1);
         if (idx == null) throw FightError.create(ErrorType.InvalidEvent, 'Server tried to draw from an empty deck');
+        if (!tick.host.decks[event.side][event.source].includes(idx))
+            throw FightError.create(ErrorType.InvalidEvent, 'Server tried to draw a card not in the deck');
+
+        tick.host.decks[event.side][event.source].splice(tick.host.decks[event.side][event.source].indexOf(idx), 1);
         const printId = tick.fight.decks[event.side][event.source][idx];
         const card = initCardFromPrint(prints, printId);
         event.card = card;

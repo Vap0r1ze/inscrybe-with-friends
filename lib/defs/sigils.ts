@@ -598,6 +598,8 @@ const SIGIL_EFFECTS = {
         requests: {
             play: {
                 callFor() {
+                    if (this.tick.host.decks[this.side].main.length === 0) return null;
+
                     return [this.side, {
                         type: 'chooseDraw',
                         deck: 'main',
@@ -607,12 +609,10 @@ const SIGIL_EFFECTS = {
                 async onResponse(event, res: ActionRes<'chooseDraw'>, req: ActionReq<'chooseDraw'>) {
                     if (!req.choices.includes(res.idx)) throw FightError.create(ErrorType.InvalidAction, 'Cannot draw card that is not in deck');
                     const side = event.pos[0];
-                    const printId = this.tick.fight.decks[side][req.deck][res.idx];
-                    const card = this.initCard(printId);
                     this.createEvent('draw', {
                         side,
-                        card,
                         source: req.deck,
+                        idx: res.idx,
                     });
                 },
             },
