@@ -17,6 +17,7 @@ export function provider<P extends DiscordProfile>(
         authorization: 'https://discord.com/api/oauth2/authorize?scope=email+identify',
         token: 'https://discord.com/api/oauth2/token',
         userinfo: 'https://discord.com/api/users/@me',
+        issuer: 'https://discord.com',
         profile(profile) {
             return {
                 id: profile.id,
